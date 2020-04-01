@@ -1,0 +1,26 @@
+{
+	"name": "management",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"client": "cd client && yarn start",
+		"server": "nodemon bin/www",
+		"dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+	},
+	"dependencies": {
+		"@types/node": "^13.1.2",
+		"body-parser": "^1.19.0",
+		"concurrently": "^4.1.2",
+		"cookie-parser": "~1.4.4",
+		"cors": "^2.8.5",
+		"debug": "~2.6.9",
+		"express": "^4.16.4",
+		"http-errors": "~1.6.3",
+		"morgan": "~1.9.1",
+		"promise-mysql": "^4.1.0",
+		"react-select": "^3.0.8"
+	},
+	"devDependencies": {
+		"terser": "^3.14.1"
+	}
+}
