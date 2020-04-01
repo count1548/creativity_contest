@@ -11,11 +11,12 @@ import ListItemText from "@material-ui/core/ListItemText";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MenuIcon from "@material-ui/icons/Menu";
 import "./Nav.css";
-const useStyles = makeStyles({
-	list: {
-		width: 250
-	}
-});
+const useStyles = makeStyles({ list: { width: 250 } });
+
+const navList = [
+    {name : "홈화면",  path : "/"},
+    {name : "정류장", path : "/notice"},
+]
 
 export default function SwipeableTemporaryDrawer() {
 	const classes = useStyles();
@@ -40,34 +41,22 @@ export default function SwipeableTemporaryDrawer() {
 			className={classes.list}
 			role="presentation"
 			onClick={toggleDrawer(side, false)}
-			onKeyDown={toggleDrawer(side, false)}
-		>
-			<List>
-				<NavLink exact to="/" className="item" activeClassName="active"> 
-					<ListItem button key={"홈화면"}>
-						<ListItemIcon>
-							<InboxIcon />
-						</ListItemIcon>
-						<ListItemText primary={"홈화면"} />
-					</ListItem>
-				</NavLink>
-			</List>
-			<List>
-				<NavLink exact to="/notice" className="item" activeClassName="active"> 
-					<ListItem button key={"공지게시판"}>
-						<ListItemIcon>
-							<InboxIcon />
-						</ListItemIcon>
-						<ListItemText primary={"공지게시판"} />
-					</ListItem>
-				</NavLink>
-			</List>
+			onKeyDown={toggleDrawer(side, false)}>
+            {
+                navList.map((item, idx) =>
+                    <List key={idx}>
+                        <NavLink exact to={item.path} className="item" activeClassName="active"> 
+                            <ListItem button key={item.name}>
+                                <ListItemIcon>
+                                    <InboxIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={item.name} />
+                            </ListItem>
+                        </NavLink>
+                    </List>
+                )
+            }
 			<Divider />
-			<List>
-			</List>
-			<Divider />
-			<List>
-			</List>
 		</div>
 	);
 	return (

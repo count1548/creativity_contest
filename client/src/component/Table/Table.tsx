@@ -1,60 +1,69 @@
 import { DataGrid, ToolbarOptions } from 'tubular-react';
 import React, { useState, useEffect } from 'react';
-import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
+import MaterialTable, { Column } from 'material-table';
+
 import localData, {data_format} from '../database';  //database 
 
 interface propsType {
     title : string
     columns : any
-    push : (path:string) => void
+    source : any
+    onClick : () => void
+    children : any
 }
 
-const node = (props:propsType) => (
-    <IconButton color="default"
-        aria-label="add"
-        onClick={() => {
-            props.push(`/new_notice/${localData[localData.length-1].id+1}`);
-        }}>
-        <AddIcon /> 
-    </IconButton>
-);
+interface state { data : any[] }
 
 const Table = (props:propsType) => {
-    const toolbarOptions = new ToolbarOptions({
-        advancePagination: true,
-        bottomPager: true,
-        exportButton: true,
-        printButton: true, 
-        customItems: node(props),
-        searchText: true,
-        topPager: true
-    });
-    const [data, setState] = useState<data_format[] | null>(null);
-    useEffect(() => {
-        fetch('http://192.168.198.128:3001/getList/', {
-            method: 'GET',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then((response) => response.json())
-        .then((responseData) => setState(responseData))
-        .catch((error)=>{ console.log('Error fetching ',error); });
-    }, [])
+    const [state, setState] = useState({data : props.source})
     return (
-        data!=null ? 
-            <DataGrid columns={props.columns} 
-                gridName="Grid" 
-                dataSource={data}
-                onRowClick={(row : data_format) => {
-                    props.push(`/view_notice/${row.id}`);
-                }}
-                toolbarOptions={toolbarOptions}
-                >
-            </DataGrid>
-            :<div>데이터 로딩중...</div>
+        <div>
+            {props.children}
+            {state.data!=null ? 
+                <MaterialTable 
+                    title = {props.title}
+                    columns={props.columns}
+                    data={state.data}
+                    onRowClick={(e, data) => props.onClick() }
+                    editable={{
+                        onRowAdd: (newData) =>
+                            new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve();
+                                    setState((prevState) => {
+                                        const data = [...prevState.data];
+                                        data.push(newData);
+                                        return { ...prevState, data };
+                                    });
+                                    }, 600);
+                            }),
+                            onRowUpdate: (newData, oldData) =>
+                            new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve();
+                                    if (oldData) {
+                                        setState((prevState) => {
+                                        const data = [...prevState.data];
+                                        data[data.indexOf(oldData)] = newData;
+                                        return { ...prevState, data };
+                                        });
+                                    }
+                                    }, 600);
+                            }),
+                            onRowDelete: (oldData) =>
+                            new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve();
+                                    setState((prevState) => {
+                                        const data = [...prevState.data];
+                                        data.splice(data.indexOf(oldData), 1);
+                                        return { ...prevState, data };
+                                    });
+                                    }, 600);
+                                }),
+                        }}/>
+                :<div>Data not exist...</div>}
+        </div>
 )};
 
 export default Table;
