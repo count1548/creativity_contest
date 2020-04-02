@@ -4,7 +4,7 @@ import Table from "../component/Table/Table";
 import columns from '../component/Table/columns';
 import TransferList from '../component/LineList/TransferList';
 import localData, {data_format} from '../component/database';
-
+import {getData} from '../data_function';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -33,30 +33,20 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Notice = (props:IParentProps) => {
     const [data, setState] = useState<any | null>(null)
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false)
     const classes = useStyles();
 
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
 
-    useEffect(() => {
-        fetch('http://192.168.198.128:3001/getList/', {
-            method: 'GET',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then((response) => response.json())
-        .then((responseData) => setState(responseData))
-        .catch((error)=>{ console.log('Error fetching ',error); });
-    }, [])
+    useEffect(() => getData('bbs', setState), [])
     return (
         data == null ? <div>Loading...</div> :
         <Table title = "Bus Stop"
             columns = {columns}
             onClick = {() => handleOpen()}
-            source = {data}>
+            source = {data}
+            onDataChange = {setState}>
             <Modal
                 aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"

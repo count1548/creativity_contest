@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import MaterialTable, { Column } from 'material-table';
 
 import localData, {data_format} from '../database';  //database 
-
+import {getData, setData, updateData, deleteData} from '../../data_function';
 interface propsType {
     title : string
     columns : any
     source : any
     onClick : () => void
+    onDataChange : (obj : any) => void
     children : any
 }
 
@@ -26,42 +27,31 @@ const Table = (props:propsType) => {
                     data={state.data}
                     onRowClick={(e, data) => props.onClick() }
                     editable={{
-                        onRowAdd: (newData) =>
-                            new Promise((resolve) => {
+                        onRowAdd: (newData) => {
+                            setData(newData, 'bbs')
+                            return new Promise((resolve) => {
                                 setTimeout(() => {
+                                    getData('bbs', props.onDataChange)
                                     resolve();
-                                    setState((prevState) => {
-                                        const data = [...prevState.data];
-                                        data.push(newData);
-                                        return { ...prevState, data };
-                                    });
-                                    }, 600);
-                            }),
-                            onRowUpdate: (newData, oldData) =>
-                            new Promise((resolve) => {
+                                }, 600);
+                        })},
+                        onRowUpdate: (newData, oldData) => {
+                            updateData(newData, 'bbs')
+                            return new Promise((resolve) => {
                                 setTimeout(() => {
+                                    getData('bbs', props.onDataChange)
                                     resolve();
-                                    if (oldData) {
-                                        setState((prevState) => {
-                                        const data = [...prevState.data];
-                                        data[data.indexOf(oldData)] = newData;
-                                        return { ...prevState, data };
-                                        });
-                                    }
-                                    }, 600);
-                            }),
-                            onRowDelete: (oldData) =>
-                            new Promise((resolve) => {
+                                }, 600);
+                        })},
+                        onRowDelete: (oldData) => {
+                            deleteData(oldData['id'], 'bbs')
+                            return new Promise((resolve) => {
                                 setTimeout(() => {
+                                    getData('bbs', props.onDataChange)
                                     resolve();
-                                    setState((prevState) => {
-                                        const data = [...prevState.data];
-                                        data.splice(data.indexOf(oldData), 1);
-                                        return { ...prevState, data };
-                                    });
-                                    }, 600);
-                                }),
-                        }}/>
+                                }, 600);
+                        })},
+                    }}/>
                 :<div>Data not exist...</div>}
         </div>
 )};

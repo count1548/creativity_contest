@@ -21,54 +21,56 @@ app.all('/*', function(req, res, next) {
     next();
 });
 
-app.post('/setNotice', (req, res) => {
-    connection.query(req.body.query, (err, rows) => {
+app.post('/getData', (req, res) => {
+    const {target, id, colunms} = req.body    
+    let where = '', colunmstr = 'id, title, sender, receiver, comment', query = ''
+
+    if(id != null) where = `WHERE id = '${id}'`
+    if(colunms != null) colunmstr = colunms
+
+    let query = `SELECT ${colunmstr} FROM ${target} ${where}`
+
+    console.log(query)
+    connection.query(query, (err, rows) => {
+        if(err) throw err;
+        res.send(rows);
+    })
+})
+
+app.post('/setData', (req, res) => {
+    const {target, columns, values} = req.body
+    const query = `INSERT INTO ${target} (${columns}) VALUE (${values})`
+
+    console.log(query)
+    return
+    connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
     })
 })
 
-app.post('/setComment', (req, res) => {
-    connection.query(req.body.query, (err, rows) => {
+app.post('/updateData', (req, res) => {
+    const {target, set, id} = req.body
+    const query = `UPDATE ${target} SET ${set} WHERE id='${id}'`  
+    
+    console.log(query)
+    return
+    connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
     })
 })
 
-app.get('/getUnread/:id/:target', (req,res) => {
-    var query = `SELECT id, name FROM USER WHERE 
-                    (department='${req.params.target}') AND
-                    NOT(readList LIKE '.${req.params.id}.')
-                    ORDER BY id;`
+app.post('/deleteData', (req, res) => {
+    const {target, id} = req.body
+    const query = `DELETE ${target} WHERE id='${id}'`    
+
+    console.log(query)
+    return
     connection.query(query, (err, rows) => {
         if(err) throw err;
-        res.send(rows);
+        res.send("success");
     })
 })
-
-app.get('/getComment/:id', (req,res) => {
-    var query = `SELECT * FROM comment WHERE bbs_id=${req.params.id} ORDER BY IF(ISNULL(parent_id), id, parent_id), id;`
-    connection.query(query, (err, rows) => {
-        if(err) throw err;
-        res.send(rows);
-    })
-})
-
-app.get('/getList', (req, res) => {
-    var query = 'SELECT b.id, b.title, b.sender, b.receiver, b.read_num, b.file, b.time, (SELECT COUNT(*) FROM comment WHERE bbs_id = b.id ORDER BY bbs_id)comment_num FROM bbs b ORDER BY b.id'
-    connection.query(query, (err, rows) => {
-        if(err) throw err
-        res.send(rows)
-    })
-})
-
-app.get('/getNotice/:id', (req, res) => {
-    var query = `SELECT * FROM bbs WHERE id=${req.params.id}`
-    connection.query(query, (err, rows) => {
-        if(err) throw err;
-        res.send(rows);
-    })
-})
-
 
 const server = app.listen(port, () => console.log('Express listening on port', port))
