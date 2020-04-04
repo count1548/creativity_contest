@@ -1,10 +1,9 @@
 const columns = [
-    { title: 'ID', field: 'id', type: 'numeric'  },
-    { title: 'Title', field: 'title' },
-    { title: 'Sender', field: 'sender'},
-    { title: 'Receiver', field: 'receiver', },
-    { title: 'Comment', field: 'comment_num', },
-    { title: 'Content', field: 'content', },
+    { title: 'ID', field: 'id', type: 'numeric', editable: 'never', width : 30  },
+    { title: '노선', field: 'name', width:100 },
+    { title: '출발', field: 'start'},
+    { title: '경유', field: 'path', editable: 'never'},
+    { title: '도착', field: 'terminus', },
     
 ]
 export default columns;

@@ -1,14 +1,12 @@
-import { DataGrid, ToolbarOptions } from 'tubular-react';
-import React, { useState, useEffect } from 'react';
-import MaterialTable, { Column } from 'material-table';
+import React from 'react';
+import MaterialTable from 'material-table';
 
-import localData, {data_format} from '../database';  //database 
 import {getData, setData, updateData, deleteData} from '../../data_function';
 interface propsType {
     title : string
     columns : any
     source : any
-    onClick : () => void
+    onClick : (row : any) => void
     onDataChange : (obj : any) => void
     children : any
 }
@@ -16,38 +14,37 @@ interface propsType {
 interface state { data : any[] }
 
 const Table = (props:propsType) => {
-    const [state, setState] = useState({data : props.source})
     return (
         <div>
             {props.children}
-            {state.data!=null ? 
+            {props.source!=null ? 
                 <MaterialTable 
                     title = {props.title}
                     columns={props.columns}
-                    data={state.data}
-                    onRowClick={(e, data) => props.onClick() }
+                    data={props.source}
+                    onRowClick={(e, data) => props.onClick(data) }
                     editable={{
                         onRowAdd: (newData) => {
-                            setData(newData, 'bbs')
+                            setData(newData, 'busLine')
                             return new Promise((resolve) => {
                                 setTimeout(() => {
-                                    getData('bbs', props.onDataChange)
+                                    getData('busLine', props.onDataChange)
                                     resolve();
                                 }, 600);
                         })},
                         onRowUpdate: (newData, oldData) => {
-                            updateData(newData, 'bbs')
+                            updateData(newData, 'busLine')
                             return new Promise((resolve) => {
                                 setTimeout(() => {
-                                    getData('bbs', props.onDataChange)
+                                    getData('busLine', props.onDataChange)
                                     resolve();
                                 }, 600);
                         })},
                         onRowDelete: (oldData) => {
-                            deleteData(oldData['id'], 'bbs')
+                            deleteData(oldData['id'], 'busLine')
                             return new Promise((resolve) => {
                                 setTimeout(() => {
-                                    getData('bbs', props.onDataChange)
+                                    getData('busLine', props.onDataChange)
                                     resolve();
                                 }, 600);
                         })},

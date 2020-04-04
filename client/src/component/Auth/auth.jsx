@@ -13,7 +13,7 @@ class Auth {
       cb();
     }
   
-    isAuthenticated() {
+    isAuthenticated() { // eslint-disable-next-line
       if(sessionStorage.getItem('session') == "login")
         return true;
       return false;

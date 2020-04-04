@@ -3,5 +3,5 @@
 	"port" : "3306",
 	"user" : "root",
 	"password" : "3qufvv",
-	"database": "bbs"
+	"database": "bus"
 }

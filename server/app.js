@@ -23,14 +23,12 @@ app.all('/*', function(req, res, next) {
 
 app.post('/getData', (req, res) => {
     const {target, id, colunms} = req.body    
-    let where = '', colunmstr = 'id, title, sender, receiver, comment', query = ''
+    let where = '', colunmstr = '*', query = ''
 
     if(id != null) where = `WHERE id = '${id}'`
     if(colunms != null) colunmstr = colunms
 
-    let query = `SELECT ${colunmstr} FROM ${target} ${where}`
-
-    console.log(query)
+    query = `SELECT ${colunmstr} FROM ${target} ${where}`
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send(rows);
@@ -42,7 +40,6 @@ app.post('/setData', (req, res) => {
     const query = `INSERT INTO ${target} (${columns}) VALUE (${values})`
 
     console.log(query)
-    return
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
@@ -51,10 +48,7 @@ app.post('/setData', (req, res) => {
 
 app.post('/updateData', (req, res) => {
     const {target, set, id} = req.body
-    const query = `UPDATE ${target} SET ${set} WHERE id='${id}'`  
-    
-    console.log(query)
-    return
+    const query = `UPDATE ${target} SET ${set} WHERE id='${id}'`
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
@@ -63,10 +57,7 @@ app.post('/updateData', (req, res) => {
 
 app.post('/deleteData', (req, res) => {
     const {target, id} = req.body
-    const query = `DELETE ${target} WHERE id='${id}'`    
-
-    console.log(query)
-    return
+    const query = `DELETE FROM ${target} WHERE id='${id}'`
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");

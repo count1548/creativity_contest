@@ -12,7 +12,9 @@ const getData = (target, setState, id = null) => {
 		}
 	})
     .then(response => response.json())
-    .then(responseData => setState(responseData))
+    .then(responseData => {
+        setState(responseData)
+    })
 	.catch(error=> console.log('Error fetching ',error) );
 }
 const setData = (data, _target) => {
@@ -28,7 +30,7 @@ const setData = (data, _target) => {
     const cString = columns.join(', ')
     const vString = values.join(', ')
 
-    fetch(`${host}:3001/setData/`, {
+    fetch(`${host}:3001/setData/`, { 
         method: 'POST',
         body : JSON.stringify({
             target : _target,
