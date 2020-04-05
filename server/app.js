@@ -49,6 +49,7 @@ app.post('/setData', (req, res) => {
 app.post('/updateData', (req, res) => {
     const {target, set, id} = req.body
     const query = `UPDATE ${target} SET ${set} WHERE id='${id}'`
+    console.log(query)
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");

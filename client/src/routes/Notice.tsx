@@ -3,7 +3,7 @@ import React, {useState, useEffect}  from "react";
 import Table from "../component/Table/Table";
 import columns from '../component/Table/columns';
 import TransferList from '../component/LineList/TransferList';
-import {getData} from '../data_function';
+import {getData, updateData} from '../data_function';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -39,7 +39,7 @@ const dictToArr = (dict:any[]) => {
     dict.map((data, idx) => column[data.id] = data.name)
     return column
 }
-let columnsData, choice:number[] = [], all
+let columnsData, choice:number[] = [], all, selectedID : number
 
 const Notice = (props:IParentProps) => {
     const [data, setState] = useState<any | null>(null)
@@ -51,8 +51,8 @@ const Notice = (props:IParentProps) => {
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
     const rowClick = (rowData) => {
-        var data = rowData['pathIdx'].split(',').map((value:any) => value*1)
-        data.pop()
+        var data = rowData['path'].split(',').map((value:any) => value*1)
+        selectedID = rowData['id']
         setLine(data)
         handleOpen()
     }
@@ -60,29 +60,29 @@ const Notice = (props:IParentProps) => {
         getData('busLine', _data => {
             getData('LineList', lineData => {
                 setColumns(lineData)
-                
-                columnsData = dictToArr(lineData)
-                all = Object.keys(columnsData).map((value:any) => value*1)
-                _data.map((item, idx) => {
-                    var path = item['path'].split(',')
-                    item['pathIdx'] = item['path']
-                    item['path'] = ''
-                    choice = []
-
-                    path.map((value, idx) => {
-                        if(value !== '') {
-                            choice.push(value*1)
-                            item['path'] += ` - ${columnsData[value*1]}`
-                        }
-                    })
-                    item['path'] = item['path'].replace('-', '')
-                    item['start'] = columnsData[item['start']*1]
-                    item['terminus'] = columnsData[item['terminus']*1]
-                })
                 setState(_data)
             })
         })
     }, [])
+    if(data != null && column != null) {
+        columnsData = dictToArr(column)
+        all = Object.keys(columnsData).map((value:any) => value*1)
+        data.map((item, idx) => {
+            var path = item['path'].split(',')
+            item['pathName'] = ''
+            choice = []
+
+            path.map((value, idx) => {
+                if(value !== '') {
+                    choice.push(value*1)
+                    item['pathName'] += ` - ${columnsData[value*1]}`
+                }
+            })
+            item['pathName'] = item['pathName'].replace('-', '')
+            item['startName'] = columnsData[item['start']*1]
+            item['terminusName'] = columnsData[item['terminus']*1]
+        })
+    }
     return (
         data == null || column == null ? <div>Loading...</div> :
         <Table title = "Bus Stop"
@@ -101,13 +101,22 @@ const Notice = (props:IParentProps) => {
                 BackdropProps={{
                 timeout: 500,}}>
                 <Fade in={open}>
-                    <div className={classes.paper}>
-                        <TransferList 
-                            dataString = {columnsData}
-                            title = {'현 정류장'}
-                            chData = {busLine}
-                            allData = {all}/>
-                    </div>
+                    <TransferList 
+                        data = {columnsData}
+                        title = {'현 정류장'}
+                        chData = {busLine}
+                        allData = {all}
+                        onSubmit = {(applyData) => {
+                            var _data = {}
+                            _data['id'] = selectedID
+                            _data['path'] = applyData.join(',')
+                            updateData(_data, 'busLine', ()=>{ 
+                                getData('busLine', res => {
+                                    setState(res)
+                                    handleClose()
+                                })                                
+                            })
+                    }}/>
                 </Fade>
             </Modal>
         </Table>

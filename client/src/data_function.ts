@@ -17,7 +17,7 @@ const getData = (target, setState, id = null) => {
     })
 	.catch(error=> console.log('Error fetching ',error) );
 }
-const setData = (data, _target) => {
+const setData = (data, _target, setState:null|any = null) => {
     let columns:string[] = []
     let values:string[] = []
 
@@ -41,11 +41,12 @@ const setData = (data, _target) => {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json'
 		}
-	})
+    })
+    .then(res => { if(setState !== null) setState() })
 	.catch(error => console.log('Error fetching ',error))
 }
 
-const updateData = (data, _target) => {
+const updateData = (data, _target, setState:null|any = null) => {
     let set:string[] = []
 
     for(var key in data) {
@@ -65,7 +66,8 @@ const updateData = (data, _target) => {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json'
 		}
-	})
+    })
+    .then(res => { if(setState !== null) setState() })
 	.catch(error => console.log('Error fetching ',error))
 }
 const deleteData = (_id, _target) => {    
