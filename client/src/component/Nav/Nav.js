@@ -15,7 +15,10 @@ const useStyles = makeStyles({ list: { width: 250 } });
 
 const navList = [
     {name : "홈화면",  path : "/"},
-    {name : "정류장", path : "/notice"},
+    {name : "노선", path : "/busline"},
+	{name : "시간표", path : "/timetable"},
+    {name : "정류장", path : "/busstop"},
+    {name : "예매내역", path : "/ticket"},
 ]
 
 export default function SwipeableTemporaryDrawer() {

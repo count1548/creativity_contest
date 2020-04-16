@@ -1,36 +1,169 @@
-import React, { useEffect,useState } from "react";
+import React, {useState, useEffect}  from "react";
+//import Table from "../component/Table/Table";
 import Table from "../component/Table/Table";
-interface IParentProps{//props타입 선언
-	tableTitle:string
-	path:string
+import columns from '../component/Table/columns';
+import TransferList from '../component/LineList/TransferList';
+import * as Data from '../data_function';
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    modal: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    paper: {
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+      },
+  }),
+);
+
+interface columnFormat {
+    id : number,
+    name : string
 }
-interface IParentState{//state타입 선언
-    columnsTitle:Columns[];
-}
-interface Columns{//컬럼 타입
-        title:string
-        field:string
-        readonly?:boolean//'?문자' -> readonly가 있을수도 업을수도 있음
+const dictToArr = (dict:any[]) => {
+    let column = {}
+    dict.map(data => column[data.id] = data.name)
+    return column
 }
 
-class Line extends React.Component<IParentProps,IParentState> {
-    constructor(props:IParentProps){
-        super(props)
-        this.state={
-            columnsTitle:[
-                { title: "INDEX", field: "IDX_BUS_LINE", readonly: true },
-				{ title: "노선ID", field: "BUS_LINE_ID" },
-				{ title: "정류장ID", field: "BUS_STOP_ID" },
-				{ title: "경유순서", field: "LINE_SEQUENCE" }
-            ]
-        }
-    }
-    render(){
-        return (
-                 <div/>
-        )
-    }
+let columnsData, allLine, selectedID : number
+let displayData:any[] = [], busLine:number[] = []
+
+const Notice = props => {
+    const [data, setState] = useState<any | null>(null)
+    const [column, setColumns] = useState<string [] | null>(null)
+    const [open, setOpen] = useState(false)
+    const classes = useStyles();    
     
+    const handleOpen = () => setOpen(true)
+    const handleClose = () => setOpen(false)
+
+    const rowChange = rowData => {
+        selectedID = rowData['id']
+        var selectedData = data[rowData['idx']]
+        busLine = selectedData['path'].split(',')
+            .map((value:number) => value*1)
+        busLine.push(selectedData['terminus']*1)
+        busLine.unshift(selectedData['start']*1)
+        handleOpen()
+    }
+
+    const defaultEdit = {
+        onRowAdd: newData => {
+            Data.setData(newData, 'busLine')
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    Data.getData('busLine', _data => {
+                        setState(_data)
+                        selectedID = _data[_data.length-1]['id']
+                        handleOpen()
+                    })
+                    
+                    resolve();
+                }, 600);
+        })},
+        onRowDelete : oldData => {
+            Data.deleteData(oldData['id'], 'busLine')
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    Data.getData('busLine', setState)
+                    resolve();
+                }, 600);
+        })}
+    }
+
+    const action = [
+        {
+            icon: 'update',
+            tooltip: 'change busline',
+            onClick: (e, data) => rowChange(data)
+        },
+    ]
+
+    useEffect(() => {
+        Data.getData('busLine', _data => {
+            Data.getData('LineList', lineData => {
+                setColumns(lineData)
+                setState(_data)
+            })
+        })
+    }, [])
+
+    if(data != null && column != null) {
+        columnsData = dictToArr(column)
+        allLine = Object.keys(columnsData).map((value:any) => value*1)
+ 
+        displayData = data.map((item, idx) => {
+            var path = Data.stringToArr(item['path'], ',')
+            return {
+                ...item,
+                'idx' : idx,
+                'start' : columnsData[item['start']*1],
+                'terminus' : columnsData[item['terminus']*1],
+                'path' : path.map((value:any) => 
+                    columnsData[value*1]).join(' - ')
+            }
+        })
+    }
+    return (
+        data == null || column == null ? <div>Loading...</div> :
+        <Table title = "Bus Stop"
+            columns = {columns}
+            source = {displayData}
+            defaultEdit = {defaultEdit}
+            action = {action}
+            onRowClick = {(e, value) => {
+                props.history.push(`/timetable/${value.id}`)
+            }}
+            options = {{
+                rowStyle: {
+                  backgroundColor: '#EEE',
+                }
+              }}
+            >
+            <Modal
+                aria-labelledby="transition-modal-title"
+                aria-describedby="transition-modal-description"
+                className={classes.modal}
+                open={open}
+                onClose={handleClose}
+                closeAfterTransition
+                BackdropComponent={Backdrop}
+                BackdropProps={{
+                timeout: 500,}}>
+                <Fade in={open}>
+                    <TransferList 
+                        data = {columnsData}
+                        title = {'현 정류장'}
+                        chData = {busLine}
+                        allData = {allLine}
+                        onSubmit = {applyData => {
+                            var _data = {
+                                'id' : selectedID,
+                                'start' : applyData.shift(),
+                                'terminus' : applyData.pop(),
+                                'path' : Data.arrToString(applyData, ',')
+                            }
+                            Data.updateData(_data, 'busLine', ()=>{ 
+                                Data.getData('busLine', res => {
+                                    setState(res)
+                                    handleClose()
+                                })                                
+                            })
+                    }}/>
+                </Fade>
+            </Modal>
+        </Table>
+    )
 }
 
-export default Line;
+export default Notice;

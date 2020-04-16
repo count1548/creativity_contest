@@ -1,10 +1,11 @@
-const host = "http://192.168.198.128"
-const getData = (target, setState, id = null) => {    
+const host = "http://192.168.219.106"
+const getData = (target, setState, col:string|null = null, value:number|null = null) => {
     fetch(`${host}:3001/getData/`, {
         method: 'POST',
         body : JSON.stringify({
-            target : target,
-            id : id
+            target : target, 
+            column : col,
+            value : value
         }),
 		headers:{
 			'Accept': 'application/json',
@@ -12,21 +13,19 @@ const getData = (target, setState, id = null) => {
 		}
 	})
     .then(response => response.json())
-    .then(responseData => {
-        setState(responseData)
-    })
+    .then(responseData => setState(responseData) )
 	.catch(error=> console.log('Error fetching ',error) );
 }
 const setData = (data, _target, setState:null|any = null) => {
     let columns:string[] = []
     let values:string[] = []
-
+    
     for(var key in data) {
         columns.push(key)
         data[key] = data[key] == null ? 'null' : data[key]
         values.push(`'${data[key]}'`)
     }
-
+     
     const cString = columns.join(', ')
     const vString = values.join(', ')
 
@@ -34,7 +33,7 @@ const setData = (data, _target, setState:null|any = null) => {
         method: 'POST',
         body : JSON.stringify({
             target : _target,
-            colunms : cString,
+            columns : cString,
             values : vString
         }),
 		headers:{
@@ -85,4 +84,11 @@ const deleteData = (_id, _target) => {
 	.catch(error => console.log('Error fetching ',error))
 }
 
-export {getData, setData, updateData, deleteData}
+const stringToArr = (str:string, sep:string) => str.split(sep)
+const arrToString = (str:any[], sep:string) => str.join(sep)
+
+export {
+    getData, setData, 
+    updateData, deleteData,
+    stringToArr, arrToString
+}

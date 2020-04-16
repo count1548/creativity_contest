@@ -8,7 +8,6 @@ import {
     ListItem,
     ListItemText,
     ListItemIcon,
-    IconButton,
     ListItemSecondaryAction
   } from "@material-ui/core";
 import Checkbox from '@material-ui/core/Checkbox';
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
     },
     list: {
         width: 400,
-        height: 600,
+        height: '300px',
         backgroundColor: theme.palette.background.paper,
         overflow: 'auto'
     },
@@ -88,8 +87,7 @@ export default function TransferList({data, chData, allData, title, onSubmit}) {
     const [right, setRight] = React.useState<any[]>(rightData);
     const leftChecked = intersection(checked, left);
     const rightChecked = intersection(checked, right);
-
-    const handleToggle = (value : number) => () => {
+    const handleToggle = (value : number) => () => { 
         const currentIndex = checked.indexOf(value);
         const newChecked = [...checked];
 
@@ -208,35 +206,7 @@ export default function TransferList({data, chData, allData, title, onSubmit}) {
                 </Droppable>
             </DragDropContext>
         </Card>
-    );
-/*
-<List className={classes.list} dense component="div" role="list">
-    {
-        items.map((value : number) => {
-            const labelId = `transfer-list-all-item-${value}-label`;
-            return (
-                <ListItem
-                    key={value}
-                    role="listitem"
-                    button
-                    onClick={handleToggle(value)}>
-                    <ListItemIcon>
-                        <Checkbox
-                            checked={checked.indexOf(value) !== -1}
-                            tabIndex={-1}
-                            disableRipple
-                            inputProps={{
-                                'aria-labelledby' : labelId
-                            }}/>
-                    </ListItemIcon>
-                    <ListItemText id={labelId} primary={`${data[value]}`}/>
-                </ListItem>
-            );
-        })
-    }
-    <ListItem/>
-</List>
-*/
+    )
     return (
         <div className={classes.paper}>
             <Grid

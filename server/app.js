@@ -22,13 +22,10 @@ app.all('/*', function(req, res, next) {
 });
 
 app.post('/getData', (req, res) => {
-    const {target, id, colunms} = req.body    
-    let where = '', colunmstr = '*', query = ''
-
-    if(id != null) where = `WHERE id = '${id}'`
-    if(colunms != null) colunmstr = colunms
-
-    query = `SELECT ${colunmstr} FROM ${target} ${where}`
+    const {target, column, value} = req.body    
+    let where = ''
+    if(column != null) where = `WHERE ${column} = '${value}'`
+    const query = `SELECT * FROM ${target} ${where}`
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send(rows);
@@ -38,8 +35,6 @@ app.post('/getData', (req, res) => {
 app.post('/setData', (req, res) => {
     const {target, columns, values} = req.body
     const query = `INSERT INTO ${target} (${columns}) VALUE (${values})`
-
-    console.log(query)
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
@@ -49,7 +44,6 @@ app.post('/setData', (req, res) => {
 app.post('/updateData', (req, res) => {
     const {target, set, id} = req.body
     const query = `UPDATE ${target} SET ${set} WHERE id='${id}'`
-    console.log(query)
     connection.query(query, (err, rows) => {
         if(err) throw err;
         res.send("success");
