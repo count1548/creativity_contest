@@ -1,6 +1,8 @@
 import React, {useState, useEffect}  from "react";
 import * as Data from '../data_function';
 import Table from 'material-table';
+import Tooltip from '../component/Tooltip/Tooltip';
+import SeatLayout from '../component/Tooltip/SeatLayout';
 
 const columns = [
     {title : 'ID', field : 'TICKET_ID', hidden : true, width:0 },
@@ -11,7 +13,12 @@ const columns = [
     {title : '출발 날짜', field : 'TICKET_DATE' },
     {title : '출발 시간', field : 'TICKET_TIME' },
     {title : '예약 날짜', field : 'RESERVATION_DATE' },
-    {title : '좌석', field : 'SEAT' },
+    {title : '좌석', field : 'SEAT', width:100, 
+        render : rowData => 
+            <Tooltip text = {<SeatLayout num = {rowData['SEAT']}/>}>
+                <div>{rowData['SEAT']}</div>
+            </Tooltip>
+    },
     {title : '탑승여부', field : 'BOARDING',
         render: rowData => 
             <div style={{
@@ -22,6 +29,7 @@ const columns = [
             }}></div>
     },
 ]
+
 const TicketList = props => {
     const [tickets, setTickets] = useState<object[] | null>(null)
     const defaultEdit = {
@@ -29,7 +37,7 @@ const TicketList = props => {
             //Data.setData({}, 'LineList')
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    Data.getData('TICKETS', setTickets)
+                    Data.getData('TICKETS', setTickets) 
                     resolve();
                 }, 600);
         })},
