@@ -1,13 +1,13 @@
 import React, {useState, useEffect}  from "react";
 //import Table from "../component/Table/Table";
-import Table from "../component/Table/Table";
+import Table from 'material-table';
 import columns from '../component/Table/columns';
 import TransferList from '../component/LineList/TransferList';
 import * as Data from '../data_function';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
+import Grow from '@material-ui/core/Grow';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -80,15 +80,6 @@ const Notice = props => {
                 }, 600);
         })}
     }
-
-    const action = [
-        {
-            icon: 'update',
-            tooltip: 'change busline',
-            onClick: (e, data) => rowChange(data)
-        },
-    ]
-
     useEffect(() => {
         Data.getData('busLine', _data => {
             Data.getData('LineList', lineData => {
@@ -116,23 +107,25 @@ const Notice = props => {
     }
     return (
         data == null || column == null ? <div>Loading...</div> :
-        <Table title = "Bus Stop"
+        <div>
+            <Table title = "Bus Line"
+            data = {displayData}
             columns = {columns}
-            source = {displayData}
-            defaultEdit = {defaultEdit}
-            action = {action}
-            onRowClick = {(e, value) => {
-                props.history.push(`/timetable/${value.id}`)
-            }}
+            editable = {defaultEdit}
+            actions = {[{
+                icon: 'update',
+                tooltip: 'change busline',
+                onClick: (e, data) => rowChange(data)
+            }]}
+            onRowClick = {(e, value) =>  props.history.push(`/timetable/${value.id}`) }
             options = {{
                 rowStyle: {
                   backgroundColor: '#EEE',
-                }
-              }}
-            >
+                }, grouping:true,
+            }}/>
             <Modal
-                aria-labelledby="transition-modal-title"
-                aria-describedby="transition-modal-description"
+                aria-labelledby="spring-modal-title"
+                aria-describedby="spring-modal-description"
                 className={classes.modal}
                 open={open}
                 onClose={handleClose}
@@ -140,7 +133,7 @@ const Notice = props => {
                 BackdropComponent={Backdrop}
                 BackdropProps={{
                 timeout: 500,}}>
-                <Fade in={open}>
+                <Grow in={open}>
                     <TransferList 
                         data = {columnsData}
                         title = {'현 정류장'}
@@ -160,9 +153,9 @@ const Notice = props => {
                                 })                                
                             })
                     }}/>
-                </Fade>
+                </Grow>
             </Modal>
-        </Table>
+        </div>
     )
 }
 

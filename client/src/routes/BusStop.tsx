@@ -1,6 +1,6 @@
 import React, {useState, useEffect}  from "react";
 import * as Data from '../data_function';
-import Table from "../component/Table/Table";
+import Table from 'material-table';
 //import Map from "../component/Maps/GoogleMaps";
 
 const BusStop = props => {
@@ -12,7 +12,7 @@ const BusStop = props => {
             title : 'ID',
             field : 'id',
             hidden : true,
-            editable: 'never', width : 0 
+            width : 0 
         },
         {
             title : '정류장',
@@ -59,18 +59,15 @@ const BusStop = props => {
                 'float' : 'left',
                 'padding' : '10px'
                 }}>
-                <Table title = ""
+                <Table title = " "
                     columns = {columns}
-                    source = {busStopName} 
-                    
-                    defaultEdit = {defaultEdit}
+                    data = {busStopName}                     
+                    editable = {defaultEdit}
                     options={{
-                        rowStyle: { 
-                            backgroundColor: '#EEE', 
-                        },
+                        rowStyle: {  backgroundColor: '#EEE',  },
                         pageSize : 15,
-                    }}
-                    />
+                        grouping: true,
+                    }}/>
             </div>
            
         </div>

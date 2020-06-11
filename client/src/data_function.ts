@@ -1,4 +1,4 @@
-const host = "http://192.168.219.106"
+const host = "http://192.168.0.5"
 const getData = (target, setState, col:string|null = null, value:number|null = null) => {
     fetch(`${host}:3001/getData/`, {
         method: 'POST',

@@ -17,7 +17,7 @@ export default function CustomizedTooltips(props) {
     return (
         <HtmlTooltip
             title={<React.Fragment>{text}</React.Fragment>}
-            placement="right">
+            placement="left">
             {children}
         </HtmlTooltip>
     );

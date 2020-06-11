@@ -6,42 +6,37 @@ import SeatLayout from '../component/Tooltip/SeatLayout';
 
 const columns = [
     {title : 'ID', field : 'TICKET_ID', hidden : true, width:0 },
-    {title : '학생', field : 'STUDENT_ID' },
-    {title : '버스', field : 'BUS_ID', defaultGroupOrder: 0 },
+    {title : '학생', field : 'STUDENT_ID', width:100 },
+    {title : '버스', field : 'BUS_ID', defaultGroupOrder: 0, width:0  },
     {title : '출발지', field : 'START' },
     {title : '도착지', field : 'END' },
-    {title : '출발 날짜', field : 'TICKET_DATE' },
-    {title : '출발 시간', field : 'TICKET_TIME' },
-    {title : '예약 날짜', field : 'RESERVATION_DATE' },
+    {title : '예약 날짜', field : 'RESERVATION_DATE', width:150 },
+    {title : '출발 날짜', field : 'TICKET_DATE', width:150  },
+    {title : '출발 시간', field : 'TICKET_TIME', width:150 },
     {title : '좌석', field : 'SEAT', width:100, 
         render : rowData => 
             <Tooltip text = {<SeatLayout num = {rowData['SEAT']}/>}>
                 <div>{rowData['SEAT']}</div>
             </Tooltip>
     },
-    {title : '탑승여부', field : 'BOARDING',
+    {title : '탑승', field : 'BOARDING', width:100, 
+        lookup: { '탑승' : '탑승', '미탑승' : '미탑승' },
         render: rowData => 
             <div style={{
                 'width' : '30px',
                 'height' : '30px',
                 'borderRadius' : '50%', 
-                'backgroundColor' : (rowData['BOARDING'] === '미탑승') ? 'red' : 'green'
+                'backgroundColor' : (rowData['BOARDING'] === '미탑승') ? 'red' : 'green',
+                'margin' : '0 auto'
             }}></div>
     },
+    {title : '결재금액', field : 'PRICE', width:180, filtering: false },
 ]
 
 const TicketList = props => {
     const [tickets, setTickets] = useState<object[] | null>(null)
     const defaultEdit = {
-        onRowAdd: newData => {
-            //Data.setData({}, 'LineList')
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    Data.getData('TICKETS', setTickets) 
-                    resolve();
-                }, 600);
-        })},
-        onRowUpdate : newData => {
+        onRowDelete : oldData => {
             //Data.updateData({}, 'LineList')
             return new Promise((resolve) => {
                 setTimeout(() => {
@@ -61,10 +56,6 @@ const TicketList = props => {
             setTickets(data)
         })
     }, [])
-
-    if(tickets !== null) {
-    }
-
     return (
         tickets === null ? <div>Loading...</div>:
         <Table
@@ -79,6 +70,14 @@ const TicketList = props => {
                     backgroundColor: '#EEE', 
                 },
             }}
+            components={{
+                GroupRow: rowData => 
+                    <div style={{
+                        width : '100%',
+                        height : '30px',
+                        backgroundColor: 'black'
+                    }}></div>
+              }}
         />
     )
 }

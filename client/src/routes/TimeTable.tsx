@@ -1,8 +1,8 @@
 import React, {useState, useEffect}  from "react";
-import Table from "../component/Table/Table";
 import * as Data from '../data_function';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+import Table from 'material-table';
 
 interface columnFormat {
     id : number,
@@ -49,7 +49,9 @@ const setTableColumn = (id, data) => {
     columnObj.unshift({
         'title' : 'id', 
         'field' : 'id',
-        'editable': 'never'
+        'editable': 'never',
+        'width' : '0',
+        'hidden' : 'true'
     })
 
     return columnObj
@@ -151,11 +153,12 @@ const Notice = props => {
                 <div>Selecte line</div> :
                 <Table title = "Bus Interval"
                     columns = {columns}
-                    source = {timeData} 
-                    defaultEdit = {defaultEdit}
+                    data = {timeData} 
+                    editable = {defaultEdit}
                     options={{
                             search: false,
-                            rowStyle: { backgroundColor: '#EEE', }
+                            rowStyle: { backgroundColor: '#EEE', },
+                            grouping : true
                         }}/>
             }
         </div>
