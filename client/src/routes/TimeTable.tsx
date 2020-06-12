@@ -6,7 +6,7 @@ import Table from 'material-table';
 
 interface columnFormat {
     id : number,
-    name : string
+    name : string 
 }
 let oldValue:string = '', 
     lineName:object = {}, 

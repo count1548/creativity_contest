@@ -10,13 +10,19 @@ const columns = [
     {title : '버스', field : 'BUS_ID', defaultGroupOrder: 0, width:0  },
     {title : '출발지', field : 'START' },
     {title : '도착지', field : 'END' },
-    {title : '예약 날짜', field : 'RESERVATION_DATE', width:150 },
-    {title : '출발 날짜', field : 'TICKET_DATE', width:150  },
-    {title : '출발 시간', field : 'TICKET_TIME', width:150 },
+    {title : '예약 날짜', field : 'RESERVATION_DATE', width:150, type:"date" as const, },
+    {title : '출발 날짜', field : 'TICKET_DATE', width:150, type:"date" as const, },
+    {title : '출발 시간', field : 'TICKET_TIME', width:150, },
     {title : '좌석', field : 'SEAT', width:100, 
         render : rowData => 
             <Tooltip text = {<SeatLayout num = {rowData['SEAT']}/>}>
-                <div>{rowData['SEAT']}</div>
+                <div style={{
+                    'textAlign' : 'center',
+                    'backgroundColor' : '#aaa',
+                    'borderRadius' : '5px',
+                    'padding' : '10px 0',
+                    'cursor' : 'default',
+                }}>{rowData['SEAT']}</div>
             </Tooltip>
     },
     {title : '탑승', field : 'BOARDING', width:100, 
@@ -40,18 +46,23 @@ const TicketList = props => {
             //Data.updateData({}, 'LineList')
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    Data.getData('TICKETS', setTickets)
+                    Data.getData('ticket_list', setTickets)
                     resolve();
                 }, 600);
         })},
     }
 
     useEffect(() => {
-        Data.getData('TICKETS', data => {
+        Data.getData('ticket_list', data => {
             data = data.map(value => {
-                value['TICKET_DATE'] = value['TICKET_DATE'].split('T')[0]
-                value['RESERVATION_DATE'] = value['RESERVATION_DATE'].split('T')[0]
-                return value
+                const time = value['TICKET_TIME'].split(':')
+                const temp = {
+                    ...value,
+                    'TICKET_DATE' : value['TICKET_DATE'].split('T')[0],
+                    'RESERVATION_DATE' : value['RESERVATION_DATE'].split('T')[0],
+                    'TICKET_TIME' : `${time[0]}:${time[1]}`
+                }
+                return temp
             })
             setTickets(data)
         })
@@ -69,15 +80,14 @@ const TicketList = props => {
                 rowStyle: { 
                     backgroundColor: '#EEE', 
                 },
+                selection:true,
+                actionsColumnIndex: -1,
             }}
-            components={{
-                GroupRow: rowData => 
-                    <div style={{
-                        width : '100%',
-                        height : '30px',
-                        backgroundColor: 'black'
-                    }}></div>
-              }}
+            actions={[{
+                tooltip: 'Remove All Selected Users',
+                icon: 'delete',
+                onClick: (evt, data:any[]) => alert('You want to delete ' + data.length + ' rows')
+            }]}
         />
     )
 }
