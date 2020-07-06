@@ -7,7 +7,7 @@ import SeatLayout from '../component/Tooltip/SeatLayout';
 const columns = [
     {title : 'ID', field : 'TICKET_ID', hidden : true, width:0 },
     {title : '학생', field : 'STUDENT_ID', width:100 },
-    {title : '버스', field : 'BUS_ID', defaultGroupOrder: 0, width:0  },
+    {title : '노선', field : 'BUS_ID', defaultGroupOrder: 0, width:0  },
     {title : '출발지', field : 'START' },
     {title : '도착지', field : 'END' },
     {title : '예약 날짜', field : 'RESERVATION_DATE', width:150, type:"date" as const, },
@@ -82,6 +82,7 @@ const TicketList = props => {
                 },
                 selection:true,
                 actionsColumnIndex: -1,
+                pageSize: 10
             }}
             actions={[{
                 tooltip: 'Remove All Selected Users',

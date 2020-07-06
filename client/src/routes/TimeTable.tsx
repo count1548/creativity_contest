@@ -1,5 +1,5 @@
 import React, {useState, useEffect}  from "react";
-import * as Data from '../data_function';
+import * as Data from '../data_function copy';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import Table from 'material-table';

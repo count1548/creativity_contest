@@ -1,0 +1,9 @@
+.line-box {
+    text-align:left;
+    min-width:950px;
+}
+.line-box:after {
+    content:"";
+    display:block;
+    clear:both;
+}

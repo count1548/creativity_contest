@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Header from "./component/Nav/Header";
+import Nav from "./component/Nav/Nav";
 import Home from "./routes/Home";
 import BusLine from "./routes/BusLine";
 import BusStop from "./routes/BusStop";
@@ -9,12 +9,24 @@ import Ticket from "./routes/Ticket";
 import Login from "./component/Login/Login";
 import Logout from "./component/Login/Logout";
 import ProtectedRoute from "./component/Auth/protected.route"
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+	root: {
+		display: 'flex',
+	  },
+	content: {
+	  flexGrow: 1,
+	  padding: 10,
+	},
+  }));
 
 const App = () => {
-	return ( <Router> <div>
-		<Header />
-		<div> 
-			<Switch>
+	const classes = useStyles()
+	return ( <Router> <div className={classes.root}>
+		<Nav />
+		<div className={classes.content}> 
+			<Switch >
 				<Route exact path="/login" component={Login} />	
 				<Route exact path="/logout" component={Logout} />	
 				<Route exact path="/" component={Home} />
