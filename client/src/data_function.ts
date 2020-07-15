@@ -1,4 +1,8 @@
 const host = "http://uck.myds.me"
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+
 const getData = (target, setState, col:string|null = null, value:number|null = null) => {
     fetch(`${host}:3001/getData/`, {
         method: 'POST',
@@ -29,9 +33,9 @@ const getAPI = (target, name, setState) => {
         var data
         switch(name) {
             case 'BUS_STOP' :
-                data = dictToArr(res[name])
+                data = dictToArr(res[name], 'BUS_STOP_ID', 'BUS_STOP_NAME')
                 break
-            case 'BUS_LINE' :
+            default :
                 data = res[name]
         }
         setState(data)
@@ -39,9 +43,11 @@ const getAPI = (target, name, setState) => {
     })
 }
 
-const dictToArr = (dict:any[]) => {
+const dictToArr = (dict:any[], idxName:string, value:string|null = null) => {
     let column = {}
-    dict.map(data => column[data['BUS_STOP_ID']] = data['BUS_STOP_NAME'])
+    dict.map(data => 
+        column[data[idxName]] = (value == null) ? _objectWithoutProperties(data, [idxName]) : data[value]
+    )
     return column
 }
 

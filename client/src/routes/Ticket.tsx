@@ -14,7 +14,7 @@ const columns = [
     {title : '출발 날짜', field : 'TICKET_DATE', width:150, type:"date" as const, },
     {title : '출발 시간', field : 'TICKET_TIME', width:150, },
     {title : '좌석', field : 'SEAT', width:100, 
-        render : rowData => 
+        render : rowData =>
             <Tooltip text = {<SeatLayout num = {rowData['SEAT']}/>}>
                 <div style={{
                     'textAlign' : 'center',

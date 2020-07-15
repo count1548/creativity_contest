@@ -25,8 +25,8 @@ const OptionBox = ({name, options}) => {
             padding:'10px',
         }}>
             <div>{name}</div>
-            {options.map(option => (
-                <Button variant="contained">{option}</Button>
+            {options.map((option, idx) => (
+                <Button variant="contained" key={idx}>{option}</Button>
             ))}
         </div>
     )
