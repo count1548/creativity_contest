@@ -1,8 +1,8 @@
-mysql = require('mysql');
+mysql = require('mysql')
 express = require('express')
-bodyParser = require('body-parser');
-path = require('path');
-cors = require('cors');
+bodyParser = require('body-parser')
+path = require('path')
+cors = require('cors')
 
 const dbconfig = require('../dbinfo.json')
 const connection = mysql.createConnection(dbconfig)
@@ -18,8 +18,17 @@ app.use(bodyParser.json())
 app.all('/*', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    next();
-});
+    next()
+})
+
+app.post('/getData_s', (req, res) => {
+    const {target} = req.body    
+    const query = `SELECT * FROM ${target}`
+    connection.query(query, (err, rows) => {
+        if(err) throw err
+        res.send(rows)
+    })
+})
 
 app.post('/getData', (req, res) => {
     const {target, column, value} = req.body    
@@ -27,11 +36,12 @@ app.post('/getData', (req, res) => {
     if(column != null) where = `WHERE ${column} = '${value}'`
     const query = `SELECT * FROM ${target} ${where}`
     connection.query(query, (err, rows) => {
-        if(err) throw err;
-        res.send(rows);
+	if(err) console.log(err)
+        //if(err) throw err;
+        if(err) res.send('mysql error : check server log')
+        res.send(rows)
     })
 })
-
 app.post('/setData', (req, res) => {
     const {target, columns, values} = req.body
     const query = `INSERT INTO ${target} (${columns}) VALUE (${values})`

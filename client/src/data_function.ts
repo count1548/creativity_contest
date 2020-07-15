@@ -16,21 +16,36 @@ const getData = (target, setState, col:string|null = null, value:number|null = n
     .then(responseData => setState(responseData) )
 	.catch(error=> console.log('Error fetching ',error) );
 }
-const getData_s = (options, setState) => {
-    return fetch(`${host}:3001/getData_s/`, {
-        method: 'POST',
-        body : JSON.stringify(options),
+const getAPI = (target, name, setState) => {
+    return fetch(`${host}:7000/${target}`, {
+        method: 'GET',
 		headers:{
 			'Accept': 'application/json',
 			'Content-Type': 'application/json'
 		}
 	})
     .then(res => res.json())
-    .then(res => {setState(res)})
+    .then(res => {
+        var data
+        switch(name) {
+            case 'BUS_STOP' :
+                data = dictToArr(res[name])
+                break
+            case 'BUS_LINE' :
+                data = res[name]
+        }
+        setState(data)
+        
+    })
 }
+
+const dictToArr = (dict:any[]) => {
+    let column = {}
+    dict.map(data => column[data['BUS_STOP_ID']] = data['BUS_STOP_NAME'])
+    return column
+}
+
 const stringToArr = (str:string, sep:string) => str.split(sep)
 const arrToString = (str:any[], sep:string) => str.join(sep)
 
-export {
-    getData, getData_s
-}
+export { getData, getAPI }

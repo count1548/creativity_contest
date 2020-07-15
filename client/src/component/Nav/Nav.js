@@ -26,7 +26,7 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: drawerWidth,
-    flexShrink: 0,
+	flexShrink: 0,
   },
   drawerPaper: {
     width: drawerWidth,
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 const navList = [
     {name : "홈화면",  path : "/"},
     {name : "통학버스", path : "/busline"},
-    {name : "정류장", path : "/busstop"},
+    {name : "셔틀버스", path : "/shuttle"},
     {name : "예매내역", path : "/ticket"},
 ]
 
@@ -123,20 +123,4 @@ export default function SwipeableTemporaryDrawer() {
 
 		</div>
 	)
-	/*
-	return (
-		<div>
-			<Button onClick={toggleDrawer("left", true)}>
-				<MenuIcon className="MenuIcon" />
-			</Button>
-			<SwipeableDrawer
-				open={state.left}
-				onClose={toggleDrawer("left", false)}
-				onOpen={toggleDrawer("left", true)}
-			>
-				{sideList("left")}
-			</SwipeableDrawer>
-		</div>
-	);*/
-
 }

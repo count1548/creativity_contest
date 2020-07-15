@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Nav from "./component/Nav/Nav";
 import Home from "./routes/Home";
 import BusLine from "./routes/BusLine";
-import BusStop from "./routes/BusStop";
+import Shuttle from "./routes/Shuttle";
 import TimeTable from "./routes/TimeTable";
 import Ticket from "./routes/Ticket";
 import Login from "./component/Login/Login";
@@ -25,13 +25,13 @@ const App = () => {
 	const classes = useStyles()
 	return ( <Router> <div className={classes.root}>
 		<Nav />
-		<div className={classes.content}> 
+		<div className={classes.content}>
 			<Switch >
 				<Route exact path="/login" component={Login} />	
-				<Route exact path="/logout" component={Logout} />	
+				<Route exact path="/logout" component={Logout} />
 				<Route exact path="/" component={Home} />
 				<ProtectedRoute exact path="/busline" component={BusLine} />
-                <ProtectedRoute exact path="/busstop" component={BusStop} />
+                <ProtectedRoute exact path="/shuttle" component={Shuttle} />
                 <ProtectedRoute exact path="/ticket" component={Ticket} />
                 <ProtectedRoute exact path="/timetable" component={TimeTable} />
 				<ProtectedRoute exact path="/timetable/:id" component={TimeTable} />
