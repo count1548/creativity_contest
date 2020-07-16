@@ -39,25 +39,38 @@ const SelectBox = ({children}) =>
         {children}
     </div>
 
-const OptionBox = ({name, options}) => {
-    return (
-        <div style={{
-            padding:'10px',
-        }}>
-            <div>{name}</div>
-            {options.map((option, idx) => (
-                <Button variant="contained" key={idx}>{option}</Button>
-            ))}
-        </div>
-    )
+const findFittedList = (lineData, campus, way) => {
+	if(campus == -1 || way == -1) return null
+	const res = lineData.map((line, key) => {
+		const other = (way == 0) ? line['DATA'].length - 1 : 0
+		
+		if(line['DATA'][other]['stopName'] == campus) {
+			const name = (way == 0) ? 
+				line['DATA'][0]['stopName'] : 
+				line['DATA'][line['DATA'].length - 1]['stopName']
+			return {
+				'ID' : line['LINE'],
+				'NAME' : name
+			}
+		}
+	})
+	if(res.length == 0) return null
+	return res
 }
 
 const Toolbar = (props) => {
-    const {title} = props
-    const [age, setAge] = useState('')
-    const handleChange = (event) =>  setAge(event.target.value)
+    const {title, lineData} = props
+	const [campus, setCampus] = useState('-1')
+    const chCampus = event =>  setCampus(event.target.value)
+	
+	const [way, setWay] = useState('-1')
+    const chWay = event =>  setWay(event.target.value)
+	
+	const [line, setLine] = useState('-1')
+    const chLine = event =>  setLine(event.target.value)
+	
     const classes = useStyles();
-    console.log(age)
+	
     return (
         <div style={{
             marginBottom: '30px',
@@ -65,78 +78,80 @@ const Toolbar = (props) => {
         }}>
             <Header component={title}/>
             <SelectBox>
-            <FormControlLabel
-                style={{
-                    width : '30%'
-                }}
+            <FormControlLabel style={{ width : '30%' }}
                 control={
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel htmlFor="outlined-age-native-simple">Campus</InputLabel>
                         <Select
-                            value={age}
+                            value={campus}
                             defaultValue={10}
-                            onChange={handleChange}
+                            onChange={chCampus}
                             label="Campus"
                             inputProps={{
                                 name: 'Campus',
                                 id: 'outlined-age-native-simple',
                             }}
                         >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        <MenuItem value={10}>아산캠퍼스</MenuItem>
+                        <MenuItem value={20}>천안캠퍼스</MenuItem>
+                        <MenuItem value={30}>당진캠퍼스</MenuItem>
                         </Select>
                     </FormControl>
                 }
                 label="캠퍼스"
                 labelPlacement="start"
             />
-            <FormControlLabel
-            style={{
-                width : '30%'
-            }}
+            <FormControlLabel style={{ width : '30%' }}
                 control={
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel htmlFor="outlined-age-native-simple">Way</InputLabel>
                         <Select
-                            value={age}
+                            value={way}
                             defaultValue={10}
-                            onChange={handleChange}
+                            onChange={chWay}
                             label="Way"
                             inputProps={{
                                 name: 'Way',
                                 id: 'outlined-age-native-simple',
                             }}
                         >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        <MenuItem value={0}>등교</MenuItem>
+                        <MenuItem value={1}>하교</MenuItem>
                         </Select>
                     </FormControl>
                 }
                 label="등하교"
                 labelPlacement="start"
             />
-            <FormControlLabel
-            style={{
-                width : '30%'
-            }}
+            <FormControlLabel style={{ width : '30%' }}
                 control={
-                    <FormControl variant="outlined" className={classes.formControl}>
+                    <FormControl variant="outlined" className={classes.formControl} disabled>
                         <InputLabel htmlFor="outlined-age-native-simple">Line</InputLabel>
                         <Select
-                            value={age}
+                            value={line}
                             defaultValue={10}
-                            onChange={handleChange}
+                            onChange={chLine}
                             label="Line"
                             inputProps={{
                                 name: 'Line',
                                 id: 'outlined-age-native-simple',
                             }}
                         >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+						
+								()= > {
+									const list = findFittedList(data, campus, way)
+									if(list == null) 
+										return {
+											<InputLabel>
+												
+											</InputLabel>
+										}
+									return 
+										list.map((value, idx) =>
+											<MenuItem value={value['ID']}>{value['NAME']}</MenuItem>
+										)
+								}
+						}
                         </Select>
                     </FormControl>
                 }

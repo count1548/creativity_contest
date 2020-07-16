@@ -49,7 +49,7 @@ const lineToRows = (dict:any[], stop) => {
     if(typeof(data[d['BUS_LINE_ID']]) == 'undefined') data[d['BUS_LINE_ID']] = []
     data[d['BUS_LINE_ID']].push({
       'SEQUENCE' : d['LINE_SEQUENCE'],
-      'STOP_ID' : stop[d['BUS_STOP_ID']],
+      'STOP_NAME' : stop[d['BUS_STOP_ID']],
       'TIME_ID' : d['IDX_BUS_LINE']
     })
   })
@@ -57,7 +57,7 @@ const lineToRows = (dict:any[], stop) => {
     data[key].sort((a, b) => 
       (a['SEQUENCE'] < b['SEQUENCE'] ? -1 : 1))
     const stop_data:any[] = data[key].map(value => ({
-        stopName : value['STOP_ID'], 
+        stopName : value['STOP_NAME'],
         timeID : value['TIME_ID']
     }))
     rows.push({
@@ -79,8 +79,8 @@ const setTime_orderby_ID = (dict:any[]) =>  {
 
 const WoDKor = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
 
-const setTableData = () => {
-
+const findFittedID = (line, campus, way) => {
+	
 }
 
 const Notice = props => {
@@ -117,16 +117,6 @@ const Notice = props => {
       Data.getAPI('bus/line/', 'BUS_LINE', setLine)
       Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
     }, [])
-
-    const setTimeTable = (rowData:any[]) => {
-      console.log(rowData)
-      if(typeof(rowData) == 'undefined') return null
-      return (
-        rowData.map((time, idx) =>
-          <TableCell align="center" key={idx}>{time}</TableCell>
-        )
-      )
-    }
     const createRowData = (rowData:any[]) =>
       rowData.map((stop, idx) =>
         <TableRow key={idx}>
@@ -142,7 +132,9 @@ const Notice = props => {
       columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
         <div>
-          <Toolbar title='통학버스 시간표'/>
+          <Toolbar 
+			  title = '통학버스 시간표'
+			  data = {columns}/>
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>
