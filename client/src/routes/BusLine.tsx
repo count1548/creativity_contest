@@ -1,3 +1,5 @@
+/*eslint-disable */
+
 import React, {useState, useEffect}  from "react"
 import TransferList from '../component/LineList/TransferList'
 import * as Data from '../data_function'
@@ -87,8 +89,10 @@ const Notice = props => {
     const [stop, setStop] = useState<any | null>(null)
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
+    
+    const [lineID, setLineID] = useState<any | null>(0)
+
     let columns = [], timeData = {}
-    const lineID = 0
 
     const [open, setOpen] = useState(false)
     const classes = useStyles(); 
@@ -112,13 +116,16 @@ const Notice = props => {
 
     if(stop != null && line != null) columns = lineToRows(line, stop)
     if(time != null) timeData = setTime_orderby_ID(time)
+
     useEffect(()=> {
       Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
       Data.getAPI('bus/line/', 'BUS_LINE', setLine)
       Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
     }, [])
-    const createRowData = (rowData:any[]) =>
-      rowData.map((stop, idx) =>
+    
+    const createRowData = (rowData:any[]) => {
+      console.log(columns)
+      return rowData.map((stop, idx) =>
         <TableRow key={idx}>
           <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
           {(timeData[stop['timeID']] == null) ? null:
@@ -127,14 +134,17 @@ const Notice = props => {
             )}
         </TableRow>
       )
+    }
     
     return (
       columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
         <div>
           <Toolbar 
-			  title = '통학버스 시간표'
-			  data = {columns}/>
+            title = '통학버스 시간표'
+            data = {columns}
+            changeLine = {setLineID}
+            />
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>

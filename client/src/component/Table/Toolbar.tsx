@@ -1,16 +1,13 @@
-import React, {useState, useEffect}  from "react"
-import Button from '@material-ui/core/Button';
+import React, {useState, }  from "react"
 
-import { makeStyles, withStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import InputBase from '@material-ui/core/InputBase';
-
-import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+
+/*eslint-disable */
 
 const Header = ({component}) =>
     <div style={{paddingLeft:'50px', fontSize:'20px', marginBottom:'30px'}}>
@@ -41,17 +38,19 @@ const SelectBox = ({children}) =>
 
 const findFittedList = (lineData, campus, way) => {
 	if(campus == -1 || way == -1) return null
-	const res = lineData.map((line, key) => {
+    let res:any[] = []
+    lineData.map((line, key) => {
 		const other = (way == 0) ? line['DATA'].length - 1 : 0
-		
 		if(line['DATA'][other]['stopName'] == campus) {
+            console.log(line)
 			const name = (way == 0) ? 
 				line['DATA'][0]['stopName'] : 
-				line['DATA'][line['DATA'].length - 1]['stopName']
-			return {
+				line['DATA'][line['DATA'].length - 1]['stopName'] // lineID -> string 으로 변경 시 lineID로 변경
+			res.push( {
+                'IDX' : key,
 				'ID' : line['LINE'],
 				'NAME' : name
-			}
+			})
 		}
 	})
 	if(res.length == 0) return null
@@ -59,18 +58,24 @@ const findFittedList = (lineData, campus, way) => {
 }
 
 const Toolbar = (props) => {
-    const {title, lineData} = props
+    const {title, data, changeLine} = props
 	const [campus, setCampus] = useState('-1')
     const chCampus = event =>  setCampus(event.target.value)
 	
 	const [way, setWay] = useState('-1')
     const chWay = event =>  setWay(event.target.value)
 	
-	const [line, setLine] = useState('-1')
-    const chLine = event =>  setLine(event.target.value)
+	const [line, setLine] = useState('0')
+    const chLine = event =>  {
+        setLine(event.target.value)
+        changeLine(event.target.value)
+    }
 	
     const classes = useStyles();
-	
+    
+    const list = findFittedList(data, campus, way)
+    console.log(list)
+
     return (
         <div style={{
             marginBottom: '30px',
@@ -92,9 +97,9 @@ const Toolbar = (props) => {
                                 id: 'outlined-age-native-simple',
                             }}
                         >
-                        <MenuItem value={10}>아산캠퍼스</MenuItem>
-                        <MenuItem value={20}>천안캠퍼스</MenuItem>
-                        <MenuItem value={30}>당진캠퍼스</MenuItem>
+                        <MenuItem value={'아산캠퍼스'}>아산캠퍼스</MenuItem>
+                        <MenuItem value={'천안캠퍼스'}>천안캠퍼스</MenuItem>
+                        <MenuItem value={'당진캠퍼스'}>당진캠퍼스</MenuItem>
                         </Select>
                     </FormControl>
                 }
@@ -125,7 +130,7 @@ const Toolbar = (props) => {
             />
             <FormControlLabel style={{ width : '30%' }}
                 control={
-                    <FormControl variant="outlined" className={classes.formControl} disabled>
+                    <FormControl variant="outlined" className={classes.formControl} >
                         <InputLabel htmlFor="outlined-age-native-simple">Line</InputLabel>
                         <Select
                             value={line}
@@ -137,21 +142,10 @@ const Toolbar = (props) => {
                                 id: 'outlined-age-native-simple',
                             }}
                         >
-						
-								()= > {
-									const list = findFittedList(data, campus, way)
-									if(list == null) 
-										return {
-											<InputLabel>
-												
-											</InputLabel>
-										}
-									return 
-										list.map((value, idx) =>
-											<MenuItem value={value['ID']}>{value['NAME']}</MenuItem>
-										)
-								}
-						}
+                        {(list == null) ? null : 
+                            list.map((value, idx) =>
+                                <MenuItem value={value['IDX']} key={value['ID']}>{value['NAME']}</MenuItem>
+                        )}
                         </Select>
                     </FormControl>
                 }
