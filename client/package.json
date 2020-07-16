@@ -12,6 +12,7 @@
 		"google-maps-react": "^2.0.2",
 		"http-proxy-middleware": "^0.19.1",
 		"material-table": "^1.50.0",
+		"nohup": "^0.1.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"react-router-dom": "^5.0.1",

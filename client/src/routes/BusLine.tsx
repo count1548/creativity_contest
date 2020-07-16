@@ -25,15 +25,28 @@ const useStyles = makeStyles((theme: Theme) =>
       cursor : 'default',
     },
     table: {
-      minWidth: 650,
+      width:'95%',
+      margin : '0 auto',
+      borderRadius: '15px',
+      minWidth: 800,
     },
+    filledCell : {
+      background: '#005295',
+      color : '#fff'
+    },
+    firstCell : {
+      background: '#3274AA',
+      color : '#fff'
+    }
   }),
 )
+
+
 
 const lineToRows = (dict:any[], stop) => {
   let data = {}, rows:any = [], obj = {}
   dict.map(d => {
-    if(typeof(data[d['BUS_LINE_ID']]) == 'undefined') data[d['BUS_LINE_ID']] = new Array()
+    if(typeof(data[d['BUS_LINE_ID']]) == 'undefined') data[d['BUS_LINE_ID']] = []
     data[d['BUS_LINE_ID']].push({
       'SEQUENCE' : d['LINE_SEQUENCE'],
       'STOP_ID' : stop[d['BUS_STOP_ID']],
@@ -43,7 +56,7 @@ const lineToRows = (dict:any[], stop) => {
   for(var key in data) {
     data[key].sort((a, b) => 
       (a['SEQUENCE'] < b['SEQUENCE'] ? -1 : 1))
-    const stop_data = data[key].map(value => ({
+    const stop_data:any[] = data[key].map(value => ({
         stopName : value['STOP_ID'], 
         timeID : value['TIME_ID']
     }))
@@ -52,14 +65,13 @@ const lineToRows = (dict:any[], stop) => {
       'DATA' : stop_data
     })
   }
-  console.log(typeof(rows[0]['DATA']))
   return rows
 }
 
-const setTime_orderby_ID = (dict:any[]) => {
+const setTime_orderby_ID = (dict:any[]) =>  {
   let data = {}
   dict.map(d => {
-    if(typeof(data[d['IDX_BUS_LINE']]) == 'undefined') data[d['IDX_BUS_LINE']] = new Array()
+    if(typeof(data[d['IDX_BUS_LINE']]) == 'undefined') data[d['IDX_BUS_LINE']] = []
     data[d['IDX_BUS_LINE']].push(d['BUS_TIME'])
   })
   return data
@@ -75,7 +87,8 @@ const Notice = props => {
     const [stop, setStop] = useState<any | null>(null)
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
-    let columns = [], rowsData = {}
+    let columns = [], timeData = {}
+    const lineID = 0
 
     const [open, setOpen] = useState(false)
     const classes = useStyles(); 
@@ -97,43 +110,51 @@ const Notice = props => {
       })},
     }
 
-    if(stop != null && line != null) {
-      columns = lineToRows(line, stop)
-      console.log(typeof(columns[0]['DATA']))
-    }
-    if(time != null) rowsData = setTime_orderby_ID(time)
+    if(stop != null && line != null) columns = lineToRows(line, stop)
+    if(time != null) timeData = setTime_orderby_ID(time)
     useEffect(()=> {
       Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
       Data.getAPI('bus/line/', 'BUS_LINE', setLine)
       Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
     }, [])
-    console.log(columns)
 
+    const setTimeTable = (rowData:any[]) => {
+      console.log(rowData)
+      if(typeof(rowData) == 'undefined') return null
+      return (
+        rowData.map((time, idx) =>
+          <TableCell align="center" key={idx}>{time}</TableCell>
+        )
+      )
+    }
+    const createRowData = (rowData:any[]) =>
+      rowData.map((stop, idx) =>
+        <TableRow key={idx}>
+          <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
+          {(timeData[stop['timeID']] == null) ? null:
+            timeData[stop['timeID']].map((time, idx) =>
+              <TableCell align="center" key={idx}>{time}</TableCell>
+            )}
+        </TableRow>
+      )
+    
     return (
-      columns.length == 0 || time == null ? 
+      columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
         <div>
           <Toolbar title='통학버스 시간표'/>
-          <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="simple table">
+          <TableContainer component={Paper} className={classes.table}>
+            <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {rows.map((row, idx) => 
-                    <TableCell key={idx}>{row.title}</TableCell>
-                  )}
+                  {rows.map((row, idx) => {
+                    const style = (idx == 0) ? classes.firstCell : classes.filledCell
+                    return <TableCell key={idx} align='center'  className={style}>{row.title}</TableCell>
+                  })}
                 </TableRow>
               </TableHead>
               <TableBody>
-              {
-              columns[0]['DATA'].map((stop, idx) => (
-                <TableRow key={idx}>
-                  <TableCell component="th" scope="row">{stop['stopName']}</TableCell>
-                  {rowsData[stop['timeID']].map((value, idx) => 
-                    <TableCell align="right" key={idx}>{value}</TableCell>
-                  )}
-                </TableRow>
-              ))
-              }
+              {createRowData(columns[lineID]['DATA'])}
               </TableBody>
             </Table>
           </TableContainer>
