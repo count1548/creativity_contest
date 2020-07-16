@@ -1,40 +1,51 @@
+/*eslint-disable */
 import React, {useState, }  from "react"
-
 import { makeStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-
-/*eslint-disable */
-
-const Header = ({component}) =>
-    <div style={{paddingLeft:'50px', fontSize:'20px', marginBottom:'30px'}}>
-        {component}
-    </div>
+import '../../style/font.css'
 
 const useStyles = makeStyles((theme) => ({
-    root : {
-        display:'none'
-    },
     formControl: {
         margin: theme.spacing(1),
         minWidth: 186,
         backgroundColor: 'white',
     },
-}));
-
-const SelectBox = ({children}) =>
-    <div style={{
-        width:'calc(100% - 100px)',
-        padding:'20px',
+    toolbar : {
+        width:'100%',
+        height: '70px', padding:'5px',
         background: '#eee',
         borderRadius:'20px',
-        margin:'10px auto'
-    }}> 
-        {children}
-    </div>
+        margin:'0 auto',
+        marginBottom:'60px',
+    },
+    head: {
+        textAlign:'center',
+        fontSize:'24px',
+        marginBottom:'20px',
+        fontFamily:'NanumSquareRoundEB',
+        fontWeight: 'bold',
+        color:'#2c537a',
+        '&:before' : {
+            content:' ',
+            display:'block',
+            clear:'both'
+        },
+    },
+    button : {
+        float:'right',
+        fontSize:'15px',
+        fontWeight:'normal',
+    }
+}));
+
+const Header = ({component, style, button}) =>
+    <div className={style}> {component} {button}</div>
+
+const SelectBox = ({children, style}) => <div className={style}> {children} </div>
 
 const findFittedList = (lineData, campus, way) => {
 	if(campus == -1 || way == -1) return null
@@ -53,19 +64,18 @@ const findFittedList = (lineData, campus, way) => {
 			})
 		}
 	})
-	if(res.length == 0) return null
-	return res
+	return (res.length == 0) ? null : res
 }
 
 const Toolbar = (props) => {
     const {title, data, changeLine} = props
-	const [campus, setCampus] = useState('-1')
+    const [campus, setCampus] = useState('')
     const chCampus = event =>  setCampus(event.target.value)
-	
-	const [way, setWay] = useState('-1')
+
+	const [way, setWay] = useState('')
     const chWay = event =>  setWay(event.target.value)
 	
-	const [line, setLine] = useState('0')
+	const [line, setLine] = useState('')
     const chLine = event =>  {
         setLine(event.target.value)
         changeLine(event.target.value)
@@ -74,85 +84,79 @@ const Toolbar = (props) => {
     const classes = useStyles();
     
     const list = findFittedList(data, campus, way)
-    console.log(list)
-
+    
     return (
         <div style={{
             marginBottom: '30px',
             padding: '10px'
         }}>
-            <Header component={title}/>
-            <SelectBox>
-            <FormControlLabel style={{ width : '30%' }}
-                control={
-                    <FormControl variant="outlined" className={classes.formControl}>
-                        <InputLabel htmlFor="outlined-age-native-simple">Campus</InputLabel>
-                        <Select
-                            value={campus}
-                            defaultValue={10}
-                            onChange={chCampus}
-                            label="Campus"
-                            inputProps={{
-                                name: 'Campus',
-                                id: 'outlined-age-native-simple',
-                            }}
-                        >
-                        <MenuItem value={'아산캠퍼스'}>아산캠퍼스</MenuItem>
-                        <MenuItem value={'천안캠퍼스'}>천안캠퍼스</MenuItem>
-                        <MenuItem value={'당진캠퍼스'}>당진캠퍼스</MenuItem>
-                        </Select>
-                    </FormControl>
-                }
-                label="캠퍼스"
-                labelPlacement="start"
+            <Header component={title} style={classes.head} 
+            button = {
+                <div className={classes.button}>수정하기</div>
+            }
             />
-            <FormControlLabel style={{ width : '30%' }}
-                control={
-                    <FormControl variant="outlined" className={classes.formControl}>
-                        <InputLabel htmlFor="outlined-age-native-simple">Way</InputLabel>
-                        <Select
-                            value={way}
-                            defaultValue={10}
-                            onChange={chWay}
-                            label="Way"
-                            inputProps={{
-                                name: 'Way',
-                                id: 'outlined-age-native-simple',
-                            }}
-                        >
-                        <MenuItem value={0}>등교</MenuItem>
-                        <MenuItem value={1}>하교</MenuItem>
-                        </Select>
-                    </FormControl>
-                }
-                label="등하교"
-                labelPlacement="start"
-            />
-            <FormControlLabel style={{ width : '30%' }}
-                control={
-                    <FormControl variant="outlined" className={classes.formControl} >
-                        <InputLabel htmlFor="outlined-age-native-simple">Line</InputLabel>
-                        <Select
-                            value={line}
-                            defaultValue={10}
-                            onChange={chLine}
-                            label="Line"
-                            inputProps={{
-                                name: 'Line',
-                                id: 'outlined-age-native-simple',
-                            }}
-                        >
-                        {(list == null) ? null : 
-                            list.map((value, idx) =>
-                                <MenuItem value={value['IDX']} key={value['ID']}>{value['NAME']}</MenuItem>
-                        )}
-                        </Select>
-                    </FormControl>
-                }
-                label="노선"
-                labelPlacement="start"
-            />
-            
+            <SelectBox style={classes.toolbar}>
+
+            <FormControlLabel style={{ width : '30%' }} control={
+                <FormControl variant="outlined" className={classes.formControl}>
+                    <InputLabel htmlFor="outlined-age-native-simple">Campus</InputLabel>
+                    <Select
+                        value={campus}
+                        defaultValue={10}
+                        onChange={chCampus}
+                        label="Campus"
+                        inputProps={{
+                            name: 'Campus',
+                            id: 'outlined-age-native-simple',
+                        }}
+                    >
+                    <MenuItem value={'아산캠퍼스'}>아산캠퍼스</MenuItem>
+                    <MenuItem value={'천안캠퍼스'}>천안캠퍼스</MenuItem>
+                    <MenuItem value={'당진캠퍼스'}>당진캠퍼스</MenuItem>
+                    </Select>
+                </FormControl>
+            } label="캠퍼스" labelPlacement="start" />
+
+            <FormControlLabel style={{ width : '30%' }} control={
+                <FormControl variant="outlined" className={classes.formControl}>
+                    <InputLabel htmlFor="outlined-age-native-simple">Way</InputLabel>
+                    <Select
+                        value={way}
+                        defaultValue={10}
+                        onChange={chWay}
+                        label="Way"
+                        inputProps={{
+                            name: 'Way',
+                            id: 'outlined-age-native-simple',
+                        }}
+                    >
+                    <MenuItem value={0}>등교</MenuItem>
+                    <MenuItem value={1}>하교</MenuItem>
+                    </Select>
+                </FormControl>
+            } label="등하교" labelPlacement="start" />
+
+            <FormControlLabel style={{ width : '30%' }} control={
+                <FormControl variant="outlined" className={classes.formControl} >
+                    <InputLabel htmlFor="outlined-age-native-simple">Line</InputLabel>
+                    <Select
+                        value={line}
+                        defaultValue={10}
+                        onChange={chLine}
+                        label="Line"
+                        inputProps={{
+                            name: 'Line',
+                            id: 'outlined-age-native-simple',
+                        }}
+                    >
+                    {(list == null) ? null : 
+                        list.map((value, idx) =>
+                            <MenuItem value={value['IDX']} key={value['ID']}>{value['NAME']}</MenuItem>
+                    )}
+                    </Select>
+                </FormControl>
+            }
+            label="노선" labelPlacement="start" />            
             </SelectBox>
         </div>
     )

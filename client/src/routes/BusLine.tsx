@@ -1,5 +1,4 @@
 /*eslint-disable */
-
 import React, {useState, useEffect}  from "react"
 import TransferList from '../component/LineList/TransferList'
 import * as Data from '../data_function'
@@ -17,8 +16,16 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
+import '../style/font.css'
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root : { 
+      width : '95%',
+      margin:'0 auto',
+      minWidth:'1021px',
+      padding: '30px'
+    },
     busStop: {
       display: 'inline-block',
       padding: '20px 0px',
@@ -27,17 +34,19 @@ const useStyles = makeStyles((theme: Theme) =>
       cursor : 'default',
     },
     table: {
-      width:'95%',
+      width:'100%',
       margin : '0 auto',
       borderRadius: '15px',
       minWidth: 800,
     },
     filledCell : {
-      background: '#005295',
+      background: '#2c537a',
+      fontFamily:'NanumSquareRoundR',
       color : '#fff'
     },
     firstCell : {
-      background: '#3274AA',
+      background: '#376b9f',
+      fontFamily:'NanumSquareRoundR',
       color : '#fff'
     }
   }),
@@ -81,11 +90,7 @@ const setTime_orderby_ID = (dict:any[]) =>  {
 
 const WoDKor = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
 
-const findFittedID = (line, campus, way) => {
-	
-}
-
-const Notice = props => {
+const BusLine = props => {
     const [stop, setStop] = useState<any | null>(null)
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
@@ -97,32 +102,26 @@ const Notice = props => {
     const [open, setOpen] = useState(false)
     const classes = useStyles(); 
     
+    //setting table head data
     const rows:any = [{
         title : '노선', 
         field : 'ID', width:100, 
         cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
     }]
-
     for (var key in WoDKor) rows.push({ title : WoDKor[key],  field : key, })
 
-    const defaultEdit = {
-      onRowDelete : oldData => {
-          return new Promise((resolve) => {
-              setTimeout(() => {
-                  resolve();
-              }, 600);
-      })},
-    }
-
+    //after data setting 데이터 가공
     if(stop != null && line != null) columns = lineToRows(line, stop)
     if(time != null) timeData = setTime_orderby_ID(time)
 
+    //data setting
     useEffect(()=> {
       Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
       Data.getAPI('bus/line/', 'BUS_LINE', setLine)
       Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
     }, [])
     
+    //setting table row data
     const createRowData = (rowData:any[]) => {
       console.log(columns)
       return rowData.map((stop, idx) =>
@@ -139,12 +138,11 @@ const Notice = props => {
     return (
       columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
-        <div>
+        <div className={classes.root}>
           <Toolbar 
             title = '통학버스 시간표'
             data = {columns}
-            changeLine = {setLineID}
-            />
+            changeLine = {setLineID}/>
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>
@@ -156,7 +154,7 @@ const Notice = props => {
                 </TableRow>
               </TableHead>
               <TableBody>
-              {createRowData(columns[lineID]['DATA'])}
+                {createRowData(columns[lineID]['DATA'])}
               </TableBody>
             </Table>
           </TableContainer>
@@ -164,4 +162,4 @@ const Notice = props => {
     )
 }
 
-export default Notice;
+export default BusLine;
