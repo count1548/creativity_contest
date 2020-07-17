@@ -48,7 +48,7 @@ const Header = ({component, style, button}) =>
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
 
 const findFittedList = (lineData, campus, way) => {
-	if(campus == -1 || way == -1) return null
+	if(campus == '' || way == '') return null
     let res:any[] = []
     lineData.map((line, key) => {
 		const other = (way == 0) ? line['DATA'].length - 1 : 0

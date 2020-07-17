@@ -14,7 +14,7 @@ import Drawer from '@material-ui/core/Drawer';
 import "./Nav.css";
 
 //const useStyles = makeStyles({ list: { width: 250 } });
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
