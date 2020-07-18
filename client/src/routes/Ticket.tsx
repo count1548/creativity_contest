@@ -46,14 +46,14 @@ const TicketList = props => {
             //Data.updateData({}, 'LineList')
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    Data.getData('ticket_list', setTickets)
+                    Data.getAPI('ticket/lists/all/', 'TICKET', setTickets)
                     resolve();
                 }, 600);
         })},
     }
 
     useEffect(() => {
-        Data.getData('ticket_list', data => {
+        Data.getAPI('ticket/lists/all/', 'TICKET', data => {
             data = data.map(value => {
                 const time = value['TICKET_TIME'].split(':')
                 const temp = {

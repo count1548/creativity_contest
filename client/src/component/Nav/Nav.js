@@ -19,10 +19,11 @@ const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: drawerWidth,
-	flexShrink: 0,
+    flexShrink: 0,
   },
   drawerPaper: {
     width: drawerWidth,
+    overflowX:'hidden',
   },
   // necessary for content to be below app bar
   toolbar: theme.mixins.toolbar,
@@ -42,10 +43,6 @@ const navList = [
 
 export default function SwipeableTemporaryDrawer() {
 	const classes = useStyles();
-	const [state, setState] = React.useState({
-		left: false
-	});
-
 	return(
 		<div>
 			<Drawer

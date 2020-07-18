@@ -38,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
     button : {
         float:'right',
         fontSize:'15px',
+        marginTop: '9px',
         fontWeight:'normal',
     }
 }));
@@ -48,7 +49,7 @@ const Header = ({component, style, button}) =>
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
 
 const findFittedList = (lineData, campus, way) => {
-	if(campus == '' || way == '') return null
+	if(campus === '' || way === '') return null
     let res:any[] = []
     lineData.map((line, key) => {
 		const other = (way == 0) ? line['DATA'].length - 1 : 0
@@ -63,7 +64,7 @@ const findFittedList = (lineData, campus, way) => {
 				'NAME' : name
 			})
 		}
-	})
+    })
 	return (res.length == 0) ? null : res
 }
 
@@ -84,7 +85,6 @@ const Toolbar = (props) => {
     const classes = useStyles();
     
     const list = findFittedList(data, campus, way)
-    
     return (
         <div style={{
             marginBottom: '30px',

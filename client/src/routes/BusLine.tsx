@@ -123,7 +123,6 @@ const BusLine = props => {
     
     //setting table row data
     const createRowData = (rowData:any[]) => {
-      console.log(columns)
       return rowData.map((stop, idx) =>
         <TableRow key={idx}>
           <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
