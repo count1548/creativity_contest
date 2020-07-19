@@ -4,7 +4,6 @@ import Nav from "./component/Nav/Nav";
 import Home from "./routes/Home";
 import BusLine from "./routes/BusLine";
 import Shuttle from "./routes/Shuttle";
-import TimeTable from "./routes/TimeTable";
 import Ticket from "./routes/Ticket";
 import Login from "./component/Login/Login";
 import Logout from "./component/Login/Logout";
@@ -32,8 +31,6 @@ const App = () => {
 				<ProtectedRoute exact path="/busline" component={BusLine} />
                 <ProtectedRoute exact path="/shuttle" component={Shuttle} />
                 <ProtectedRoute exact path="/ticket" component={Ticket} />
-                <ProtectedRoute exact path="/timetable" component={TimeTable} />
-				<ProtectedRoute exact path="/timetable/:id" component={TimeTable} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
 			</Switch>
 		</div>

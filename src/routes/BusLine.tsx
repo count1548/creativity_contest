@@ -52,8 +52,6 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-
-
 const lineToRows = (dict:any[], stop) => {
   let data = {}, rows:any = [], obj = {}
   dict.map(d => {
@@ -95,7 +93,9 @@ const BusLine = props => {
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
     
-    const [lineID, setLineID] = useState<any | null>(0)
+    const [campus, setCampus] = useState('') 
+    const [way, setWay] = useState('')
+    const [lineID, setLineID] = useState<any | null>('')
 
     let columns = [], timeData = {}
 
@@ -121,8 +121,11 @@ const BusLine = props => {
       Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
     }, [])
     
-    //setting table row data
-    const createRowData = (rowData:any[]) => {
+    //setting table row(stop : time) data
+    const createRowData = (row:any[]) => {
+      if(row == null) return null
+
+      const rowData = row['DATA']
       return rowData.map((stop, idx) =>
         <TableRow key={idx}>
           <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
@@ -134,14 +137,48 @@ const BusLine = props => {
       )
     }
     
+    const stoplist = Data.findFittedList(columns, campus, way)
+
+    const forms = [
+      {
+          name : '캠퍼스',
+          label : 'Campus',
+          options : [
+              {value : '아산캠퍼스', label : '아산캠퍼스'},
+              {value : '천안캠퍼스', label : '천안캠퍼스'},
+              {value : '당진캠퍼스', label : '당진캠퍼스'}
+          ],
+          action : value => setCampus(value),
+          value : campus,
+      },
+      {
+          name : '등하교',
+          label : 'Way',
+          options : [
+              {value : 0, label : '등교'},
+              {value : 1, label : '하교'},
+          ],
+          action : value => setWay(value),
+          value : way,
+      },
+      {
+          name : '노선',
+          label : 'Line',
+          options : (stoplist == null) ? 
+            [] : stoplist.map(value => ({value : value['IDX'], label : value['NAME']})),
+          action : value => setLineID(value),
+          value : lineID,
+          disable : () => (stoplist == null)
+      },
+    ]
+
     return (
       columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
         <div className={classes.root}>
           <Toolbar 
             title = '통학버스 시간표'
-            data = {columns}
-            changeLine = {setLineID}/>
+            data = {forms}/>
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>
@@ -153,7 +190,7 @@ const BusLine = props => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {createRowData(columns[lineID]['DATA'])}
+                {createRowData(columns[lineID])}
               </TableBody>
             </Table>
           </TableContainer>

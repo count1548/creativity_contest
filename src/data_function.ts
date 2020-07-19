@@ -1,27 +1,9 @@
-const host = "http://uck.myds.me"
+const host = "http://uck.myds.me:7000"
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-
-const getData = (target, setState, col:string|null = null, value:number|null = null) => {
-    fetch(`${host}:3001/getData/`, {
-        method: 'POST',
-        body : JSON.stringify({
-            target : target, 
-            column : col,
-            value : value
-        }),
-		headers:{
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'
-		}
-	})
-    .then(response => response.json())
-    .then(responseData => setState(responseData) )
-	.catch(error=> console.log('Error fetching ',error) );
-}
 const getAPI = (target, name, setState) => {
-    return fetch(`${host}:7000/${target}`, {
+    return fetch(`${host}/${target}`, {
         method: 'GET',
 		headers:{
 			'Accept': 'application/json',
@@ -54,4 +36,23 @@ const dictToArr = (dict:any[], idxName:string, value:string|null = null) => {
 const stringToArr = (str:string, sep:string) => str.split(sep)
 const arrToString = (str:any[], sep:string) => str.join(sep)
 
-export { getData, getAPI }
+const findFittedList = (lineData, campus, way) => {
+	if(lineData == null || campus === '' || way === '') return null
+    let res:any[] = []
+    lineData.map((line, key) => {
+		const other = (way == 0) ? line['DATA'].length - 1 : 0
+		if(line['DATA'][other]['stopName'] == campus) {
+			const name = (way == 0) ? 
+				line['DATA'][0]['stopName'] : 
+				line['DATA'][line['DATA'].length - 1]['stopName'] // lineID -> string 으로 변경 시 lineID로 변경
+			res.push( {
+                'IDX' : key,
+				'ID' : line['LINE'],
+				'NAME' : name
+			})
+		}
+    })
+	return (res.length == 0) ? null : res
+}
+
+export { getAPI, findFittedList }
