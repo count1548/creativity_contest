@@ -11,25 +11,33 @@ const getAPI = (target, name, setState) => {
 		}
 	})
     .then(res => res.json())
-    .then(res => {
-        var data
-        switch(name) {
-            case 'BUS_STOP' :
-                data = dictToArr(res[name], 'BUS_STOP_ID', 'BUS_STOP_NAME')
-                break
-            default :
-                data = res[name]
-        }
-        setState(data)
-        
-    })
+    .then(res => setState(res[name]) )
 }
 
-const dictToArr = (dict:any[], idxName:string, value:string|null = null) => {
+const dictToArr = (dict:any[], idxName:string, value:string|null = null, array=false) => {
     let column = {}
-    dict.map(data => 
-        column[data[idxName]] = (value == null) ? _objectWithoutProperties(data, [idxName]) : data[value]
-    )
+    dict.map(data => {
+        const v_data = (value == null) ? _objectWithoutProperties(data, [idxName]) : data[value]
+        if(array) {
+            if(typeof(column[data[idxName]]) == 'undefined') column[data[idxName]] = []
+            column[data[idxName]].push(v_data)
+        }
+        else column[data[idxName]] = v_data
+    })
+    return column
+}
+
+const dictToArr_s = (dict:any[], idxName:string, idxName2:string, value:string|null = null, array=false) => {
+    let column = {}
+    dict.map(data => {
+        const v_data = (value == null) ? _objectWithoutProperties(data, [idxName, idxName2]) : data[value]
+        if(array) {
+            if(typeof(column[data[idxName]]) == 'undefined') column[data[idxName]] = {}
+            if(typeof(column[data[idxName]][data[idxName2]]) == 'undefined') column[data[idxName]][data[idxName2]] = []
+            column[data[idxName]][data[idxName2]].push(v_data)
+        }
+        else column[data[idxName]][data[idxName2]] = v_data
+    })
     return column
 }
 
@@ -55,4 +63,4 @@ const findFittedList = (lineData, campus, way) => {
 	return (res.length == 0) ? null : res
 }
 
-export { getAPI, findFittedList }
+export { getAPI, findFittedList, dictToArr, dictToArr_s }

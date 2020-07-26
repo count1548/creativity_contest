@@ -19,17 +19,18 @@ const useStyles = makeStyles((theme) => ({
 interface form_interface {
     name : string, label : string,
     options : any[], action(value:number) : any,
-    value : string | number, disable? : any | null
+    value : string | number, disable? : any | null,
+    width?: number
 }
 
-const SelectForm = ({name, label, options, action, value, disable = null} : form_interface) => {
+const SelectForm = ({name, label, options, action, value, disable = null, width = 33} : form_interface) => {
     const changeValue = event => action(event.target.value)
     const classes = useStyles()
     return (
-        <FormControlLabel style={{ width : '30%' }} control={
-            <FormControl variant="outlined" className={classes.formControl} {
-                ...{disabled : (disable == null) ? false : disable()}
-            }>
+        <div style={{width : `${width}%`, float : 'left'}}><div style={{margin : '0 auto', width : '260px'}}>
+            <FormControlLabel control={
+                <FormControl variant="outlined" className={classes.formControl} {
+                    ...{disabled : (disable == null) ? false : disable()}}>
                 <InputLabel htmlFor="outlined-age-native-simple">{label}</InputLabel>
                 <Select
                     value={value}
@@ -38,10 +39,11 @@ const SelectForm = ({name, label, options, action, value, disable = null} : form
                     inputProps={{
                         name, id: 'outlined-age-native-simple',
                     }}>
-                {options.map((data, idx) => <MenuItem value={data['value']} key={data['value']}>{data['label']}</MenuItem>)}
+                {options.map((data, idx) => <MenuItem value={data['value']} key={idx}>{data['label']}</MenuItem>)}
                 </Select>
             </FormControl>
         } label={name} labelPlacement="start" />
+        </div></div>
     )
 }
 

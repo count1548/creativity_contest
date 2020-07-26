@@ -52,134 +52,114 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-const lineToRows = (dict:any[], stop) => {
-  let data = {}, rows:any = [], obj = {}
-  dict.map(d => {
-    if(typeof(data[d['BUS_LINE_ID']]) == 'undefined') data[d['BUS_LINE_ID']] = []
-    data[d['BUS_LINE_ID']].push({
-      'SEQUENCE' : d['LINE_SEQUENCE'],
-      'STOP_NAME' : stop[d['BUS_STOP_ID']],
-      'TIME_ID' : d['IDX_BUS_LINE']
-    })
-  })
-  for(var key in data) {
-    data[key].sort((a, b) => 
-      (a['SEQUENCE'] < b['SEQUENCE'] ? -1 : 1))
-    const stop_data:any[] = data[key].map(value => ({
-        stopName : value['STOP_NAME'],
-        timeID : value['TIME_ID']
+const lineToRows = (dict:any[], stop, time) => {
+  let rows:any = [], obj = {}
+  const data = Data.dictToArr_s(dict, 'LINE_NAME', 'CODE', null, true)
+  
+  for(var line in data) for(var day in data[line]) {
+    const now = data[line][day]
+    data[line][day]['DATA'] = now.map((value, idx) => ({
+      'STOP_NAME' : stop[value['SHUTTLE_STOP_ID']],
+      'TIME' : time[value['IDX']],
     }))
-    rows.push({
-      'LINE': key,
-      'DATA' : stop_data
-    })
+    data[line][day]['COUNT'] = 
+      (typeof(data[line][day]['DATA'][0]['TIME']) == 'undefined') ? 0 : data[line][day]['DATA'][0]['TIME'].length
   }
-  return rows
-}
-
-const setTime_orderby_ID = (dict:any[]) =>  {
-  let data = {}
-  dict.map(d => {
-    if(typeof(data[d['IDX_BUS_LINE']]) == 'undefined') data[d['IDX_BUS_LINE']] = []
-    data[d['IDX_BUS_LINE']].push(d['BUS_TIME'])
-  })
   return data
 }
 
-const WoDKor = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
+const setTime_orderby_ID = (dict:any[]) =>  {
+  return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
+}
 
-const BusLine = props => {
+const ShuttleLine = props => {
     const [stop, setStop] = useState<any | null>(null)
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
+    const lang = 'KOR_NAME'
     
-    const [campus, setCampus] = useState('') 
-    const [way, setWay] = useState('')
-    const [lineID, setLineID] = useState<any | null>('')
+    const [lineName, setLineName] = useState('') 
+    const [day, setDay] = useState('')
 
-    let columns = [], timeData = {}
-
-    const [open, setOpen] = useState(false)
+    let stopName:Object|null = null, columns:Object = {}, timeData:Object|null = null
     const classes = useStyles(); 
-    
+
+    //data setting
+    useEffect(()=> {
+      Data.getAPI('bus/shuttle/stop', 'result', setStop)
+      Data.getAPI('bus/shuttle/line/', 'result', setLine)
+      Data.getAPI('bus/shuttle/time/', 'result', setTime)
+    }, [])
+
     //setting table head data
-    const rows:any = [{
+    const rows:any[] = [{
         title : '운행', 
         field : 'IDX', width:100, 
         cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
     }]
-    for (var key in WoDKor) rows.push({ title : WoDKor[key],  field : key, })
-
+    
     //after data setting 데이터 가공
-    if(stop != null && line != null) columns = lineToRows(line, stop)
+    if(stop != null) stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
     if(time != null) timeData = setTime_orderby_ID(time)
-
-    //data setting
-    useEffect(()=> {
-      Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
-      Data.getAPI('bus/line/', 'BUS_LINE', setLine)
-      Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
-    }, [])
+    if(stopName != null && timeData != null && line != null) 
+      columns = lineToRows(line, stopName, timeData)
+    console.log(columns)
+    if(lineName !== '' && day !== '') {
+      columns[lineName][day]['DATA'].map(value => rows.push({
+        title : value['STOP_NAME'],
+        cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
+      }))
+    }
     
     //setting table row(stop : time) data
     const createRowData = (row:any[]) => {
       if(row == null) return null
-
-      const rowData = row['DATA']
-      return rowData.map((stop, idx) =>
+      const res:any[] = []
+      for(var idx = 0; idx < row['COUNT']; idx++) {
+        console.log(row['DATA'])
+        res.push(
         <TableRow key={idx}>
-          <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
-          {(timeData[stop['timeID']] == null) ? null:
-            timeData[stop['timeID']].map((time, idx) =>
-              <TableCell align="center" key={idx}>{time}</TableCell>
-            )}
+          <TableCell component="th" scope="row" className={classes.filledCell}>{(idx+1)}</TableCell>
+          {Object.keys(row['DATA']).map((data, key)=>
+            <TableCell align="center" key={key}>{row['DATA'][data]['TIME'][idx]}</TableCell>
+          )}
         </TableRow>
-      )
+        )
+      }
+      return res
     }
-    
-    const stoplist = Data.findFittedList(columns, campus, way)
-    
+
     const forms = [
-      {
-          name : '캠퍼스',
-          label : 'Campus',
-          options : [
-              {value : '아산캠퍼스', label : '아산캠퍼스'},
-              {value : '천안캠퍼스', label : '천안캠퍼스'},
-              {value : '당진캠퍼스', label : '당진캠퍼스'},
-          ],
-          action : value => setCampus(value),
-          value : campus,
-      },
-      {
-          name : '등하교',
-          label : 'Way',
-          options : [
-              {value : 0, label : '등교'},
-              {value : 1, label : '하교'},
-          ],
-          action : value => setWay(value),
-          value : way,
-      },
       {
           name : '노선',
           label : 'Line',
-          options : (stoplist == null) ? 
-            [] : stoplist.map(value => ({value : value['IDX'], label : value['NAME']})),
-          action : value => setLineID(value),
-          value : lineID,
-          disable : () => (stoplist == null)
+          options : Object.keys(columns).map((value, idx) => ({'value' : value, 'label' : value})),
+          action : value => {
+            setDay('')
+            setLineName(value)
+          },
+          value : lineName, width : 45
+      },
+      {
+          name : '날짜',
+          label : 'Week Of Days',
+          options : 
+            (typeof(columns[lineName]) == 'undefined') ? ['None'] : 
+              Object.keys(columns[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
+          action : value => setDay(value),
+          value : day, width : 45,
+          disable : () => (lineName == '')
       },
     ]
 
     return (
-      columns.length == 0 || time == null || rows.length == 0? 
+      (Object.keys(columns).length === 0) ? 
         <div>Loading...</div>:
         <div className={classes.root}>
-          <Toolbar 
-            title = '통학버스 시간표'
-            data = {forms}/>
-          <TableContainer component={Paper} className={classes.table}>
+          <Toolbar title = '셔틀버스 시간표' data = {forms}/>
+          {
+            (rows.length < 2) ? <div>no Data</div> : 
+            <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
@@ -190,12 +170,13 @@ const BusLine = props => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {createRowData(columns[lineID])}
+              {createRowData(columns[lineName][day])}
               </TableBody>
             </Table>
           </TableContainer>
+          }
         </div>
     )
 }
 
-export default BusLine;
+export default ShuttleLine;

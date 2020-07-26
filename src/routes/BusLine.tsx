@@ -53,21 +53,15 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 const lineToRows = (dict:any[], stop) => {
-  let data = {}, rows:any = [], obj = {}
-  dict.map(d => {
-    if(typeof(data[d['BUS_LINE_ID']]) == 'undefined') data[d['BUS_LINE_ID']] = []
-    data[d['BUS_LINE_ID']].push({
-      'SEQUENCE' : d['LINE_SEQUENCE'],
-      'STOP_NAME' : stop[d['BUS_STOP_ID']],
-      'TIME_ID' : d['IDX_BUS_LINE']
-    })
-  })
+  let rows:any = [], obj = {}
+  const data = Data.dictToArr(dict, 'BUS_LINE_ID', null, true)
+
   for(var key in data) {
     data[key].sort((a, b) => 
-      (a['SEQUENCE'] < b['SEQUENCE'] ? -1 : 1))
+      (a['LINE_SEQUENCE'] < b['LINE_SEQUENCE'] ? -1 : 1))
     const stop_data:any[] = data[key].map(value => ({
-        stopName : value['STOP_NAME'],
-        timeID : value['TIME_ID']
+        stopName : stop[value['BUS_STOP_ID']],
+        timeID : value['IDX_BUS_LINE']
     }))
     rows.push({
       'LINE': key,
@@ -78,12 +72,7 @@ const lineToRows = (dict:any[], stop) => {
 }
 
 const setTime_orderby_ID = (dict:any[]) =>  {
-  let data = {}
-  dict.map(d => {
-    if(typeof(data[d['IDX_BUS_LINE']]) == 'undefined') data[d['IDX_BUS_LINE']] = []
-    data[d['IDX_BUS_LINE']].push(d['BUS_TIME'])
-  })
-  return data
+  return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
 }
 
 const WoDKor = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
@@ -97,7 +86,7 @@ const BusLine = props => {
     const [way, setWay] = useState('')
     const [lineID, setLineID] = useState<any | null>('')
 
-    let columns = [], timeData = {}
+    let stopName:Object|null = null, columns = [], timeData = {}
 
     const [open, setOpen] = useState(false)
     const classes = useStyles(); 
@@ -111,9 +100,9 @@ const BusLine = props => {
     for (var key in WoDKor) rows.push({ title : WoDKor[key],  field : key, })
 
     //after data setting 데이터 가공
-    if(stop != null && line != null) columns = lineToRows(line, stop)
+    if(stop != null) stopName = Data.dictToArr(stop, 'BUS_STOP_ID', 'BUS_STOP_NAME')
+    if(stopName != null && line != null) columns = lineToRows(line, stopName)
     if(time != null) timeData = setTime_orderby_ID(time)
-
     //data setting
     useEffect(()=> {
       Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
@@ -176,9 +165,7 @@ const BusLine = props => {
       columns.length == 0 || time == null || rows.length == 0? 
         <div>Loading...</div>:
         <div className={classes.root}>
-          <Toolbar 
-            title = '통학버스 시간표'
-            data = {forms}/>
+          <Toolbar title = '통학버스 시간표' data = {forms}/>          
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>

@@ -57,7 +57,7 @@ const Toolbar = (props) => {
             button = {<div className={classes.button}>수정하기</div>}
             />
             <SelectBox style={classes.toolbar}>
-                {data.map((form, idx) =>  <SelectForm {...form} key={idx}/>)}
+                {data.map((form, idx) =>  <SelectForm {...form} key={idx}/>)} 
             </SelectBox>
         </div>
     )
