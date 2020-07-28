@@ -7,63 +7,26 @@ import Modal from '@material-ui/core/Modal'
 import {getAPI} from '../data_function'
 import '../style/lineTable.css'
 import Toolbar from '../component/Table/Toolbar'
-
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import Table from '../component/Table/Table'
+import NoData from '../component/Table/NoData'
 
 import '../style/font.css'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root : { 
-      width : '95%',
-      margin:'0 auto',
-      minWidth:'1021px',
-      padding: '30px'
-    },
-    busStop: {
-      display: 'inline-block',
-      padding: '20px 0px',
-      textAlign: 'center',
-      borderLeft: '1px solid gray',
-      cursor : 'default',
-    },
-    table: {
-      width:'100%',
-      margin : '0 auto',
-      borderRadius: '15px',
-      minWidth: 800,
-    },
-    filledCell : {
-      background: '#2c537a',
-      fontFamily:'NanumSquareRoundR',
-      color : '#fff'
-    },
-    firstCell : {
-      background: '#376b9f',
-      fontFamily:'NanumSquareRoundR',
-      color : '#fff'
-    }
-  }),
-)
-
 const lineToRows = (dict:any, stop, lineIDX) => {
-  let rows:any = [], obj = {}
   const IDX = Data.dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
   for(var line in dict) for(var day in dict[line]) for(var bus in dict[line][day])  {
     const now = dict[line][day][bus]
-    dict[line][day]['LINE'] = now.map(value => stop[IDX[value['IDX_BUS_LINE']]])
+    
+    dict[line][day]['LINE'] = now.map(value => ({
+      'IDX' : IDX[value['IDX_BUS_LINE']], 
+      'NAME' : stop[IDX[value['IDX_BUS_LINE']]]
+    }))
+    
     dict[line][day][bus] = now.map((value, idx) => ({
       'IDX_BUS_LINE' : value['IDX_BUS_LINE'],
       'TIME' : value['BUS_TIME'],
     }))
   }
-  console.log(dict)
   return dict
 }
 
@@ -76,9 +39,13 @@ const setTime_orderby_ID = (dict:any[]) =>  {
   return data
 }
 
+const isEmpty = obj => {
+  obj.map(data => {if(Object.keys(data).length === 0 ) return true})
+  return false
+}
 
 const ShuttleLine = props => {
-  const [stat, setState] = useState('update-line')
+  const [stat, setState] = useState('show')
 
   const [stop, setStop] = useState<any | null>(null)
   const [line, setLine] = useState<any | null>(null)
@@ -88,8 +55,10 @@ const ShuttleLine = props => {
   const [lineName, setLineName] = useState('') 
   const [day, setDay] = useState('')
 
-  let stopName:Object|null = null, columns:Object = {}, timeData:Object|null = null
-  const classes = useStyles(); 
+  let stopName:Object = {}, 
+      rows:Object = {}, 
+      timeData:Object = {},
+      columns:Object = {}
 
   //data setting
   useEffect(()=> {
@@ -97,53 +66,21 @@ const ShuttleLine = props => {
     Data.getAPI('bus/shuttle/line/', 'result', setLine)
     Data.getAPI('bus/shuttle/time/', 'result', setTime)
   }, [])
-
-  //setting table head data
-  const rows:any[] = [{
-      title : '운행', 
-      field : 'IDX', width:100, 
-      cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
-  }]
   
   //after data setting 데이터 가공
   if(stop != null) stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
   if(time != null) timeData = setTime_orderby_ID(time)
-  if(stopName != null && timeData != null && line != null) 
-    //columns = lineToRows(line, stopName, timeData)
-    columns = lineToRows(timeData, stopName, line)
-
+  if(!(isEmpty([stopName, timeData]) || line === null))
+    rows = lineToRows(timeData, stopName, line)
+  if(!(lineName === '' || day === ''))
+    columns = ['운행', ...rows[lineName][day]['LINE'].map(value => value['NAME'])]
   //setting table head data
-  if(lineName !== '' && day !== '') {
-    columns[lineName][day]['LINE'].map(value => rows.push({
-      title : value,
-      cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
-    }))
-  }
   
-  //setting table row(stop : time) data
-  const createRowData = (row:any[]) => {
-    if(row == null) return null
-    const res:any[] = []
-    var idx = 1
-    for(var bus in row) {
-      if(bus == 'LINE') break
-      res.push(
-        <TableRow key={idx}>
-        <TableCell component="th" scope="row" className={classes.filledCell}>{(idx++)}</TableCell>
-        {row[bus].map((data, key)=>
-          <TableCell align="center" key={key}>{data['TIME']}</TableCell>
-        )}
-      </TableRow>
-      )
-    }
-    return res
-  }
-
   const forms = [
     {
         name : '노선',
         label : 'Line',
-        options : Object.keys(columns).map((value, idx) => ({'value' : value, 'label' : value})),
+        options : Object.keys(rows).map((value, idx) => ({'value' : value, 'label' : value})),
         action : value => {
           setDay('')
           setLineName(value)
@@ -154,8 +91,8 @@ const ShuttleLine = props => {
         name : '날짜',
         label : 'Week Of Days',
         options : 
-          (typeof(columns[lineName]) == 'undefined') ? ['None'] : 
-            Object.keys(columns[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
+          (typeof(rows[lineName]) == 'undefined') ? ['None'] : 
+            Object.keys(rows[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
         action : value => setDay(value),
         value : day, width : 45,
         disable : () => (lineName == '')
@@ -172,12 +109,17 @@ const ShuttleLine = props => {
         {
           'label' : '시간수정',
           action : () => setState('update-time')
-        }]
+        },
+        {
+          'label' : '배차수정',
+          action : () => setState('update-bus')
+        },
+      ]
       case 'update-line':
       case 'update-time':
         return [{
-          'label' : '적용하기',
-          action : () => setState('apply')
+          'label' : '돌아가기',
+          action : () => setState('show')
         }]
       case 'show':
       default : 
@@ -190,32 +132,61 @@ const ShuttleLine = props => {
   const buttons = getButtonList(stat)
 
   const displayComponent = () => {
-    const empty = <div>No Data...</div>
+    const empty = <NoData message='Please Select Options'/>
+    var component = empty
+    
+    switch(stat) {
+      case 'update-line':
+        if(lineName === '' || day === '') break
+        const now = rows[lineName][day]
+        component = 
+          <TransferList
+            data = {stopName}
+            chData = {now['LINE'].map(value => value['IDX'])}
+            allData = {Object.keys(stopName).map((value:any) => value*1)}
+            title = {'노선'}
+            onSubmit = {data=>{
+              //Data.setAPI('line', 'update', {
+              //  'lineID' : lineID, 'data' : data
+              //})
+            } }
+          />
+        break
+      case 'show':
+      case 'update':
+      case 'update-time':
+      case 'default':
+        if (!(lineName === '' || day === '')) {
+          const now = rows[lineName][day]
+          const record = Object.keys(now).map(key => {
+            if(key !== 'LINE')
+              return now[key].map(data => data['TIME'])
+          }) 
+          record.pop()
+          const rowHead = Array.from({length : Object.keys(now).length-1}, (x, idx) => idx+1)
+    
+          component = <Table
+            columnHead = {columns}
+            rowHead = {rowHead}
+            record = {record}
+            stat={stat}/>
+        }
+    }
 
-    const component = (rows.length < 2 || (Object.keys(columns).length === 0)) ? empty :
-      <TableContainer component={Paper} className={classes.table}>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              {rows.map((row, idx) => {
-                const style = (idx == 0) ? classes.firstCell : classes.filledCell
-                return <TableCell key={idx} align='center'  className={style}>{row.title}</TableCell>
-              })}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-          {createRowData(columns[lineName][day])}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    
     
     return component
   }
 
   return (
-    <div className={classes.root}>
+    <div style={{
+      width : '95%',
+      margin:'0 auto',
+      minWidth:'1021px',
+      padding: '30px'
+    }}>
       <Toolbar 
-      title = '통학버스 시간표' 
+      title = '셔틀버스 시간표' 
       selectForm = {forms}
       buttons={buttons}/>
       {displayComponent()}

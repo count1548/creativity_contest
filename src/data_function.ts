@@ -38,7 +38,10 @@ const dictToArr_s = (dict:any[], idxName:string, idxName2:string, value:string|n
             if(typeof(column[data[idxName]][data[idxName2]]) == 'undefined') column[data[idxName]][data[idxName2]] = []
             column[data[idxName]][data[idxName2]].push(v_data)
         }
-        else column[data[idxName]][data[idxName2]] = v_data
+        else {
+            if(typeof(column[data[idxName]]) == 'undefined') column[data[idxName]] = {}
+            column[data[idxName]][data[idxName2]] = v_data
+        }
     })
     return column
 }

@@ -41,7 +41,13 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
     submit : {
         display : 'block',
         margin : '10px auto'
-    }
+    },
+    text: {
+        ...theme.typography.button,
+        backgroundColor: theme.palette.background.paper,
+        textAlign:'center',
+        padding: theme.spacing(1),
+      },
 }),);
 
 function not(a : number[], b : number[]) {
@@ -80,10 +86,11 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
     const [checked, setChecked] = React.useState<number[]>([])
     const [left, setLeft] = React.useState<any[]>([]);
     const [right, setRight] = React.useState<any[]>([])
-
+    const rightData = allData.filter(value => !chData.includes(value))
+    
     React.useEffect(()=> {
         setLeft(chData)
-        setRight(allData.filter(value => !chData.includes(value)))
+        setRight(rightData)
     }, [chData])
 
     const classes = useStyles();
@@ -190,9 +197,7 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
                                                         'aria-labelledby' : labelId
                                                 }}/>
                                             </ListItemIcon>
-                                            <ListItemText
-                                                primary={data[value]}
-                                            />
+                                            <ListItemText primary={data[value]} />
                                             <ListItemSecondaryAction/>
                                         </ListItem>)
                                     }}
@@ -246,6 +251,7 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
                 color="primary" 
                 className={classes.submit}
                 onClick={()=>onSubmit(left)}>Submit</Button>
+            <div className={classes.text}>{"첫 / 마지막 정류장은 항상 캠퍼스여야 하며, 하나 이상의 경유지가 존재해야 합니다."}</div>
         </div>
     );
 }
