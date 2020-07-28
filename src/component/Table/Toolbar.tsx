@@ -20,16 +20,22 @@ const useStyles = makeStyles((theme) => ({
         marginBottom:'60px',
     },
     head: {
+        position:'relative',
         textAlign:'center',
         fontSize:'24px',
         marginBottom:'20px',
         fontFamily:'NanumSquareRoundEB',
         fontWeight: 'bold',
+        height:'32px',
         color:'#2c537a',
-        '&:before' : {
-            content:' ',
-            display:'block',
-            clear:'both'
+        width:'100%',
+        '&:after' : {
+            content:'attr(data-text)',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            zIndex: '-1',
+            width:'100%',
         },
     },
     button : {
@@ -37,27 +43,33 @@ const useStyles = makeStyles((theme) => ({
         fontSize:'15px',
         marginTop: '9px',
         fontWeight:'normal',
+        marginLeft:'10px',
+        cursor:'pointer'
     }
 }));
 
 const Header = ({component, style, button}) =>
-    <div className={style}> {component} {button}</div>
+    <div className={style} data-text={component}>{button}</div>
 
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
 
 const Toolbar = (props) => {
-    const {title, data} = props
+    const {title, selectForm, buttons} = props
     const classes = useStyles()
     return (
         <div style={{
             marginBottom: '30px',
             padding: '10px'
         }}>
-            <Header component={title} style={classes.head} 
-            button = {<div className={classes.button}>수정하기</div>}
-            />
+            <Header 
+                component={title} 
+                style={classes.head} 
+                button = {
+                    buttons.map((data, idx) => 
+                        <div className={classes.button} key={idx} onClick={data['action']}>{data['label']}</div>
+                    ) } />
             <SelectBox style={classes.toolbar}>
-                {data.map((form, idx) =>  <SelectForm {...form} key={idx}/>)} 
+                {selectForm.map((form, idx) =>  <SelectForm {...form} key={idx}/>)} 
             </SelectBox>
         </div>
     )

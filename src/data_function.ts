@@ -13,6 +13,8 @@ const getAPI = (target, name, setState) => {
     .then(res => res.json())
     .then(res => setState(res[name]) )
 }
+const setAPI = (target, type, data) => {
+}
 
 const dictToArr = (dict:any[], idxName:string, value:string|null = null, array=false) => {
     let column = {}
@@ -63,4 +65,4 @@ const findFittedList = (lineData, campus, way) => {
 	return (res.length == 0) ? null : res
 }
 
-export { getAPI, findFittedList, dictToArr, dictToArr_s }
+export { getAPI, setAPI, findFittedList, dictToArr, dictToArr_s }

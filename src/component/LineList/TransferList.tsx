@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
     list: {
         width: 400,
         height: '300px',
+        border: '2px solid #000',
         backgroundColor: theme.palette.background.paper,
         overflow: 'auto'
     },
@@ -35,8 +36,6 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
     },
     paper: {
         backgroundColor: theme.palette.background.paper,
-        border: '2px solid #000',
-        boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
     },
     submit : {
@@ -77,16 +76,20 @@ const getItemStyle = (isDragging, draggableStyle) => ({
     })
 });
 
-export default function TransferList({data, chData, allData, title, onSubmit}) {
-    const classes = useStyles();
-    const [checked, setChecked] = React.useState<number[]>([]);
-    
-    const rightData = allData.filter(value => !chData.includes(value))
+export default function TransferList({data, chData, allData, title, onSubmit, reload=false}) {
+    const [checked, setChecked] = React.useState<number[]>([])
+    const [left, setLeft] = React.useState<any[]>([]);
+    const [right, setRight] = React.useState<any[]>([])
 
-    const [left, setLeft] = React.useState<any[]>(chData);
-    const [right, setRight] = React.useState<any[]>(rightData);
+    React.useEffect(()=> {
+        setLeft(chData)
+        setRight(allData.filter(value => !chData.includes(value)))
+    }, [chData])
+
+    const classes = useStyles();
     const leftChecked = intersection(checked, left);
     const rightChecked = intersection(checked, right);
+
     const handleToggle = (value : number) => () => { 
         const currentIndex = checked.indexOf(value);
         const newChecked = [...checked];
@@ -103,11 +106,8 @@ export default function TransferList({data, chData, allData, title, onSubmit}) {
     const numberOfChecked = (items : number[]) => intersection(checked, items).length;
 
     const handleToggleAll = (items : number[]) => () => {
-        if (numberOfChecked(items) === items.length) {
-            setChecked(not(checked, items));
-        } else {
-            setChecked(union(checked, items));
-        }
+        if (numberOfChecked(items) === items.length) setChecked(not(checked, items)) 
+        else setChecked(union(checked, items)) 
     };
 
     const handleCheckedRight = () => {
@@ -200,6 +200,7 @@ export default function TransferList({data, chData, allData, title, onSubmit}) {
                                 ))
                             }
                             <ListItem/>
+                            {provided.placeholder}
                         </List>
                     </RootRef>
                 )}
@@ -244,7 +245,7 @@ export default function TransferList({data, chData, allData, title, onSubmit}) {
                 variant="contained" 
                 color="primary" 
                 className={classes.submit}
-                onClick={()=>onSubmit(left)}>Primary</Button>
+                onClick={()=>onSubmit(left)}>Submit</Button>
         </div>
     );
 }

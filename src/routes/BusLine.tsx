@@ -16,6 +16,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
+import TextField from '@material-ui/core/TextField';
+
 import '../style/font.css'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -48,20 +50,27 @@ const useStyles = makeStyles((theme: Theme) =>
       background: '#376b9f',
       fontFamily:'NanumSquareRoundR',
       color : '#fff'
+    },
+    inputCell : {
+      width:'110px',
+      textAlign:'center',
     }
   }),
 )
-
-const lineToRows = (dict:any[], stop) => {
-  let rows:any = [], obj = {}
+interface rowInterface {
+  'LINE' : any, 
+  'DATA' : any[]
+}
+const lineToRows = (dict:any[], stop) : rowInterface[] => {
+  let rows:rowInterface[] = [], obj = {}
   const data = Data.dictToArr(dict, 'BUS_LINE_ID', null, true)
-
   for(var key in data) {
     data[key].sort((a, b) => 
       (a['LINE_SEQUENCE'] < b['LINE_SEQUENCE'] ? -1 : 1))
     const stop_data:any[] = data[key].map(value => ({
-        stopName : stop[value['BUS_STOP_ID']],
-        timeID : value['IDX_BUS_LINE']
+      stopID: value['BUS_STOP_ID'],
+      stopName : stop[value['BUS_STOP_ID']],
+      timeID : value['IDX_BUS_LINE']
     }))
     rows.push({
       'LINE': key,
@@ -76,8 +85,11 @@ const setTime_orderby_ID = (dict:any[]) =>  {
 }
 
 const WoDKor = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
+const week = 5
 
 const BusLine = props => {
+    const [stat, setState] = useState('show')
+  
     const [stop, setStop] = useState<any | null>(null)
     const [line, setLine] = useState<any | null>(null)
     const [time, setTime] = useState<any | null>(null)
@@ -86,7 +98,7 @@ const BusLine = props => {
     const [way, setWay] = useState('')
     const [lineID, setLineID] = useState<any | null>('')
 
-    let stopName:Object|null = null, columns = [], timeData = {}
+    let stopName:Object|null = null, columns:any[] = [], timeData = {}
 
     const [open, setOpen] = useState(false)
     const classes = useStyles(); 
@@ -103,6 +115,7 @@ const BusLine = props => {
     if(stop != null) stopName = Data.dictToArr(stop, 'BUS_STOP_ID', 'BUS_STOP_NAME')
     if(stopName != null && line != null) columns = lineToRows(line, stopName)
     if(time != null) timeData = setTime_orderby_ID(time)
+
     //data setting
     useEffect(()=> {
       Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
@@ -111,21 +124,86 @@ const BusLine = props => {
     }, [])
     
     //setting table row(stop : time) data
-    const createRowData = (row:any[]) => {
+    const createRowData = (row:any[], stat) => {
       if(row == null) return null
-
       const rowData = row['DATA']
-      return rowData.map((stop, idx) =>
+      const setTimeData = id => {
+        let res : any[] = []
+        switch(stat) {
+          case 'update-line':
+            break
+          case 'update-time':
+            if(timeData[id] != null)
+              res = timeData[id].map((time, idx) => 
+                  <TextField
+                    id={`${id}-${idx}`}
+                    defaultValue={time}
+                    className={classes.inputCell}
+                    onChange={
+                      event => {
+                        console.log('change')
+                        changeTime(id, idx, event.target.value)
+                      }
+                    }/>)
+            else {
+              res = []
+              timeData[id] = Array.from({length : week}, () => 0)
+              for(let idx = 0; idx < week; idx++) {
+                res.push(<TextField
+                  id={`${id}-${idx}-nodata`}
+                  className={classes.inputCell}
+                  onChange = {event => {
+                    console.log('change')
+                    changeTime(id, idx, event.target.value)
+                  }}/>)
+              }
+            }
+            break
+          case 'show':
+          default:
+            if(timeData[id] != null) res = timeData[id]
+            break
+        }
+        return res.map((data, idx) => <TableCell align="center" key={idx}>{data}</TableCell>)
+      }
+      const res = rowData.map((stop, idx) =>
         <TableRow key={idx}>
           <TableCell component="th" scope="row" className={classes.filledCell}>{stop['stopName']}</TableCell>
-          {(timeData[stop['timeID']] == null) ? null:
-            timeData[stop['timeID']].map((time, idx) =>
-              <TableCell align="center" key={idx}>{time}</TableCell>
-            )}
+          {setTimeData(stop['timeID'])}
         </TableRow>
       )
+      return res
     }
-    
+
+    const changeTime = (id, idx, value) => {
+      console.log('change value', id, idx, value)
+      timeData[id][idx] = value
+    }
+    const getButtonList = stat => {
+      switch(stat) {        
+        case 'update':
+          return [{
+            'label' : '노선수정',
+            action : () => setState('update-line')
+          },
+          {
+            'label' : '시간수정',
+            action : () => setState('update-time')
+          }]
+        case 'update-line':
+        case 'update-time':
+          return [{
+            'label' : '적용하기',
+            action : () => setState('apply')
+          }]
+        case 'show':
+        default : 
+          return [{
+            'label' : '수정하기',
+            action : () => setState('update')
+          }]
+      }
+    }
     const stoplist = Data.findFittedList(columns, campus, way)
 
     const forms = [
@@ -161,27 +239,63 @@ const BusLine = props => {
       },
     ]
 
-    return (
-      columns.length == 0 || time == null || rows.length == 0? 
-        <div>Loading...</div>:
-        <div className={classes.root}>
-          <Toolbar title = '통학버스 시간표' data = {forms}/>          
+    const buttons = getButtonList(stat)
+    const displayComponent = () => {
+      const empty = <div>No Data...</div>
+  
+      var component = empty
+      
+      switch(stat) {
+        case 'update-line':
+          if(!stopName|| columns.length === 0 || lineID === '') break
+          component = 
+            <TransferList
+              data = {stopName}
+              chData = {columns[lineID]['DATA'].map(value => value['stopID'])}
+              allData = {Object.keys(stopName).map((value:any) => value*1)}
+              title = {'노선'}
+              onSubmit = {data=>{
+                Data.setAPI('line', 'update', {
+                  'lineID' : lineID, 'data' : data
+                })
+              } }
+              reload
+            />
+          break
+        case 'show':
+        case 'update':
+        case 'update-time':
+        case 'default':
+          component = (rows.length == 0 || columns.length == 0) ? empty :
           <TableContainer component={Paper} className={classes.table}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
                   {rows.map((row, idx) => {
                     const style = (idx == 0) ? classes.firstCell : classes.filledCell
-                    return <TableCell key={idx} align='center'  className={style}>{row.title}</TableCell>
+                    return <TableCell key={idx} align='center'  className={style}>{row['title']}</TableCell>
                   })}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {createRowData(columns[lineID])}
+                {createRowData(columns[lineID], stat)}
               </TableBody>
             </Table>
           </TableContainer>
-        </div>
+          break
+      }
+      
+      return component
+    }
+  
+    return (
+      <div className={classes.root}>
+        <Toolbar 
+        title = '통학버스 시간표' 
+        selectForm = {forms}
+        buttons={buttons}/>
+        {displayComponent()}
+      </div>
     )
 }
 
