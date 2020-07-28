@@ -52,25 +52,30 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-const lineToRows = (dict:any[], stop, time) => {
+const lineToRows = (dict:any, stop, lineIDX) => {
   let rows:any = [], obj = {}
-  const data = Data.dictToArr_s(dict, 'LINE_NAME', 'CODE', null, true)
-  
-  for(var line in data) for(var day in data[line]) {
-    const now = data[line][day]
-    data[line][day]['DATA'] = now.map((value, idx) => ({
-      'STOP_NAME' : stop[value['SHUTTLE_STOP_ID']],
-      'TIME' : time[value['IDX']],
+  const IDX = Data.dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
+  for(var line in dict) for(var day in dict[line]) for(var bus in dict[line][day])  {
+    const now = dict[line][day][bus]
+    dict[line][day]['LINE'] = now.map(value => stop[IDX[value['IDX_BUS_LINE']]])
+    dict[line][day][bus] = now.map((value, idx) => ({
+      'IDX_BUS_LINE' : value['IDX_BUS_LINE'],
+      'TIME' : value['BUS_TIME'],
     }))
-    data[line][day]['COUNT'] = 
-      (typeof(data[line][day]['DATA'][0]['TIME']) == 'undefined') ? 0 : data[line][day]['DATA'][0]['TIME'].length
+  }
+  console.log(dict)
+  return dict
+}
+
+const setTime_orderby_ID = (dict:any[]) =>  {
+  //return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
+  const data = Data.dictToArr_s(dict, 'LINE_NAME', 'CODE', null, true)
+  for(var line_name in data) for(var code_name in data[line_name]) {
+    data[line_name][code_name] = Data.dictToArr(data[line_name][code_name], 'BUS_ID', null, true)
   }
   return data
 }
 
-const setTime_orderby_ID = (dict:any[]) =>  {
-  return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
-}
 
 const ShuttleLine = props => {
   const [stat, setState] = useState('update-line')
@@ -104,10 +109,13 @@ const ShuttleLine = props => {
   if(stop != null) stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
   if(time != null) timeData = setTime_orderby_ID(time)
   if(stopName != null && timeData != null && line != null) 
-    columns = lineToRows(line, stopName, timeData)
+    //columns = lineToRows(line, stopName, timeData)
+    columns = lineToRows(timeData, stopName, line)
+
+  //setting table head data
   if(lineName !== '' && day !== '') {
-    columns[lineName][day]['DATA'].map(value => rows.push({
-      title : value['STOP_NAME'],
+    columns[lineName][day]['LINE'].map(value => rows.push({
+      title : value,
       cellStyle : { padding:'0px 10px', textAlign:'center' as const } 
     }))
   }
@@ -116,12 +124,14 @@ const ShuttleLine = props => {
   const createRowData = (row:any[]) => {
     if(row == null) return null
     const res:any[] = []
-    for(var idx = 0; idx < row['COUNT']; idx++) {
+    var idx = 1
+    for(var bus in row) {
+      if(bus == 'LINE') break
       res.push(
-      <TableRow key={idx}>
-        <TableCell component="th" scope="row" className={classes.filledCell}>{(idx+1)}</TableCell>
-        {Object.keys(row['DATA']).map((data, key)=>
-          <TableCell align="center" key={key}>{row['DATA'][data]['TIME'][idx]}</TableCell>
+        <TableRow key={idx}>
+        <TableCell component="th" scope="row" className={classes.filledCell}>{(idx++)}</TableCell>
+        {row[bus].map((data, key)=>
+          <TableCell align="center" key={key}>{data['TIME']}</TableCell>
         )}
       </TableRow>
       )
