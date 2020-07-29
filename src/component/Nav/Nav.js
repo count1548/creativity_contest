@@ -11,6 +11,7 @@ import InboxIcon from "@material-ui/icons/MoveToInbox";
 
 import Drawer from '@material-ui/core/Drawer';
 
+import '../../style/font.css'
 import "./Nav.css";
 
 //const useStyles = makeStyles({ list: { width: 250 } });
@@ -24,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     width: drawerWidth,
     overflowX:'hidden',
+    backgroundColor:'#2c537a'
   },
   // necessary for content to be below app bar
   toolbar: theme.mixins.toolbar,
@@ -51,31 +53,23 @@ export default function SwipeableTemporaryDrawer() {
 				classes={{paper: classes.drawerPaper,}}
 				anchor="left"
 			>
-				<img src="/logo_type.png" alt="logo" style={{"display":"block", "margin" : '10px auto'}}></img>
-				<NavLink to="/login">
-					<Button color="inherit">Login</Button>
-				</NavLink>
-				<NavLink to="/logout">
-					<Button color="inherit">logout</Button>
-				</NavLink>
+				<div className='MuiList-main-script'>HUB</div>
 				<div className={classes.toolbar} />
-				<Divider />
 				<List>
 				{navList.map((item, idx) =>
-                    <List key={idx}>
-                        <NavLink exact to={item.path} className="item" activeClassName="active"> 
-                            <ListItem button key={item.name}>
-                                <ListItemIcon>
-                                    <InboxIcon />
-                                </ListItemIcon>
-                                <ListItemText primary={item.name} />
-                            </ListItem>
-                        </NavLink>
-                    </List>
-                )}
+            <NavLink exact to={item.path} activeClassName="active"> 
+                <ListItem className="item" key={item.name}>
+                  <ListItemText primary={item.name} />
+                </ListItem>
+            </NavLink>
+        )}
 				</List>
 			</Drawer>
 
 		</div>
-	)
+  )
+  // <ListItemIcon>
+  //     <InboxIcon />
+  // </ListItemIcon>
+  // <ListItemText primary={item.name} />
 }

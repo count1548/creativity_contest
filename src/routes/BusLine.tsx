@@ -179,12 +179,7 @@ const BusLine = props => {
       return component
     }
     return (
-      <div style={{
-        width : '95%',
-        margin:'0 auto',
-        minWidth:'1021px',
-        padding: '30px'
-      }}>
+      <div>
         <Toolbar 
         title = '통학버스 시간표' 
         selectForm = {forms}

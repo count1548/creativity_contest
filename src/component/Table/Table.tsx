@@ -38,6 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
       color : '#fff',
       backgroundColor : '#2c537a',
     },
+    
     inputCell : {
       width:'110px',
       textAlign:'center',
@@ -49,12 +50,49 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
+const getStyle = (idx, length, head = false) : Object => {
+    if(head) {
+        switch(idx) {
+            case 0:
+                return {
+                    backgroundColor:'#376b9f',
+                    borderRight : '1px solid white',
+                }
+            case length-1:
+                return {}
+            default:
+                return {borderRight : '1px solid white',}
+        }
+    }
+    else {
+        switch(idx) {
+            case 0:
+                return {borderRight : '1px solid white',}
+            case length-1:
+                return {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                }
+            default:
+                return {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                    borderRight : '1px solid white',
+                }
+        }
+    }
+}
+
 const CustomTable = (props) => {
     const {columnHead, rowHead, record, stat, changeEvent = ()=>{}, onSubmit = () =>{}} = props
     const classes = useStyles(); 
 
     const rowData = rowHead.map((data, idx) => [data].concat(record[idx]))
     const columnData:string[] = columnHead
+
+    const columnCount = columnData.length
 
     const displayCell = (id, idx, data) => {
         const value = (typeof(data) === 'undefined') ? '' : data
@@ -81,10 +119,7 @@ const CustomTable = (props) => {
                         <TableCell 
                             key={idx} align='center' 
                             className={classes.headCell}
-                            style={(idx === 0 ) ? {
-                                backgroundColor:'#376b9f',
-                                width:180
-                            } : {}}
+                            style={getStyle(idx, columnCount, true)}
                             children={column}/>
                     )}
                     </TableRow>
@@ -97,11 +132,7 @@ const CustomTable = (props) => {
                                 <TableCell 
                                     component="th" scope="row" 
                                     className={classes.headCell}
-                                    style={(idx2 !== 0 ) ? {
-                                        backgroundColor:'#eee',
-                                        textAlign:'center',
-                                        color:'#000'
-                                    } : {}}
+                                    style={getStyle(idx2, columnCount)}
                                     key={idx2}
                                     children={displayCell(idx, idx2, row[idx2])}/>)
                             }

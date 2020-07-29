@@ -4,6 +4,8 @@ import Table from 'material-table';
 import Tooltip from '../component/Tooltip/Tooltip';
 import SeatLayout from '../component/Tooltip/SeatLayout';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 const columns = [
     {title : 'ID', field : 'TICKET_ID', hidden : true, width:0 },
     {title : '학생', field : 'STUDENT_ID', width:100 },
@@ -68,7 +70,7 @@ const TicketList = props => {
         })
     }, [])
     return (
-        tickets === null ? <div>Loading...</div>:
+        tickets === null ? <div style={{width:'300px', margin:'30px auto'}}><CircularProgress size={200}/></div> :
         <Table
             title="티켓 목록"
             data={tickets}

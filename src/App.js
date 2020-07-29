@@ -15,7 +15,11 @@ const useStyles = makeStyles((theme) => ({
 		display: 'flex',
 	  },
 	content: {
-	  flexGrow: 1,
+		flexGrow: 1,
+		width : '95%',
+		margin:'0 auto',
+		minWidth:'1021px',
+		padding: '30px'
 	},
   }));
 
