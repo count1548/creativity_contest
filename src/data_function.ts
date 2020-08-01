@@ -1,4 +1,5 @@
-const host = "http://uck.myds.me:7000"
+const host = "http://uck.myds.me:3001"
+
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -13,12 +14,48 @@ const getAPI = (target, name, setState) => {
     .then(res => res.json())
     .then(res => setState(res[name]) )
 }
-const setAPI = (target, type, data) => {
+const setAPI = (target, data, setState, value) => {
+    // return fetch(`${host}/${target}`, {
+    //     method: 'POST',
+	// 	headers:{
+	// 		'Accept': 'application/json',
+	// 		'Content-Type': 'application/json'
+    //     },
+    //     body : JSON.stringify(data)
+	// })
+    // .then(res => setState(value))
+    console.log({
+        url : target,
+        body : data,
+    })
+    setTimeout(()=>setState(value), 1000)
 }
+
+// const arrayToDict = (arr:Object[], idxList:string[], valueList:string[], retArr = false) => {
+//     var column
+//     const len = idxList.length
+
+//     const getTaget = idx => {
+
+//     }
+
+//     if(idxList.length <= 1)  
+//     const data = dictToArr(arr, idxList.shift(), null, true)
+
+//     for(var key in data) {
+//         data[key] = dictToArr(data[key], idxList[0], null, true)
+//     }
+
+//     arr.forEach ( (object, idx) => {
+//         idxList.forEach ( key => {
+//             if()
+//         })
+//     })
+// }
 
 const dictToArr = (dict:any[], idxName:string, value:string|null = null, array=false) => {
     let column = {}
-    dict.map(data => {
+    dict.forEach(data => {
         const v_data = (value == null) ? _objectWithoutProperties(data, [idxName]) : data[value]
         if(array) {
             if(typeof(column[data[idxName]]) == 'undefined') column[data[idxName]] = []
@@ -31,7 +68,7 @@ const dictToArr = (dict:any[], idxName:string, value:string|null = null, array=f
 
 const dictToArr_s = (dict:any[], idxName:string, idxName2:string, value:string|null = null, array=false) => {
     let column = {}
-    dict.map(data => {
+    dict.forEach(data => {
         const v_data = (value == null) ? _objectWithoutProperties(data, [idxName, idxName2]) : data[value]
         if(array) {
             if(typeof(column[data[idxName]]) == 'undefined') column[data[idxName]] = {}
@@ -45,17 +82,13 @@ const dictToArr_s = (dict:any[], idxName:string, idxName2:string, value:string|n
     })
     return column
 }
-
-const stringToArr = (str:string, sep:string) => str.split(sep)
-const arrToString = (str:any[], sep:string) => str.join(sep)
-
 const findFittedList = (lineData, campus, way) => {
 	if(lineData == null || campus === '' || way === '') return null
     let res:any[] = []
-    lineData.map((line, key) => {
-		const other = (way == 0) ? line['DATA'].length - 1 : 0
-		if(line['DATA'][other]['stopName'] == campus) {
-			const name = (way == 0) ? 
+    lineData.forEach((line, key) => {
+		const other = (way === 0) ? line['DATA'].length - 1 : 0
+		if(line['DATA'][other]['stopName'] === campus) {
+			const name = (way === 0) ? 
 				line['DATA'][0]['stopName'] : 
 				line['DATA'][line['DATA'].length - 1]['stopName'] // lineID -> string 으로 변경 시 lineID로 변경
 			res.push( {
@@ -65,7 +98,7 @@ const findFittedList = (lineData, campus, way) => {
 			})
 		}
     })
-	return (res.length == 0) ? null : res
+	return (res.length === 0) ? null : res
 }
 
 export { getAPI, setAPI, findFittedList, dictToArr, dictToArr_s }

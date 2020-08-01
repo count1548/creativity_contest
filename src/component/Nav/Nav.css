@@ -15,14 +15,24 @@ a {
 	background:#fff;
 	color: black;
 }
-.MuiList-main-script {
+.MuiList-script{
 	font-family: 'NanumSquareRoundB';
+	text-align:center;
+	margin-bottom:80px;
+}
+.MuiList-script .script {
+	margin-top:32px;
+	
+}
+.MuiList-main {
 	font-size:24px;
 	color:#fff;
-	text-align:center;
-
 	font-weight:bold;
-	margin:32px auto 120px auto;
+}
+
+.MuiList-sub {
+	font-size:14px;
+	color:#ddd;
 }
 .MenuIcon {
 	color: black;

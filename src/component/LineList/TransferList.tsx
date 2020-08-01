@@ -86,12 +86,11 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
     const [checked, setChecked] = React.useState<number[]>([])
     const [left, setLeft] = React.useState<any[]>([]);
     const [right, setRight] = React.useState<any[]>([])
-    const rightData = allData.filter(value => !chData.includes(value))
     
     React.useEffect(()=> {
         setLeft(chData)
-        setRight(rightData)
-    }, [chData])
+        setRight(allData.filter(value => !chData.includes(value)))
+    }, [chData, allData])
 
     const classes = useStyles();
     const leftChecked = intersection(checked, left);
@@ -251,7 +250,7 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
                 color="primary" 
                 className={classes.submit}
                 onClick={()=>onSubmit(left)}>Submit</Button>
-            <div className={classes.text}>{"첫 / 마지막 정류장은 항상 캠퍼스여야 하며, 하나 이상의 경유지가 존재해야 합니다."}</div>
+            <div className={classes.text}>{"첫 or 마지막 정류장은 항상 캠퍼스여야 하며, 하나 이상의 경유지가 존재해야 합니다."}</div>
         </div>
     );
 }

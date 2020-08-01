@@ -6,7 +6,6 @@ import BusLine from "./routes/BusLine";
 import Shuttle from "./routes/Shuttle";
 import Ticket from "./routes/Ticket";
 import Login from "./component/Login/Login";
-import Logout from "./component/Login/Logout";
 import ProtectedRoute from "./component/Auth/protected.route"
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -18,19 +17,18 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1,
 		width : '95%',
 		margin:'0 auto',
-		minWidth:'1021px',
-		padding: '30px'
+		minWidth:'1000px',
+		padding: '30px',
 	},
   }));
 
 const App = () => {
 	const classes = useStyles()
 	return ( <Router> <div className={classes.root}>
-		<Nav />
+		<Nav/>
 		<div className={classes.content}>
 			<Switch >
 				<Route exact path="/login" component={Login} />	
-				<Route exact path="/logout" component={Logout} />
 				<Route exact path="/" component={Home} />
 				<ProtectedRoute exact path="/busline" component={BusLine} />
                 <ProtectedRoute exact path="/shuttle" component={Shuttle} />

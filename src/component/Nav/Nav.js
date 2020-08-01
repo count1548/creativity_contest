@@ -1,15 +1,13 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
 import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-
+import Button from '@material-ui/core/Button';
+import Auth from '../Auth/auth'
 import Drawer from '@material-ui/core/Drawer';
+
 
 import '../../style/font.css'
 import "./Nav.css";
@@ -44,7 +42,7 @@ const navList = [
 ]
 
 export default function SwipeableTemporaryDrawer() {
-	const classes = useStyles();
+  const classes = useStyles()
 	return(
 		<div>
 			<Drawer
@@ -53,11 +51,18 @@ export default function SwipeableTemporaryDrawer() {
 				classes={{paper: classes.drawerPaper,}}
 				anchor="left"
 			>
-				<div className='MuiList-main-script'>HUB</div>
+        <div className='MuiList-script'>
+          <div className='MuiList-main script'>HUB</div>
+          <div className='MuiList-sub script'>관리자 페이지</div>
+          {Auth.isAuthenticated() ? 
+            <Button variant="contained" className='script' onClick={Auth.logout}>Logout</Button> : 
+            <Link to='/login'><Button variant="contained" className='script'>Login</Button></Link>}
+        </div>
+				
 				<div className={classes.toolbar} />
 				<List>
 				{navList.map((item, idx) =>
-            <NavLink exact to={item.path} activeClassName="active"> 
+            <NavLink exact to={item.path} activeClassName="active" key={idx}>
                 <ListItem className="item" key={item.name}>
                   <ListItemText primary={item.name} />
                 </ListItem>
@@ -68,8 +73,4 @@ export default function SwipeableTemporaryDrawer() {
 
 		</div>
   )
-  // <ListItemIcon>
-  //     <InboxIcon />
-  // </ListItemIcon>
-  // <ListItemText primary={item.name} />
 }

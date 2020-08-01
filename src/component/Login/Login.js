@@ -52,16 +52,15 @@ const useStyles = makeStyles(theme => ({
 }));
 const onSubmit = (e, fun) => {
 	e.preventDefault();
-	/*const data = {
+	const data = {
 		id : e.target.id.value,
-		password : e.target.password.value
-	}*/
-	//로그인 검증
-	//if 검증 완료시 sessionStorage 적용 후 이동
-	auth.login();
+		pwd : e.target.password.value
+	}
+	auth.login(data)
 }
 export default function SignIn(props) {
 	const classes = useStyles();
+	if(auth.isAuthenticated()) props.history.push('/')
 	return (
 		
 		<Container component="main" maxWidth="xs">
@@ -75,7 +74,7 @@ export default function SignIn(props) {
 				</Typography>
 				<form className={classes.form} noValidate onSubmit={(e) => {
 					onSubmit(e)
-					props.history.push('/')
+					/* eslint no-restricted-globals:0 */
 				}}>
 					<TextField
 						variant="outlined"

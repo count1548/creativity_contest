@@ -7,6 +7,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SelectForm from './SelectForm'
+import TextField from '@material-ui/core/TextField'
+
 
 import '../../style/font.css'
 
@@ -45,16 +47,28 @@ const useStyles = makeStyles((theme) => ({
         fontWeight:'normal',
         marginLeft:'10px',
         cursor:'pointer'
-    }
+    },
 }));
 
 const Header = ({component, style, button}) =>
     <div className={style} data-text={component}>{button}</div>
 
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
+const TextForm = ({label, action, name, width}) => (
+    <div style={{width : `${width}%`, float : 'left'}}>
+        <div style={{margin : '0 auto', width : '260px'}}>
+            <FormControlLabel control={
+                <TextField 
+                    id={label} 
+                    label={label} 
+                    variant="outlined" 
+                    onChange={ev => action(ev.target.value)}
+                    style = {{width:190, marginLeft:20, marginTop:6}}
+                    />
+    } label={name} labelPlacement="start" /></div></div>)
 
 const Toolbar = (props) => {
-    const {title, selectForm, buttons} = props
+    const {title, selectForm, buttons, type} = props
     const classes = useStyles()
     return (
         <div style={{
@@ -69,7 +83,10 @@ const Toolbar = (props) => {
                         <div className={classes.button} key={idx} onClick={data['action']}>{data['label']}</div>
                     ) } />
             <SelectBox style={classes.toolbar}>
-                {selectForm.map((form, idx) =>  <SelectForm {...form} key={idx}/>)} 
+                {selectForm.map((form, idx) =>  
+                    ((type === 'selectBox') ? 
+                        <SelectForm {...form} key={idx}/> : 
+                        <TextForm {...form} key = {idx}/>))} 
             </SelectBox>
         </div>
     )
