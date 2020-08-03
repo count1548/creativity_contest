@@ -48,15 +48,14 @@ const TicketList = props => {
             //Data.updateData({}, 'LineList')
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    Data.getAPI('ticket/lists/all/', 'TICKET', setTickets)
                     resolve();
                 }, 600);
         })},
     }
 
     useEffect(() => {
-        Data.getAPI('ticket/lists/all/', 'TICKET', data => {
-            data = data.map(value => {
+        Data.getAPI('ticket/lists/all/', 'TICKET').then(res => {
+            res = res.map(value => {
                 const time = value['TICKET_TIME'].split(':')
                 const temp = {
                     ...value,
@@ -66,8 +65,8 @@ const TicketList = props => {
                 }
                 return temp
             })
-            setTickets(data)
-        })
+            setTickets(res)
+        })        
     }, [])
     return (
         tickets === null ? <div style={{width:'300px', margin:'30px auto'}}><CircularProgress size={200}/></div> :

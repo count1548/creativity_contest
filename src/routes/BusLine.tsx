@@ -5,14 +5,39 @@ import * as Data from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Modal from '../component/Modal/Modal'
 import {getAPI} from '../data_function'
-import '../style/lineTable.css'
+import { DropzoneDialog } from 'material-ui-dropzone';
 import Toolbar from '../component/Table/Toolbar'
 import Table from '../component/Table/Table'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
-
 import '../style/font.css'
+import '../style/lineTable.css'
+
+const useStyles = makeStyles(theme => createStyles({
+  previewChip: {
+    minWidth: 160,
+    maxWidth: 210,
+  },
+}));
+
+
+const Dropzone = ({open, onClose, onSave}) => {
+  const classes = useStyles();
+  return (
+    <DropzoneDialog
+    acceptedFiles={["image/*", "video/*", "application/*"]}
+    cancelButtonText={"cancel"}
+    submitButtonText={"submit"}
+    maxFileSize={5000000}
+    open={open}
+    onClose={onClose}
+    onSave={files => onSave(files)}
+    showPreviews={false}
+    showFileNamesInPreview={true}
+  />
+    )
+}
 
 interface rowInterface {
   'LINE' : any, 
@@ -22,8 +47,7 @@ const lineToRows = (dict:any[], stop) : rowInterface[] => {
   let ros:rowInterface[] = [], obj = {}
   const data = Data.dictToArr(dict, 'BUS_LINE_ID', null, true)
   for(var key in data) {
-    data[key].sort((a, b) => 
-      (a['LINE_SEQUENCE'] < b['LINE_SEQUENCE'] ? -1 : 1))
+    data[key].sort((a, b) => (a['LINE_SEQUENCE'] < b['LINE_SEQUENCE'] ? -1 : 1))
     const stop_data:any[] = data[key].map(value => ({
       stopID: value['BUS_STOP_ID'],
       stopName : stop[value['BUS_STOP_ID']],
@@ -44,17 +68,27 @@ const setTime_orderby_ID = (dict:any[]) =>  {
 const columns = ['노선', '월', '화', '수', '목', '금']
 const week = 5
 
-const BusLine = props => {
-  const [stat, setState] = useState('show')
+async function getData() {
+  const stop = await Data.getAPI('bus/stop/', 'BUS_STOP')
+  const time = await Data.getAPI('bus/time/', 'TIME_TABLE')
+  const line = await Data.getAPI('bus/line/', 'BUS_LINE')
 
-  const [stop, setStop] = useState<any | null>(null)
-  const [line, setLine] = useState<any | null>(null)
-  const [time, setTime] = useState<any | null>(null)
-  
+  const stopName = Data.dictToArr(stop, 'BUS_STOP_ID', 'BUS_STOP_NAME')
+  const timeData = setTime_orderby_ID(time)
+  const rows = lineToRows(line, stopName)
+
+  return {stopName, timeData, rows}
+}
+
+let stopName:Object = {}, rows:any[] = [], timeData = {}
+
+const BusLine = props => {
+  const [stat, setState] = useState('apply')
+  const [updated, setUpdated] = useState(true)
+
   const [campus, setCampus] = useState('') 
   const [way, setWay] = useState('')
   const [lineIDX, setlineIDX] = useState<any | null>('')
-  
 
   const init = () => {
     setCampus('')
@@ -62,37 +96,30 @@ const BusLine = props => {
     setlineIDX('')
   }
 
-  let stopName:Object = {}, rows:any[] = [], timeData = {}
-
   //setting table head data
   useEffect(()=> {
-    Data.getAPI('bus/stop/', 'BUS_STOP', setStop)
-    Data.getAPI('bus/line/', 'BUS_LINE', setLine)
-    Data.getAPI('bus/time/', 'TIME_TABLE', setTime)
-  }, [stat])
+    //update 대기
+      getData().then(res => {
+        ({stopName, timeData, rows} = res)
+        setState('show')
+      })
+  }, [updated])
+
   if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
 
-  //after data setting 데이터 가공
-  if(stop != null) stopName = Data.dictToArr(stop, 'BUS_STOP_ID', 'BUS_STOP_NAME')
-  if(stopName != null && line != null) rows = lineToRows(line, stopName)
-  if(time != null) timeData = setTime_orderby_ID(time)
   const selected = (lineIDX !== '')
   const stoplist = Data.findFittedList(rows, campus, way)
 
   const transferData = (stop, day, value) => {
-    var key = -1
-    rows[lineIDX]['DATA'].forEach((data, idx) => {
-      if(idx === stop) { key = data['timeID'] }
+    const key = rows[lineIDX]['DATA'].forEach((data, idx) => {
+      if(idx === stop) return data['timeID']
     })
-    if(key === -1) return {}
 
-    const object = {
+    return {
       'IDX_BUS_LINE' : key,
       'DAY' : day,
       'VALUE' : value
     }
-
-    return object
   }
 
   const equals = (obj1, obj2) => {
@@ -100,7 +127,6 @@ const BusLine = props => {
     (obj1['DAY'] == obj2['DAY'])) return true
     return false
   }
-
   const createButtonForm = (label, to) => ({label : label, action : () => setState(to)})
   const buttons = {
     'return' : createButtonForm('돌아가기', 'show'),
@@ -112,6 +138,7 @@ const BusLine = props => {
     'create' : createButtonForm('생성하기', 'create'),
 
     'delete' : createButtonForm('삭제하기', 'delete'),
+    'upload' : createButtonForm('불러오기', 'upload')
   }
 
   const getButtonList = stat => {
@@ -119,7 +146,7 @@ const BusLine = props => {
 
     switch(stat) {
       case 'show':
-        bntlist = [buttons['create']]
+        bntlist = [buttons['create'], buttons['upload']]
         if(selected) {
           bntlist = bntlist.concat([buttons['update'], buttons['delete']])
         }
@@ -181,7 +208,7 @@ const BusLine = props => {
           title = {'노선'}
           onSubmit = {data=>{
             setState('apply')
-            Data.setAPI('/bus/line/update', { 'data' : data }, setState, 'show')
+            Data.setAPI('/bus/line/create', { 'data' : data }).then(res => setUpdated(!updated))
           } }
         />
       )
@@ -205,9 +232,8 @@ const BusLine = props => {
             onSubmit = {data=>{
               setState('apply')
               Data.setAPI('/bus/line/update', {
-                'lineIDX' : rows[lineIDX]['LINE'], 'data' : data
-              }, setState, 'show')
-            } }
+                'lineIDX' : rows[lineIDX]['LINE'], 'data' : data}).then(res => setUpdated(!updated))
+            }}
           />)
       case 'update-time':
         props = {
@@ -226,8 +252,7 @@ const BusLine = props => {
             setState('apply')
             Data.setAPI(
               '/bus/time/update', 
-              {timeList : changeList}
-              , setState, 'show')
+              {timeList : changeList}).then(res => setUpdated(!updated))
           }
         }
         break
@@ -243,13 +268,13 @@ const BusLine = props => {
     />)
   }
   const displayModal = () => {
-    if(!selected) return null
     var open = false
 
     var component:any = null
 
     switch(stat) {
       case 'delete':
+        if(!selected) return null
         open = (stat === 'delete')
         component = <div style={{ textAlign:'center' }}>
           노선을 삭제하시겠습니까?<br/><br/><br/>
@@ -257,11 +282,23 @@ const BusLine = props => {
             setState('apply')
             Data.setAPI('/bus//shuttle/line/delete', {
               'lineID' : rows[lineIDX]['LINE'],
-            }, setState, 'show')
+            }).then(res => setUpdated(!updated))
             init()
           }}>Delete</Button>
         </div>
-        
+        break
+      case 'upload' :
+        open = (stat === 'upload')
+        return <Dropzone
+          open = {open}
+          onClose = {()=>setState('show')}
+          onSave = {files=>{
+            setState('apply')
+            Data.setTimeTable(files, 'bus').then(res => {
+              console.log(files, typeof(files[0]))
+              setUpdated(!updated)
+            }).catch(err => console.log(err))
+          }}/>        
     }
     return (
       <Modal close = {()=>setState('show')} visible = {open}>

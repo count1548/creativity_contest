@@ -3,32 +3,53 @@ const host = "http://uck.myds.me:3001"
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const getAPI = (target, name, setState) => {
-    return fetch(`${host}/${target}`, {
-        method: 'GET',
-		headers:{
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'
-		}
-	})
-    .then(res => res.json())
-    .then(res => setState(res[name]) )
+const getAPI = (target, name) => {
+    return new Promise<any[]>((resolve, reject) => {
+        fetch(`${host}/${target}`, {
+            method: 'GET',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => resolve(res[name]))
+        .catch(err => reject(err))
+    })
+    
 }
-const setAPI = (target, data, setState, value) => {
+const setAPI = (target, data) => {
     // return fetch(`${host}/${target}`, {
     //     method: 'POST',
-	// 	headers:{
-	// 		'Accept': 'application/json',
-	// 		'Content-Type': 'application/json'
-    //     },
+    //     	headers:{
+    //     		'Accept': 'application/json',
+    //     		'Content-Type': 'application/json'
+    //         },
     //     body : JSON.stringify(data)
 	// })
     // .then(res => setState(value))
     console.log({
         url : target,
-        body : data,
+        body : JSON.stringify(data),
     })
-    setTimeout(()=>setState(value), 1000)
+    return new Promise((res, rej) => {
+        setTimeout(()=>(res('success')), 1000)
+    })
+}
+
+const setTimeTable = (data, target) => {
+    return new Promise((resolve, rej) => {
+        fetch(`${host}/${target}/import/`, {
+            method: 'POST',
+            headers : {'Content-Type': 'multipart/form-data'},
+            body : data
+        })
+        .then(res => resolve(res))
+        .catch(err => {
+            console.log(err)
+            rej(err)
+        })
+    })
 }
 
 // const arrayToDict = (arr:Object[], idxList:string[], valueList:string[], retArr = false) => {
@@ -83,7 +104,7 @@ const dictToArr_s = (dict:any[], idxName:string, idxName2:string, value:string|n
     return column
 }
 const findFittedList = (lineData, campus, way) => {
-	if(lineData == null || campus === '' || way === '') return null
+    if(campus === '' || way === '') return null
     let res:any[] = []
     lineData.forEach((line, key) => {
 		const other = (way === 0) ? line['DATA'].length - 1 : 0
@@ -101,4 +122,4 @@ const findFittedList = (lineData, campus, way) => {
 	return (res.length === 0) ? null : res
 }
 
-export { getAPI, setAPI, findFittedList, dictToArr, dictToArr_s }
+export { getAPI, setAPI, findFittedList, dictToArr, dictToArr_s, setTimeTable }

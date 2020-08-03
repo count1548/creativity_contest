@@ -48,8 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const getStyle = (id, idx, length, headWidth, delList, head = false) : Object => {
     let style:Object = {}
-    if(head) {
-        switch(idx) {
+    if(head) switch(idx) {
         case 0:
             style = {
                 backgroundColor:'#376b9f',
@@ -64,10 +63,8 @@ const getStyle = (id, idx, length, headWidth, delList, head = false) : Object =>
                     width:`${(100-headWidth)/(length-1)}%`
                 }
             break
-        }
-    }
-    else {
-        switch(idx) {
+        } 
+    else switch(idx) {
         case 0:
             style =  {
                 borderRight : '1px solid white',
@@ -99,20 +96,27 @@ const getStyle = (id, idx, length, headWidth, delList, head = false) : Object =>
                     style['backgroundColor'] = '#EEB8EE'
                     break
             }
-        }
-    }
+        } 
     return style
+}
+
+const equals = (obj, target) => {
+    if((obj['rowID'] === target['rowID']) &&
+        (obj['idx'] === target['idx'])) return true
+    return false
 }
 
 const CustomTable = (props) => {
     const {columnHead, rowHead, record, stat, onChange, onSubmit, headWidth} = props
-
     const [delList, setList] = useState<number[]>([])
     useEffect(()=>setList([]), [stat])
+
     const classes = useStyles()
     const rowData = rowHead.map((data, idx) => [data].concat(record[idx]))
     const columnData:string[] = columnHead
     const columnCount = columnData.length
+
+    const changeList:Object[] = []
 
     const displayCell = (id, idx, data) => {
         const value = (typeof(data) === 'undefined') ? '' : data
@@ -121,20 +125,40 @@ const CustomTable = (props) => {
                return (idx === 0) ? value : <TextField
                         id={`${id}-${idx}`}
                         defaultValue={value}
-                        onChange={ ev => onChange(id, idx-1, ev.target.value)}/>
+                        type='time'
+                        onChange={ ev => {
+                            record[id][idx-1] = ev.target.value //실제 보이는 데이터 변경
+ 
+                            const chValue = {
+                                rowID : id,
+                                idx : idx - 1,
+                                value : value
+                            }
+                            var flag = false
+                            changeList.forEach(data => {
+                                if(equals(data, chValue)) {
+                                    flag = true
+                                    data['value'] = chValue['value']
+                                    return true
+                                }
+                            })
+                            if(!flag) changeList.push(chValue)
+
+                            onChange(id, idx-1, ev.target.value)
+                        }}/>
             case 'show':
             default :
             return value
         }
     }
 
-    const submit = state => {
+    const getButton = state => {
         let color, msg, onClick
         switch(state) {
             case 'update-time':
                 color = 'primary'
                 msg = 'Submit'
-                onClick = ()=>onSubmit()
+                onClick = () => onSubmit(changeList)
                 break
             case 'delete-bus':
                 color = 'secondary'
@@ -146,14 +170,14 @@ const CustomTable = (props) => {
         }
         return (
             <Button 
-            variant="contained" 
-            color={color} 
-            className={classes.submit}
-            onClick={onClick}>{msg}</Button>
+                variant="contained" 
+                color={color} 
+                className={classes.submit}
+                onClick={onClick}>{msg}</Button>
         )
     }
 
-    const clickHandle = (val:number) => {
+    const selectHandle = (val:number) => {
         const idx = delList.indexOf(val)
         const cp = delList.slice()
 
@@ -179,9 +203,7 @@ const CustomTable = (props) => {
                 <TableBody>
                 {
                     rowData.map((row, idx) => 
-                        <TableRow key={idx} {
-                            ...(stat === 'delete-bus') ? {onClick : ()=>clickHandle(idx)} : null
-                        }>
+                        <TableRow key={idx} {...(stat === 'delete-bus') ? {onClick : ()=>selectHandle(idx)} : null}>
                             {columnData.map((data, idx2) => 
                                 <TableCell 
                                     component="th" scope="row" 
@@ -196,7 +218,7 @@ const CustomTable = (props) => {
                 </TableBody>
                 </Table>
             </TableContainer>
-            {submit(stat)}
+            {getButton(stat)}
         </div>
     )
 }

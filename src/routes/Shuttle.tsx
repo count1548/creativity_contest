@@ -19,12 +19,10 @@ const lineToRows = (dict:any, stop, lineIDX) => {
   const IDX = Data.dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
   for(var line in dict) for(var day in dict[line]) for(var bus in dict[line][day])  {
     const now = dict[line][day][bus]
-    
     dict[line][day]['LINE'] = now.map(value => ({
       'IDX' : IDX[value['IDX_BUS_LINE']], 
       'NAME' : stop[IDX[value['IDX_BUS_LINE']]]
     }))
-    
     dict[line][day][bus] = now.map((value, idx) => ({
       'IDX_BUS_LINE' : value['IDX_BUS_LINE'],
       'TIME' : value['BUS_TIME'],
@@ -41,19 +39,33 @@ const setTime_orderby_ID = (dict:any[]) =>  {
   }
   return data
 }
+const lang = 'KOR_NAME'
+
+async function getData() {
+  const stop = await Data.getAPI('bus/shuttle/stop', 'result')
+  const time = await Data.getAPI('bus/shuttle/time/', 'result')  // important api sql 구문에서 첫 노선 시간에 따른 정렬 순서대로 불러올것!
+  const line = await Data.getAPI('bus/shuttle/line/', 'result')
+  
+  const stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
+  const timeData = setTime_orderby_ID(time)
+  const rows = lineToRows(timeData, stopName, line)
+
+  return {stopName, timeData, rows}
+}
 
 const isEmpty = obj => {
   obj.map(data => {if(Object.keys(data).length === 0 ) return true})
   return false
 }
 
-const ShuttleLine = props => {
-  const [stat, setState] = useState('show')
+let stopName:Object = {}, 
+      rows:Object = {}, 
+      timeData:Object = {},
+      columns:string[] = []
 
-  const [stop, setStop] = useState<any | null>(null)
-  const [line, setLine] = useState<any | null>(null)
-  const [time, setTime] = useState<any | null>(null) // important api sql 구문에서 첫 노선 시간에 따른 정렬 순서대로 불러올것!
-  const lang = 'KOR_NAME'
+const ShuttleLine = props => {
+  const [stat, setState] = useState('apply')
+  const [updated, setUpdated] = useState(true)
   
   const [lineName, setLineName] = useState('') 
   const [day, setDay] = useState('')
@@ -63,32 +75,22 @@ const ShuttleLine = props => {
   }
   const [delval, setValue] = useState('1 :  ')
 
-  let stopName:Object = {}, 
-      rows:Object = {}, 
-      timeData:Object = {},
-      columns:string[] = []
-
   //data setting
   useEffect(()=> {
-    Data.getAPI('bus/shuttle/stop', 'result', setStop)
-    Data.getAPI('bus/shuttle/line/', 'result', setLine)
-    Data.getAPI('bus/shuttle/time/', 'result', setTime)
-  }, [stat])
+    getData().then(res => {
+      ({stopName, timeData, rows} = res)
+      setState('show')
+    })
+  }, [updated])
   
   if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
-
-  //after data setting 데이터 가공
-  if(stop != null) stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
-  if(time != null) timeData = setTime_orderby_ID(time)
-  if(!(isEmpty([stopName, timeData]) || line === null))
-    rows = lineToRows(timeData, stopName, line)
-  if(!(lineName === '' || day === '') && stat !== 'create-line') {
-    if(typeof(rows[lineName]) === 'undefined' || typeof(rows[lineName][day]) === 'undefined') init() 
-    else columns = ['운행', ...rows[lineName][day]['LINE'].map(value => value['NAME'])]
+  
+  const selected = !(lineName === '' || day === '' || stat === 'create-line')
+  if(selected) {
+    columns = ['운행', ...rows[lineName][day]['LINE'].map(value => value['NAME'])]
   }
-
   //setting table head data
-  const selected = (columns.length !== 0)
+  
   const forms = [
     {
         name : '노선',
@@ -158,8 +160,11 @@ const ShuttleLine = props => {
   const IdxToID = (busidx) => {
     var bus:any = -1
     const now = rows[lineName][day]
-
-    return Object.keys(now).forEach((busID, idx) => { if(busidx === idx) return busID })
+    Object.keys(now).forEach((busID, idx) => { if(busidx === idx) {
+      bus = busID
+      return
+    } })
+    return bus
   }
   const transferData = (busIdx, stop, value) => {
     var idx = rows[lineName][day]['LINE'][stop]['IDX']    
@@ -187,11 +192,14 @@ const ShuttleLine = props => {
           title = {'노선'}
           onSubmit = {data=>{
             setState('apply')
-            Data.setAPI('/bus/shuttle/line/update', {
+            Data.setAPI('/bus/shuttle/line/create', {
               'lineName' : lineName,
               'code' : day,
               'data' : data,
-            }, setState, 'show')
+            }).then(res => {
+              init()
+              setUpdated(!updated)
+            })
           }}/>
       }
       return <NoData message='Please Select Options'/>
@@ -220,7 +228,7 @@ const ShuttleLine = props => {
                 'lineName' : lineName,
                 'code' : day,
                 'data' : data,
-              }, setState, 'show')
+              }).then(res => setUpdated(!updated))
             } }/>
       case 'update-time' :
         props['onChange'] = (bus, stop, value) => {
@@ -238,8 +246,7 @@ const ShuttleLine = props => {
           setState('apply')
           Data.setAPI(
             '/bus/shuttle/time/update', 
-            {timeList : changeList}
-            , setState, 'show')
+            {timeList : changeList}).then(res => setUpdated(!updated))
         }
         break
       case 'delete-bus' :
@@ -247,8 +254,7 @@ const ShuttleLine = props => {
           setState('apply')
           Data.setAPI(
             '/bus/shuttle/bus/delete', 
-            {delList : list.map(idx => IdxToID(idx))}
-            , setState, 'show')
+            {delList : list.map(idx => IdxToID(idx))}).then(res => setUpdated(!updated))
         }
         break
     }
@@ -289,8 +295,7 @@ const ShuttleLine = props => {
               timeList : rows[lineName][day]['LINE'].map((value, idx) => ({
                 'IDX_BUS_LINE': value['IDX'],
                 'VALUE' : newBus[idx]
-            }))}
-            ,setState, 'show')            
+            }))}).then(res => setUpdated(!updated))      
           }}
       />
       break
@@ -303,7 +308,7 @@ const ShuttleLine = props => {
             Data.setAPI('/bus//shuttle/line/delete', {
               'lineName' : lineName,
               'code' : day,
-            }, setState, 'show')
+            }).then(res => setUpdated(!updated))
             init()
           }}>Delete</Button>
         </div>
