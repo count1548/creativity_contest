@@ -5,6 +5,7 @@ import Home from "./routes/Home";
 import BusLine from "./routes/BusLine";
 import Shuttle from "./routes/Shuttle";
 import Ticket from "./routes/Ticket";
+import StopList from "./routes/StopList";
 import Login from "./component/Login/Login";
 import ProtectedRoute from "./component/Auth/protected.route"
 import { makeStyles } from "@material-ui/core/styles";
@@ -33,6 +34,7 @@ const App = () => {
 				<ProtectedRoute exact path="/busline" component={BusLine} />
                 <ProtectedRoute exact path="/shuttle" component={Shuttle} />
                 <ProtectedRoute exact path="/ticket" component={Ticket} />
+				<ProtectedRoute exact path="/stoplist" component={StopList} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
 			</Switch>
 		</div>

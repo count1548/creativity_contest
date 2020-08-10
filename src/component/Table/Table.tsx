@@ -10,16 +10,11 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 
+import NoData from './NoData'
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root : { 
-      width : '95%',
-      margin:'0 auto',
-      minWidth:'1021px',
-      padding: '30px'
-    },
     busStop: {
       display: 'inline-block',
       padding: '20px 0px',
@@ -31,7 +26,9 @@ const useStyles = makeStyles((theme: Theme) =>
       width:'100%',
       margin : '0 auto',
       borderRadius: '15px',
-      minWidth: 800,
+      '&::-webkit-scrollbar' : {
+          display:'none'
+      }
     },
     headCell : {
       fontFamily:'NanumSquareRoundR',
@@ -46,46 +43,66 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-const getStyle = (id, idx, length, headWidth, delList, head = false) : Object => {
+const getStyle = (id, idx, length, headWidth, delList, head = false, rowHead = true) : Object => {
     let style:Object = {}
-    if(head) switch(idx) {
-        case 0:
-            style = {
-                backgroundColor:'#376b9f',
-                borderRight : '1px solid white',
-                width:`${headWidth}%`
-            }
-            break
-        default:
-            if(idx !== length - 1)
+    if(head) {
+        switch(idx) {
+            case 0:
                 style = {
-                    borderRight : '1px solid white', 
-                    width:`${(100-headWidth)/(length-1)}%`
+                    backgroundColor:'#376b9f',
+                    borderRight : '1px solid white',
+                    width:`${headWidth}%`
                 }
-            break
-        } 
-    else switch(idx) {
-        case 0:
-            style =  {
-                borderRight : '1px solid white',
-                textAlign:'center'
-            }
-            break
-        case length-1:
-            style =  {
-                backgroundColor:'#eee',
-                textAlign:'center',
-                color:'#000',
-            }
-            break
-        default:
-            style =  {
-                backgroundColor:'#eee',
-                textAlign:'center',
-                color:'#000',
-                borderRight : '1px solid white',
-            }
-            break
+                break
+            default:
+                if(idx !== length - 1)
+                    style = {
+                        borderRight : '1px solid white', 
+                        width:`${(100-headWidth)/(length-1)}%`
+                    }
+                break
+            } 
+    }
+    else {
+        if (rowHead) switch(idx) {
+            case 0:
+                style =  {
+                    borderRight : '1px solid white',
+                    textAlign:'center'
+                }
+                break
+            case length-1:
+                style =  {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                }
+                break
+            default:
+                style =  {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                    borderRight : '1px solid white',
+                }
+                break
+        }
+        else switch(idx) {
+            case length-1:
+                style =  {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                }
+                break
+            default:
+                style =  {
+                    backgroundColor:'#eee',
+                    textAlign:'center',
+                    color:'#000',
+                    borderRight : '1px solid white',
+                }
+                break
         }
         if(delList.indexOf(id) > -1) {
             switch(idx) {
@@ -96,71 +113,79 @@ const getStyle = (id, idx, length, headWidth, delList, head = false) : Object =>
                     style['backgroundColor'] = '#EEB8EE'
                     break
             }
-        } 
+        }
+    }
+    
     return style
 }
 
 const equals = (obj, target) => {
-    if((obj['rowID'] === target['rowID']) &&
-        (obj['idx'] === target['idx'])) return true
+    if((obj['row'] === target['row']) &&
+        (obj['column'] === target['column'])) return true
     return false
 }
 
 const CustomTable = (props) => {
-    const {columnHead, rowHead, record, stat, onChange, onSubmit, headWidth} = props
+    const {columnHead, rowHead=null, record, 
+        onChange = ()=>{}, onSubmit, 
+        headWidth, style=null, editable=false,
+        button = null, onClick=()=>{},
+        maxHeight = null} = props
+    
     const [delList, setList] = useState<number[]>([])
-    useEffect(()=>setList([]), [stat])
-
+    useEffect(()=>setList([]), [])
     const classes = useStyles()
-    const rowData = rowHead.map((data, idx) => [data].concat(record[idx]))
+    const changeList:Object[] = []
+    if(columnHead.length === 0 || record.length === 0)
+        return <NoData message='Please Select Options' />
+
+    const tableStyle = (style === null) ? classes.table : style
+    const rowData = (rowHead === null) ? record:
+        rowHead.map((data, idx) => [data].concat(record[idx]))
     const columnData:string[] = columnHead
     const columnCount = columnData.length
 
-    const changeList:Object[] = []
-
     const displayCell = (id, idx, data) => {
         const value = (typeof(data) === 'undefined') ? '' : data
-        switch(stat) {
-            case 'update-time':
-               return (idx === 0) ? value : <TextField
-                        id={`${id}-${idx}`}
-                        defaultValue={value}
-                        type='time'
-                        onChange={ ev => {
-                            record[id][idx-1] = ev.target.value //실제 보이는 데이터 변경
- 
-                            const chValue = {
-                                rowID : id,
-                                idx : idx - 1,
-                                value : value
-                            }
-                            var flag = false
-                            changeList.forEach(data => {
-                                if(equals(data, chValue)) {
-                                    flag = true
-                                    data['value'] = chValue['value']
-                                    return true
-                                }
-                            })
-                            if(!flag) changeList.push(chValue)
+        if(editable) return (idx === 0) ? value : <TextField
+                id={`${id}-${idx}`}
+                defaultValue={value}
+                type='time'
+                onChange={ ev => {
+                    const changeval = ev.target.value
+                    console.log(record)
+                    record[id][idx-1] = changeval //실제 보이는 데이터 변경
 
-                            onChange(id, idx-1, ev.target.value)
-                        }}/>
-            case 'show':
-            default :
-            return value
-        }
+                    const chObject = {
+                        row : id,
+                        column : idx - 1,
+                        value : changeval
+                    }
+                    var flag = false
+
+                    changeList.forEach(data => {
+                        if(equals(data, chObject)) {
+                            flag = true
+                            data['value'] = chObject['value']
+                            return true
+                        }
+                    })
+                    if(!flag) changeList.push(chObject)
+
+                    onChange(id, idx-1, changeval)
+                }}/>
+        else return value
     }
 
-    const getButton = state => {
+    const getButton = () => {
         let color, msg, onClick
-        switch(state) {
-            case 'update-time':
+        switch(button) {
+            case 'apply':
                 color = 'primary'
                 msg = 'Submit'
                 onClick = () => onSubmit(changeList)
                 break
-            case 'delete-bus':
+            case 'delete':
                 color = 'secondary'
                 msg = 'Delete'
                 onClick = ()=>onSubmit(delList)
@@ -184,42 +209,61 @@ const CustomTable = (props) => {
         if(idx > -1) cp.splice(idx, 1)
         else  cp.push(val)
         setList(cp)
+        onClick(val)
     }
-    return (
-        <div>
-            <TableContainer component={Paper} className={classes.table}>
-                <Table aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                    {columnData.map((column, idx) => 
-                        <TableCell 
-                            key={idx} align='center' 
-                            className={classes.headCell}
-                            style={getStyle(null, idx, columnCount, headWidth, delList, true)}
-                            children={column}/>
-                    )}
+    // const addMarkers = async (e, aug, geoData) => {
+    //     // console.log(aug);
+    //     const {stores} = this.state;
+    //     let stateData = stores;
+    //     let latLng;
+    //     latLng = {latitude : geoData.latLng.lat(), longitude : geoData.latLng.lng()};
+    //     stateData.push(latLng);
+    //     await this.setState({
+    //     stores: stateData
+    //     });
+    // }
+    const component = <div>
+        <TableContainer component={Paper} className={tableStyle} style={{
+            maxHeight: maxHeight,
+        }}>
+            <Table aria-label="simple table">
+            <TableHead>
+                <TableRow>
+                {columnData.map((column, idx) => 
+                    <TableCell 
+                        key={idx} align='center' 
+                        className={classes.headCell}
+                        style={getStyle(null, idx, columnCount, headWidth, delList, true)}
+                        children={column}/>
+                )}
+                </TableRow>
+            </TableHead>
+            <TableBody>
+            {
+                rowData.map((row, idx) => 
+                    <TableRow key={idx} 
+                        {...(button === 'delete') ? 
+                            {onClick : ()=>selectHandle(idx)} : 
+                            {onClick : ()=> onClick(idx)}}>
+                        {columnData.map((data, idx2) => 
+                            <TableCell 
+                                component="th" scope="row" 
+                                className={classes.headCell}
+                                style={getStyle(idx, idx2, columnCount, headWidth, delList, false, rowHead!==null)}
+                                key={idx2}
+                                children={displayCell(idx, idx2, row[idx2])}/>)
+                        }
                     </TableRow>
-                </TableHead>
-                <TableBody>
-                {
-                    rowData.map((row, idx) => 
-                        <TableRow key={idx} {...(stat === 'delete-bus') ? {onClick : ()=>selectHandle(idx)} : null}>
-                            {columnData.map((data, idx2) => 
-                                <TableCell 
-                                    component="th" scope="row" 
-                                    className={classes.headCell}
-                                    style={getStyle(idx, idx2, columnCount, headWidth, delList)}
-                                    key={idx2}
-                                    children={displayCell(idx, idx2, row[idx2])}/>)
-                            }
-                        </TableRow>
-                    )
-                }
-                </TableBody>
-                </Table>
-            </TableContainer>
-            {getButton(stat)}
-        </div>
+                )
+            }
+            </TableBody>
+            </Table>
+        </TableContainer>
+        {getButton()}
+    </div>
+
+    return (
+        component
     )
 }
 

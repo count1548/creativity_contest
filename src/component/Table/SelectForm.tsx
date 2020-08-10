@@ -18,32 +18,31 @@ const useStyles = makeStyles((theme) => ({
 
 interface form_interface {
     name : string, label : string,
-    options : any[], action(value:number) : any,
+    options : any[], onChange(value:number) : any,
     value : string | number, disable? : any | null,
     width?: number
 }
 
-const SelectForm = ({name, label, options, action, value, disable = null, width = 33} : form_interface) => {
-    const changeValue = event => action(event.target.value)
+const SelectForm = ({name, label, options, onChange, value, disable = null, width = 33} : form_interface) => {
+    const changeValue = event => onChange(event.target.value)
     const classes = useStyles()
+
+    const content = <FormControl variant="outlined" className={classes.formControl} {
+            ...{disabled : (disable == null) ? false : disable()}}>
+            <InputLabel htmlFor="outlined-age-native-simple">{label}</InputLabel>
+            <Select
+                value={value}
+                onChange={changeValue}
+                label={label}
+                inputProps={{
+                    name, id: 'outlined-age-native-simple',
+                }}>
+            {options.map((data, idx) => <MenuItem value={data['value']} key={idx}>{data['label']}</MenuItem>)}
+            </Select>
+        </FormControl>
+
     return (
-        <div style={{width : `${width}%`, float : 'left'}}><div style={{margin : '0 auto', width : '260px'}}>
-            <FormControlLabel control={
-                <FormControl variant="outlined" className={classes.formControl} {
-                    ...{disabled : (disable == null) ? false : disable()}}>
-                <InputLabel htmlFor="outlined-age-native-simple">{label}</InputLabel>
-                <Select
-                    value={value}
-                    onChange={changeValue}
-                    label={label}
-                    inputProps={{
-                        name, id: 'outlined-age-native-simple',
-                    }}>
-                {options.map((data, idx) => <MenuItem value={data['value']} key={idx}>{data['label']}</MenuItem>)}
-                </Select>
-            </FormControl>
-        } label={name} labelPlacement="start" />
-        </div></div>
+        (typeof(name) === 'undefined') ? content : <FormControlLabel control={content} label={name} labelPlacement="start" style={{marginLeft:40}}/>
     )
 }
 

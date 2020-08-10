@@ -22,13 +22,13 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
         margin: '0px auto'
     },
     cardHeader: {
+        border:'2px solid grey',
         padding: theme.spacing(1, 2)
     },
     list: {
         width: 400,
         height: '300px',
-        border: '2px solid #000',
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: 'powderblue',
         overflow: 'auto'
     },
     button: {
@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
         ...theme.typography.button,
         backgroundColor: theme.palette.background.paper,
         textAlign:'center',
+        color:'grey',
         padding: theme.spacing(1),
       },
 }),);
@@ -82,7 +83,15 @@ const getItemStyle = (isDragging, draggableStyle) => ({
     })
 });
 
-export default function TransferList({data, chData, allData, title, onSubmit, reload=false}) {
+interface listProps {
+    dataLabels ? : Object | null,
+    chData : any[],
+    allData : any[],
+    title : string,
+    onSubmit (list : any[]) : any
+}
+
+export default function TransferList({dataLabels = null, chData, allData, title, onSubmit} : listProps) {
     const [checked, setChecked] = React.useState<number[]>([])
     const [left, setLeft] = React.useState<any[]>([]);
     const [right, setRight] = React.useState<any[]>([])
@@ -196,7 +205,7 @@ export default function TransferList({data, chData, allData, title, onSubmit, re
                                                         'aria-labelledby' : labelId
                                                 }}/>
                                             </ListItemIcon>
-                                            <ListItemText primary={data[value]} />
+                                            <ListItemText primary={(dataLabels !== null) ? dataLabels[value] : value} />
                                             <ListItemSecondaryAction/>
                                         </ListItem>)
                                     }}

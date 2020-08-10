@@ -1,10 +1,9 @@
 /*eslint-disable */
 import React, {useState, useEffect}  from "react"
 import TransferList from '../component/LineList/TransferList'
-import * as Data from '../data_function'
+import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_function' 
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
-import {getAPI} from '../data_function'
 import '../style/lineTable.css'
 import Toolbar from '../component/Table/Toolbar'
 import Table from '../component/Table/Table'
@@ -14,9 +13,10 @@ import Modal from '../component/Modal/Modal'
 import Button from '@material-ui/core/Button';
 
 import '../style/font.css'
+import { LinearProgress } from "@material-ui/core"
 
 const lineToRows = (dict:any, stop, lineIDX) => {
-  const IDX = Data.dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
+  const IDX =  dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
   for(var line in dict) for(var day in dict[line]) for(var bus in dict[line][day])  {
     const now = dict[line][day][bus]
     dict[line][day]['LINE'] = now.map(value => ({
@@ -32,87 +32,108 @@ const lineToRows = (dict:any, stop, lineIDX) => {
 }
 
 const setTime_orderby_ID = (dict:any[]) =>  {
-  //return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
-  const data = Data.dictToArr_s(dict, 'LINE_NAME', 'CODE', null, true)
+  //return  dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
+  const data =  dictToArr_s(dict, 'LINE_NAME', 'CODE', null, true)
   for(var line_name in data) for(var code_name in data[line_name]) {
-    data[line_name][code_name] = Data.dictToArr(data[line_name][code_name], 'BUS_ID', null, true)
+    data[line_name][code_name] =  dictToArr(data[line_name][code_name], 'BUS_ID', null, true)
   }
   return data
 }
 const lang = 'KOR_NAME'
 
 async function getData() {
-  const stop = await Data.getAPI('bus/shuttle/stop', 'result')
-  const time = await Data.getAPI('bus/shuttle/time/', 'result')  // important api sql 구문에서 첫 노선 시간에 따른 정렬 순서대로 불러올것!
-  const line = await Data.getAPI('bus/shuttle/line/', 'result')
+  const stop = await  getAPI('bus/shuttle/stop', 'result')
+  const time = await  getAPI('bus/shuttle/time/', 'result')  // important api sql 구문에서 첫 노선 시간에 따른 정렬 순서대로 불러올것!
+  const line = await  getAPI('bus/shuttle/line/', 'result')
   
-  const stopName = Data.dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
+  const stopName =  dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
   const timeData = setTime_orderby_ID(time)
-  const rows = lineToRows(timeData, stopName, line)
-
-  return {stopName, timeData, rows}
-}
-
-const isEmpty = obj => {
-  obj.map(data => {if(Object.keys(data).length === 0 ) return true})
-  return false
+  const lineData = lineToRows(timeData, stopName, line)
+  
+  return {stopName, timeData, lineData}
 }
 
 let stopName:Object = {}, 
-      rows:Object = {}, 
+      lineData:Object = {}, 
       timeData:Object = {},
       columns:string[] = []
 
 const ShuttleLine = props => {
   const [stat, setState] = useState('apply')
   const [updated, setUpdated] = useState(true)
-  
   const [lineName, setLineName] = useState('') 
   const [day, setDay] = useState('')
   const init = () => {
     setLineName('')
     setDay('')
   }
-  const [delval, setValue] = useState('1 :  ')
-
+  let newLineName:string = '', newLineDay:string = ''
   //data setting
   useEffect(()=> {
     getData().then(res => {
-      ({stopName, timeData, rows} = res)
+      ({stopName, timeData, lineData} = res)
       setState('show')
     })
   }, [updated])
-  
   if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
   
-  const selected = !(lineName === '' || day === '' || stat === 'create-line')
+  let selected = !(lineName === '' || day === '' || stat === 'create-line')
   if(selected) {
-    columns = ['운행', ...rows[lineName][day]['LINE'].map(value => value['NAME'])]
+    if(!isAvailable(lineData[lineName]) || !isAvailable(lineData[lineName][day])) {
+      init()
+      return null
+    }
+    else columns = ['운행', ...lineData[lineName][day]['LINE'].map(value => value['NAME'])]
   }
   //setting table head data
-  
+  const IdxToID = (busidx) => {
+    const key = Object.keys(lineData[lineName][day]).find((value, idx) => busidx === idx)
+    return key
+  }
+  const dataToJson = ({row, column, value}) => {
+    const key = IdxToID(row)
+    return {
+      BUS_ID : key,
+      IDX_BUS_LINE : lineData[lineName][day][key][column],
+      BUS_TIME : value
+    }
+  }
+
   const forms = [
-    {
+    [{
         name : '노선',
         label : 'Line',
-        options : Object.keys(rows).map((value, idx) => ({'value' : value, 'label' : value})),
-        action : value => {
-          setDay('')
-          setLineName(value)
+        ...(stat === 'create-line') ? {
+          type : 'text',
+          onChange : value => { newLineName = value },
+          value:newLineName,
+        } : {
+          type : 'select',
+          options : Object.keys(lineData).map((value, idx) => ({'value' : value, 'label' : value})),
+          onChange : value => {
+            setDay('')
+            setLineName(value)
+          },
+          value:lineName,
+          disable : () => (stat !== 'show')
         },
-        value : lineName, width : 45,
-        disable : () => (stat !== 'show')
     },
     {
         name : '날짜',
         label : 'Days',
-        options : 
-          (typeof(rows[lineName]) == 'undefined') ? ['None'] : 
-            Object.keys(rows[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
-        action : value => setDay(value),
-        value : day, width : 45,
-        disable : () => ((lineName == '') || (stat !== 'show'))
-    },
+        ...(stat === 'create-line') ? {
+          type : 'text',
+          onChange : value => { newLineDay = value },
+          value : newLineDay,
+        }: {
+          type : 'select',
+          options : (typeof(lineData[lineName]) == 'undefined') ? ['None'] : 
+            Object.keys(lineData[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
+          onChange: value => setDay(value),
+          value:day,
+          disable : () => ((lineName == '') || (stat !== 'show'))
+        },
+    },]
   ]
 
   const createButtonForm = (label, to) => ({label : label, action : () => setState(to)})
@@ -156,26 +177,6 @@ const ShuttleLine = props => {
 
     return bntlist
   }
-  const changeList:Object[] = []
-  const IdxToID = (busidx) => {
-    var bus:any = -1
-    const now = rows[lineName][day]
-    Object.keys(now).forEach((busID, idx) => { if(busidx === idx) {
-      bus = busID
-      return
-    } })
-    return bus
-  }
-  const transferData = (busIdx, stop, value) => {
-    var idx = rows[lineName][day]['LINE'][stop]['IDX']    
-
-    return {
-      'IDX_BUS_LINE' : idx,
-      'BUS_ID' : IdxToID(busIdx),
-      'VALUE' : value
-    }
-  }
-
   const equals = (obj1, obj2) => {
     if((obj1['IDX_BUS_LINE'] === obj2['IDX_BUS_LINE']) &&
     (obj1['BUS_ID'] == obj2['BUS_ID'])) return true
@@ -183,90 +184,97 @@ const ShuttleLine = props => {
   }
 
   const displayComponent = () => {
-    if (!selected) {
-      if(stat === 'create-line') {
-          return <TransferList
-          data = {stopName}
-          chData = {[]}
-          allData = {Object.keys(stopName).map((value:any) => value*1)}
-          title = {'노선'}
-          onSubmit = {data=>{
-            setState('apply')
-            Data.setAPI('/bus/shuttle/line/create', {
-              'lineName' : lineName,
-              'code' : day,
-              'data' : data,
-            }).then(res => {
-              init()
-              setUpdated(!updated)
-            })
-          }}/>
-      }
-      return <NoData message='Please Select Options'/>
-    }
-    const now = rows[lineName][day]
-    const props:Object = {}
-    let deleteForm:any = null
+    let listProps:{chData : any[], onSubmit (list : any[]) : any }|null = null,
+        tableProps:{onSubmit (list : any[]) : any, button : string}|null = null
 
-    const record = Object.keys(now).map(key => {
-      if(key !== 'LINE')
-        return now[key].map(data => data['TIME'].split(':').slice(0, 2).join(':'))
-    })
-    record.pop()
-    const rowHead = Array.from({length : Object.keys(now).length-1}, (x, idx) => idx+1)
+    let component = <NoData message='Please Select Options'/>
 
     switch(stat) {
-      case 'update-line':
-        return <TransferList
-            data = {stopName}
-            chData = {now['LINE'].map(value => value['IDX'])}
-            allData = {Object.keys(stopName).map((value:any) => value*1)}
-            title = {'노선'}
-            onSubmit = {data=>{
-              setState('apply')
-              Data.setAPI('/bus/shuttle/line/update', {
-                'lineName' : lineName,
-                'code' : day,
-                'data' : data,
-              }).then(res => setUpdated(!updated))
-            } }/>
-      case 'update-time' :
-        props['onChange'] = (bus, stop, value) => {
-          const tdata = transferData(bus, stop, value)
-              let flag = true
-              changeList.forEach((data, idx) => {
-                if(equals(data, tdata)) {
-                  changeList[idx] = tdata
-                  flag = false
-                }
-              })
-              if(flag) changeList.push(tdata)
+      case 'create-line':
+        listProps = {
+          chData : [],
+          onSubmit : list=>{
+            setState('apply')
+            //if(newLineName === '' || newLineDay === '' || list.length === 0) break
+            setAPI('/bus/shuttle/line/create', {
+              'lineName' : newLineName,
+              'code' : newLineDay,
+              'data' : list,
+            }).then(res => { init(); setUpdated(!updated) })
+          }
         }
-        props['onSubmit'] = () => {
-          setState('apply')
-          Data.setAPI(
-            '/bus/shuttle/time/update', 
-            {timeList : changeList}).then(res => setUpdated(!updated))
+        break
+      case 'update-line':
+        if(!selected) break
+        listProps = {
+          chData : lineData[lineName][day]['LINE'].map(value => value['IDX']),
+          onSubmit : list => {
+            setState('apply')
+            //if(list.length === 0) break
+            setAPI('/bus/shuttle/line/update', {
+              'lineName' : lineName,
+              'code' : day,
+              'data' : list,
+            }).then(res => setUpdated(!updated))
+          }
+        }
+        break
+      case 'update-time':
+        if(!selected) break
+        tableProps = {
+          onSubmit : list => {
+            setState('apply')
+            setAPI(
+             '/bus/shuttle/time/update', 
+             {timeList : list.map(data => dataToJson(data))})
+             .then(res => setUpdated(!updated))
+          },
+          button : 'apply'
         }
         break
       case 'delete-bus' :
-        props['onSubmit'] = list => {
-          setState('apply')
-          Data.setAPI(
-            '/bus/shuttle/bus/delete', 
-            {delList : list.map(idx => IdxToID(idx))}).then(res => setUpdated(!updated))
+        if(!selected) break
+        tableProps = {
+          onSubmit : list => {
+            setState('apply')
+            setAPI(
+             '/bus/shuttle/bus/delete', 
+             {delList : list.map(idx => IdxToID(idx))})
+             .then(res => setUpdated(!updated))
+          },
+          button : 'delete'
         }
         break
     }
 
-   return <Table
+    if(stat.indexOf('line') !== -1) {if(listProps !== null) 
+      component = <TransferList
+        dataLabels = {stopName}
+        allData = {Object.keys(stopName).map((value:any) => value*1)}
+        title = {'노선'}
+        {...listProps}
+      />
+    }
+
+    else if(selected) {
+      const now = lineData[lineName][day]
+      const record = Object.keys(now).map(key => {
+        if(key !== 'LINE')
+          return now[key].map(data => data['TIME'].split(':').slice(0, 2).join(':'))
+      }); record.pop()
+      const rowHead = Array.from({length : Object.keys(now).length-1}, (x, idx) => idx+1)
+      
+      return (
+        <Table
           columnHead = {columns}
           rowHead = {rowHead}
           record = {record}
-          stat={stat}
+          editable={stat === 'update-time'}
           headWidth={5}
-          {...props}
-          />
+          {...tableProps}
+        />
+    )}
+    return component
   }
   const displayModal = () => {
     if(!selected) return null
@@ -283,16 +291,16 @@ const ShuttleLine = props => {
           columnHead = {columns}
           rowHead = {['BUS']}
           record = {[newBus]}
-          stat={'update-time'}
+          editable={true}
           headWidth={5}
           onChange={(bus, stop, value) => newBus[stop] = value }
           onSubmit = { ()=> {
             setState('apply')
-            Data.setAPI( '/bus/shuttle/time/create', 
+             setAPI( '/bus/shuttle/time/create', 
             {
               lineName : lineName,
               day : day,
-              timeList : rows[lineName][day]['LINE'].map((value, idx) => ({
+              timeList : lineData[lineName][day]['LINE'].map((value, idx) => ({
                 'IDX_BUS_LINE': value['IDX'],
                 'VALUE' : newBus[idx]
             }))}).then(res => setUpdated(!updated))      
@@ -305,7 +313,7 @@ const ShuttleLine = props => {
           노선을 삭제하시겠습니까?<br/><br/><br/>
           <Button  variant="contained" color="secondary" onClick = {() => {
             setState('apply')
-            Data.setAPI('/bus//shuttle/line/delete', {
+             setAPI('/bus//shuttle/line/delete', {
               'lineName' : lineName,
               'code' : day,
             }).then(res => setUpdated(!updated))
@@ -324,8 +332,7 @@ const ShuttleLine = props => {
     <div>
       <Toolbar 
       title = '셔틀버스 시간표' 
-      selectForm = {forms}
-      type={(stat === 'create-line') ? 'textField' : 'selectBox'}
+      inputForm = {forms}
       buttons={getButtonList(stat)}/>
       {displayComponent()}
       {displayModal()}

@@ -1,5 +1,5 @@
 /*eslint-disable */
-import React, {useState, }  from "react"
+import React, {useState, useEffect, }  from "react"
 import { makeStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,12 +14,12 @@ import '../../style/font.css'
 
 const useStyles = makeStyles((theme) => ({
     toolbar : {
-        width:'100%',
+        width:'calc(100% - 10px)',
         height: '70px', padding:'5px',
         background: '#eee',
         borderRadius:'20px',
         margin:'0 auto',
-        marginBottom:'60px',
+        marginBottom:'30px',
     },
     head: {
         position:'relative',
@@ -54,40 +54,59 @@ const Header = ({component, style, button}) =>
     <div className={style} data-text={component}>{button}</div>
 
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
-const TextForm = ({label, action, name, width}) => (
-    <div style={{width : `${width}%`, float : 'left'}}>
-        <div style={{margin : '0 auto', width : '260px'}}>
-            <FormControlLabel control={
-                <TextField 
-                    id={label} 
-                    label={label} 
-                    variant="outlined" 
-                    onChange={ev => action(ev.target.value)}
-                    style = {{width:190, marginLeft:20, marginTop:6}}
-                    />
-    } label={name} labelPlacement="start" /></div></div>)
+const TextForm = ({label, onChange, name, value=''}) => {
+    const [text, setText] = useState<any>(value)
+    useEffect(() => {
+        setText(value)
+    }, [value])
+
+    const textField = 
+        <TextField 
+            id={label} 
+            label={label} 
+            variant="outlined" 
+            value={text}
+            onChange={ev => {
+                const val = ev.target.value
+                setText(val)
+                onChange(val)
+            }}
+            style = {{width:190, marginTop:8, marginLeft:10, backgroundColor:'#fff'}}/>
+    return (
+        <div style={{float : 'left'}}>
+                {(typeof(name) === 'undefined') ? textField : 
+                <FormControlLabel control={textField} label={name} labelPlacement="start" style={{
+                    marginLeft:40
+                }}/>
+                }
+        </div>
+    )
+}
 
 const Toolbar = (props) => {
-    const {title, selectForm, buttons, type} = props
+    const {header = true, title, inputForm, buttons} = props
     const classes = useStyles()
     return (
         <div style={{
-            marginBottom: '30px',
-            padding: '10px'
-        }}>
-            <Header 
+            marginBottom: '30px'}}>
+            {header ? <Header 
                 component={title} 
                 style={classes.head} 
                 button = {
                     buttons.map((data, idx) => 
                         <div className={classes.button} key={idx} onClick={data['action']}>{data['label']}</div>
-                    ) } />
-            <SelectBox style={classes.toolbar}>
-                {selectForm.map((form, idx) =>  
-                    ((type === 'selectBox') ? 
-                        <SelectForm {...form} key={idx}/> : 
-                        <TextForm {...form} key = {idx}/>))} 
-            </SelectBox>
+            )}/> : null}
+            <div style={{marginBottom:'30px'}}>
+            {
+                inputForm.map((box, key) => 
+                    <SelectBox style={classes.toolbar} key={key}>
+                        {box.map((form, idx) =>  
+                            ((form['type'] === 'select') ? 
+                                <SelectForm {...form} key={idx}/> : 
+                                <TextForm {...form} key = {idx}/>))} 
+                    </SelectBox>)
+            }
+            </div>
         </div>
     )
 }

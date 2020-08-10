@@ -38,6 +38,7 @@ const navList = [
     {name : "홈화면",  path : "/"},
     {name : "통학버스", path : "/busline"},
     {name : "셔틀버스", path : "/shuttle"},
+    {name : "정류장관리", path : "/stoplist"},
     {name : "예매내역", path : "/ticket"},
 ]
 

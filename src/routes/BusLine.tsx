@@ -1,10 +1,9 @@
 /*eslint-disable */
-import React, {useState, useEffect}  from "react"
+import React, { useState, useEffect } from "react"
 import TransferList from '../component/LineList/TransferList'
-import * as Data from '../data_function'
+import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI, setTimeTable} from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Modal from '../component/Modal/Modal'
-import {getAPI} from '../data_function'
 import { DropzoneDialog } from 'material-ui-dropzone';
 import Toolbar from '../component/Table/Toolbar'
 import Table from '../component/Table/Table'
@@ -22,297 +21,283 @@ const useStyles = makeStyles(theme => createStyles({
 }));
 
 
-const Dropzone = ({open, onClose, onSave}) => {
+const Dropzone = ({ open, onClose, onSave }) => {
   const classes = useStyles();
   return (
     <DropzoneDialog
-    acceptedFiles={["image/*", "video/*", "application/*"]}
-    cancelButtonText={"cancel"}
-    submitButtonText={"submit"}
-    maxFileSize={5000000}
-    open={open}
-    onClose={onClose}
-    onSave={files => onSave(files)}
-    showPreviews={false}
-    showFileNamesInPreview={true}
-  />
-    )
-}
-
-interface rowInterface {
-  'LINE' : any, 
-  'DATA' : any[]
-}
-const lineToRows = (dict:any[], stop) : rowInterface[] => {
-  let ros:rowInterface[] = [], obj = {}
-  const data = Data.dictToArr(dict, 'BUS_LINE_ID', null, true)
-  for(var key in data) {
-    data[key].sort((a, b) => (a['LINE_SEQUENCE'] < b['LINE_SEQUENCE'] ? -1 : 1))
-    const stop_data:any[] = data[key].map(value => ({
-      stopID: value['BUS_STOP_ID'],
-      stopName : stop[value['BUS_STOP_ID']],
-      timeID : value['IDX_BUS_LINE']
-    }))
-    ros.push({
-      'LINE': key,
-      'DATA' : stop_data
-    })
-  }
-  return ros
-}
-
-const setTime_orderby_ID = (dict:any[]) =>  {
-  return Data.dictToArr(dict, 'IDX_BUS_LINE', 'BUS_TIME', true)
+      acceptedFiles={["image/*", "video/*", "application/*"]}
+      cancelButtonText={"cancel"}
+      submitButtonText={"submit"}
+      maxFileSize={5000000}
+      open={open}
+      onClose={onClose}
+      onSave={files => onSave(files)}
+      showPreviews={false}
+      showFileNamesInPreview={true}
+    />
+  )
 }
 
 const columns = ['노선', '월', '화', '수', '목', '금']
 const week = 5
-
 async function getData() {
-  const stop = await Data.getAPI('bus/stop/', 'BUS_STOP')
-  const time = await Data.getAPI('bus/time/', 'TIME_TABLE')
-  const line = await Data.getAPI('bus/line/', 'BUS_LINE')
-
-  const stopName = Data.dictToArr(stop, 'BUS_STOP_ID', 'BUS_STOP_NAME')
-  const timeData = setTime_orderby_ID(time)
-  const rows = lineToRows(line, stopName)
-
-  return {stopName, timeData, rows}
+  const stops = await getAPI('bus/stop/', 'BUS_STOP')
+  const times = await getAPI('bus/time/', 'TIME_TABLE')
+  const lines = await getAPI('bus/line/', 'BUS_LINE')
+  if( !isAvailable(stops) || 
+      !isAvailable(times) || 
+      !isAvailable(lines)) return {lineData : {}, stopData : {}, timeData : {}}
+    
+  const lineData = dictToArr(lines, 'BUS_LINE_NAME', null, true)
+  const stopData = dictToArr(stops, 'CODE', null, true)
+  const timeData = dictToArr(times.map(time => ({
+    ...time,
+    'BUS_TIME' : time['BUS_TIME'].split(':').slice(0, 2).join(':')
+  })),'IDX_BUS_LINE', null, true)
+  
+  return { lineData, stopData, timeData }
 }
 
-let stopName:Object = {}, rows:any[] = [], timeData = {}
+const findNames = (object, name) => object['BUS_LINE_NAME'] === name
+const findStops = (object, name) => {
+  const res = object.filter(value => value['BUS_STOP_NAME'] === name)
+  return (res.length !== 0)
+}
+const findWays = (name, way) => name.indexOf(way) !== -1 
+const findTimes = (object, IDX_BUS_LINE) => object['IDX_BUS_LINE'] === IDX_BUS_LINE
+
+let stopData:Object, lineData: Object, timeData: Object, 
+    lineNames: string[], stopNames: string[],
+    selectedLines:string[] = []
 
 const BusLine = props => {
   const [stat, setState] = useState('apply')
   const [updated, setUpdated] = useState(true)
 
-  const [campus, setCampus] = useState('') 
+  const [campus, setCampus] = useState('')
   const [way, setWay] = useState('')
-  const [lineIDX, setlineIDX] = useState<any | null>('')
+  const [lineName, setLine] = useState<any | null>('')
 
-  const init = () => {
-    setCampus('')
-    setWay('')
-    setlineIDX('')
-  }
+  const init = () => { setCampus(''); setWay(''); setLine(''); }
+  let newLineName:string = ''
 
   //setting table head data
-  useEffect(()=> {
+  useEffect(() => {
     //update 대기
-      getData().then(res => {
-        ({stopName, timeData, rows} = res)
-        setState('show')
-      })
+    getData().then(res => {
+      ({lineData, stopData, timeData} = res)
+      setState('show')
+    }).catch(err => console.log(err))
   }, [updated])
 
-  if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
+  if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
+  
+  const dataToJson = ({row, column, value}) => ({
+    IDX_BUS_LINE : lineData[lineName].find((value, idx) => (idx === row))['IDX_BUS_LINE'],
+    WEEK_OF_DAY : column,
+    BUS_TIME : value
+  })
 
-  const selected = (lineIDX !== '')
-  const stoplist = Data.findFittedList(rows, campus, way)
+  const selected = [(campus !== '' && way !== ''), (lineName !== ''), (stat !== 'create-line')]
 
-  const transferData = (stop, day, value) => {
-    const key = rows[lineIDX]['DATA'].forEach((data, idx) => {
-      if(idx === stop) return data['timeID']
-    })
-
-    return {
-      'IDX_BUS_LINE' : key,
-      'DAY' : day,
-      'VALUE' : value
-    }
-  }
-
-  const equals = (obj1, obj2) => {
-    if((obj1['IDX_BUS_LINE'] === obj2['IDX_BUS_LINE']) &&
-    (obj1['DAY'] == obj2['DAY'])) return true
-    return false
-  }
-  const createButtonForm = (label, to) => ({label : label, action : () => setState(to)})
+  if(selected[0] && selected[2]) selectedLines = Object.keys(lineData)
+      .filter(name => findStops(lineData[name], campus))
+      .filter(name => findWays(name, way))
+      .map(name => name.split('_')[0])
+  if(selected[1] && !isAvailable(lineData[lineName])) { init(); return null }
+  
+  const createButtonForm = (label, to) => ({ label: label, action: () => setState(to) })
   const buttons = {
-    'return' : createButtonForm('돌아가기', 'show'),
+    'return': createButtonForm('돌아가기', 'show'),
 
-    'update' : createButtonForm('수정하기', 'update'),
-    'mod-line' : createButtonForm('노선수정', 'update-line'),
-    'mod-time' : createButtonForm('시간수정', 'update-time'),
+    'update': createButtonForm('수정하기', 'update'),
+    'update-line': createButtonForm('노선수정', 'update-line'),
+    'update-time': createButtonForm('시간수정', 'update-time'),
 
-    'create' : createButtonForm('생성하기', 'create'),
+    'create-line': createButtonForm('생성하기', 'create-line'),
 
-    'delete' : createButtonForm('삭제하기', 'delete'),
-    'upload' : createButtonForm('불러오기', 'upload')
+    'delete-line': createButtonForm('삭제하기', 'delete-line'),
+    'upload': createButtonForm('불러오기', 'upload')
   }
 
   const getButtonList = stat => {
-    let bntlist:Object[] = [buttons['return']]
+    let bntlist: Object[] = [buttons['return']]
 
-    switch(stat) {
+    switch (stat) {
       case 'show':
-        bntlist = [buttons['create'], buttons['upload']]
-        if(selected) {
-          bntlist = bntlist.concat([buttons['update'], buttons['delete']])
+        bntlist = [buttons['upload']]
+        if (selected[1]) {
+          bntlist.push(buttons['update'], buttons['delete-line'])
         }
+        if (selected[0]) bntlist.push(buttons['create-line'])
         break
       case 'update':
-        if(selected) bntlist = [buttons['mod-line'], buttons['mod-time']]
+        if (selected[1]) bntlist = [buttons['update-line'], buttons['update-time']]
         break
     }
 
     return bntlist
   }
-  
-  
+
 
   const forms = [
-    {
-        name : '캠퍼스',
-        label : 'Campus',
-        options : [
-            {value : '아산캠퍼스', label : '아산캠퍼스'},
-            {value : '천안캠퍼스', label : '천안캠퍼스'},
-            {value : '당진캠퍼스', label : '당진캠퍼스'}
-        ],
-        action : value => setCampus(value),
-        value : campus,
-        disable : () => (stat !== 'show')
+    [{
+      name: '캠퍼스',
+      label: 'Campus',
+      type : 'select',
+      options: [
+        { value: '아산캠퍼스', label: '아산캠퍼스' },
+        { value: '천안캠퍼스', label: '천안캠퍼스' },
+        { value: '당진캠퍼스', label: '당진캠퍼스' }
+      ],
+      onChange: value => {
+        setLine('')
+        setCampus(value)
+      },
+      value: campus,
+      disable: () => (stat !== 'show')
     },
     {
-        name : '등하교',
-        label : 'Way',
-        options : [
-            {value : 0, label : '등교'},
-            {value : 1, label : '하교'},
-        ],
-        action : value => setWay(value),
-        value : way,
-        disable : () => (stat !== 'show')
+      name: '등하교',
+      label: 'Way',
+      type : 'select',
+      options: [
+        { value: '등교', label: '등교' },
+        { value: '하교', label: '하교' },
+      ],
+      onChange: value => {
+        setLine('')
+        setWay(value)
+      },
+      value: way,
+      disable: () => (stat !== 'show')
     },
     {
-        name : '노선',
-        label : 'Line',
-        options : (stoplist == null) ? 
-          [] : stoplist.map(value => ({value : value['IDX'], label : value['NAME']})),
-        action : value => setlineIDX(value),
-        value : lineIDX,
-        disable : () => ((stoplist == null) || stat !== 'show')
-    },
+      name: '노선',
+      label: 'Line',
+      ...(selected[2]) ? {
+        type : 'select',
+        options: selectedLines.map((name, idx) => ({
+          value : name,
+          label : name
+        })),
+        onChange: value => setLine(value),
+        value: lineName,
+        disable: () => ((selectedLines.length === 0) || stat !== 'show')
+      } : {
+        type : 'text',
+        onChange: value => {newLineName = value},
+        value: newLineName,
+      }
+    },]
   ]
 
-  const changeList:Object[] = []
-
   const displayComponent = () => {
-    if(stat === 'create') {
-      return (
-        <TransferList
-          data = {stopName}
-          chData = {[]}
-          allData = {Object.keys(stopName).map((value:any) => value*1)}
-          title = {'노선'}
-          onSubmit = {data=>{
-            setState('apply')
-            Data.setAPI('/bus/line/create', { 'data' : data }).then(res => setUpdated(!updated))
-          } }
-        />
-      )
-    }
-    if (!selected) return <NoData message='Please Select Options'/>
-    let props:Object = {}
+    let listProps:{chData : any[], onSubmit (list : any[]) : any }|null = null
+    let component = <NoData message='Please Select Options' />
 
-    const record = rows[lineIDX]['DATA'].map(data => {
-      if(typeof(timeData[data['timeID']]) !== 'undefined')
-        return timeData[data['timeID']].map( time => time.split(':').slice(0, 2).join(':') )
-    })
-    
     switch(stat) {
-      case 'update-line':
-        return (
-          <TransferList
-            data = {stopName}
-            chData = {rows[lineIDX]['DATA'].map(value => value['stopID'])}
-            allData = {Object.keys(stopName).map((value:any) => value*1)}
-            title = {'노선'}
-            onSubmit = {data=>{
-              setState('apply')
-              Data.setAPI('/bus/line/update', {
-                'lineIDX' : rows[lineIDX]['LINE'], 'data' : data}).then(res => setUpdated(!updated))
-            }}
-          />)
-      case 'update-time':
-        props = {
-          'onChange' : (stop, day, value) => {
-            const tdata = transferData(stop, day, value)
-            let flag = true
-            changeList.forEach((data, idx) => {
-              if(equals(data, tdata)) {
-                changeList[idx] = tdata
-                flag = false
-              }
-            })
-            if(flag) changeList.push(tdata)
-          },
-          'onSubmit' : ()=> {
+      case 'create-line':
+        listProps = {
+          chData : [campus],
+          onSubmit : data => {
             setState('apply')
-            Data.setAPI(
-              '/bus/time/update', 
-              {timeList : changeList}).then(res => setUpdated(!updated))
+            setAPI('/bus/line/create', {
+              'lineName': `${newLineName}_${way}`, 'data': data
+            }).then(res => setUpdated(!updated))
+          }
+        }
+        break
+      case 'update-line':
+        if(!selected[0]) break
+        listProps = {
+          chData : lineData[lineName].map(line => line['BUS_STOP_NAME']),
+          onSubmit : data => {
+            setState('apply')
+            setAPI('/bus/line/update', {
+              'lineName': lineName, 'data': data
+            }).then(res => setUpdated(!updated))
           }
         }
         break
     }
-    return (
-      <Table
-        columnHead = {columns}
-        rowHead = {rows[lineIDX]['DATA'].map(data => (data['stopName']))}
-        record = {record}
-        stat={stat}
+    if(stat === 'update-line' || stat === 'create-line') {
+      if(listProps !== null) component = <TransferList
+          allData={stopData[way].map(data => data['BUS_STOP_NAME'])}
+          title={'노선'}
+          {...listProps}
+        />
+    }
+    else if(selected[1]) {
+      const record = lineData[lineName].map(data => {
+        if (typeof (timeData[data['IDX_BUS_LINE']]) === 'undefined') return new Array(5)
+        else return timeData[data['IDX_BUS_LINE']].map(time => time['BUS_TIME'])
+      })
+
+      component = <Table
+        columnHead={columns}
+        rowHead={lineData[lineName].map(data => data['BUS_STOP_NAME'])}
+        record={record}
+        editable={stat === 'update-time'}
         headWidth={20}
-        {...props}
-    />)
+        button={stat === 'update-time' ? 'apply' : null}
+        onSubmit={(chlist) => {
+          setState('apply')
+          setAPI(
+            '/bus/time/update',
+            { timeList: chlist.map(data => dataToJson(data)) })
+            .then(res => setUpdated(!updated))
+        }}
+      />
+    }
+
+    return component
   }
   const displayModal = () => {
     var open = false
 
-    var component:any = null
+    var component: any = null
 
-    switch(stat) {
-      case 'delete':
-        if(!selected) return null
-        open = (stat === 'delete')
-        component = <div style={{ textAlign:'center' }}>
-          노선을 삭제하시겠습니까?<br/><br/><br/>
-          <Button  variant="contained" color="secondary" onClick = {() => {
+    switch (stat) {
+      case 'delete-line':
+        if (!selected[1]) return null
+        open = (stat === 'delete-line')
+        component = <div style={{ textAlign: 'center' }}>
+          노선을 삭제하시겠습니까?<br /><br /><br />
+          <Button variant="contained" color="secondary" onClick={() => {
             setState('apply')
-            Data.setAPI('/bus//shuttle/line/delete', {
-              'lineID' : rows[lineIDX]['LINE'],
+            setAPI('/bus//shuttle/line/delete', {
+              'lineName': lineName,
             }).then(res => setUpdated(!updated))
             init()
           }}>Delete</Button>
         </div>
         break
-      case 'upload' :
+      case 'upload':
         open = (stat === 'upload')
         return <Dropzone
-          open = {open}
-          onClose = {()=>setState('show')}
-          onSave = {files=>{
+          open={open}
+          onClose={() => setState('show')}
+          onSave={files => {
             setState('apply')
-            Data.setTimeTable(files, 'bus').then(res => {
-              console.log(files, typeof(files[0]))
+            setTimeTable(files, 'bus').then(res => {
+              console.log(files, typeof (files[0]))
               setUpdated(!updated)
             }).catch(err => console.log(err))
-          }}/>        
+          }}/>
     }
     return (
-      <Modal close = {()=>setState('show')} visible = {open}>
+      <Modal close={() => setState('show')} visible={open}>
         {component}
       </Modal>
     )
   }
   return (
     <div>
-      <Toolbar 
-      title = '통학버스 시간표' 
-      selectForm = {forms}
-      type='selectBox'
-      buttons={getButtonList(stat)}/>
+      <Toolbar
+        title='통학버스 시간표'
+        inputForm={forms}
+        buttons={getButtonList(stat)} />
       {displayComponent()}
       {displayModal()}
     </div>
