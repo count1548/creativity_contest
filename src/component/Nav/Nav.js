@@ -8,7 +8,6 @@ import Button from '@material-ui/core/Button';
 import Auth from '../Auth/auth'
 import Drawer from '@material-ui/core/Drawer';
 
-
 import '../../style/font.css'
 import "./Nav.css";
 
@@ -17,6 +16,7 @@ const drawerWidth = 200;
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
+    position:'relative',
     width: drawerWidth,
     flexShrink: 0,
   },
@@ -70,8 +70,8 @@ export default function SwipeableTemporaryDrawer() {
             </NavLink>
         )}
 				</List>
+        <div className='copyright'>Copyright © 2020 Hoseo-University</div>
 			</Drawer>
-
 		</div>
   )
 }

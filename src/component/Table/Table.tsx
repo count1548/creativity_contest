@@ -211,17 +211,7 @@ const CustomTable = (props) => {
         setList(cp)
         onClick(val)
     }
-    // const addMarkers = async (e, aug, geoData) => {
-    //     // console.log(aug);
-    //     const {stores} = this.state;
-    //     let stateData = stores;
-    //     let latLng;
-    //     latLng = {latitude : geoData.latLng.lat(), longitude : geoData.latLng.lng()};
-    //     stateData.push(latLng);
-    //     await this.setState({
-    //     stores: stateData
-    //     });
-    // }
+
     const component = <div>
         <TableContainer component={Paper} className={tableStyle} style={{
             maxHeight: maxHeight,

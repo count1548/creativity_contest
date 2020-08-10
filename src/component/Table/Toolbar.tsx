@@ -54,7 +54,7 @@ const Header = ({component, style, button}) =>
     <div className={style} data-text={component}>{button}</div>
 
 const SelectBox = ({children, style}) => <div className={style}> {children} </div>
-const TextForm = ({label, onChange, name, value=''}) => {
+const TextForm = ({label, onChange, name, value='', textType = 'text'}) => {
     const [text, setText] = useState<any>(value)
     useEffect(() => {
         setText(value)
@@ -66,6 +66,7 @@ const TextForm = ({label, onChange, name, value=''}) => {
             label={label} 
             variant="outlined" 
             value={text}
+            type={textType}
             onChange={ev => {
                 const val = ev.target.value
                 setText(val)

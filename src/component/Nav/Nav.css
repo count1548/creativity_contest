@@ -37,3 +37,12 @@ a {
 .MenuIcon {
 	color: black;
 }
+.copyright {
+	width:100%;
+	bottom:10px;
+	position:absolute;
+	font-size:10px;
+	color:#bbb;
+	text-align:center;
+	word-break:all;
+}
