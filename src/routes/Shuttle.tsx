@@ -1,16 +1,16 @@
 /*eslint-disable */
 import React, {useState, useEffect}  from "react"
-import TransferList from '../component/LineList/TransferList'
+import TransferList from '../component/LineList/'
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_function' 
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
 import '../style/lineTable.css'
 import Toolbar from '../component/Table/Toolbar'
-import Table from '../component/Table/Table'
+import Table from '../component/Table/'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress'
-import Modal from '../component/Modal/Modal'
 import Button from '@material-ui/core/Button';
+import Dialog from '../component/Dialog'
 
 import '../style/font.css'
 import { LinearProgress } from "@material-ui/core"
@@ -54,20 +54,25 @@ async function getData() {
 }
 
 let stopName:Object = {}, 
-      lineData:Object = {}, 
-      timeData:Object = {},
-      columns:string[] = []
+    lineData:Object = {}, 
+    timeData:Object = {},
+    columns:string[] = [],
+    newLineName:string = '', newLineDay:string = ''
 
 const ShuttleLine = props => {
   const [stat, setState] = useState('apply')
+
+  const [required, setRequired] = useState(false)
   const [updated, setUpdated] = useState(true)
   const [lineName, setLineName] = useState('') 
   const [day, setDay] = useState('')
   const init = () => {
     setLineName('')
     setDay('')
+    newLineName = ''
+    newLineDay = ''
   }
-  let newLineName:string = '', newLineDay:string = ''
+  
   //data setting
   useEffect(()=> {
     getData().then(res => {
@@ -77,7 +82,7 @@ const ShuttleLine = props => {
   }, [updated])
   if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
   
-  let selected = !(lineName === '' || day === '' || stat === 'create-line')
+  let selected = !(lineName === '' || day === '')
   if(selected) {
     if(!isAvailable(lineData[lineName]) || !isAvailable(lineData[lineName][day])) {
       init()
@@ -185,7 +190,7 @@ const ShuttleLine = props => {
 
   const displayComponent = () => {
     let listProps:{chData : any[], onSubmit (list : any[]) : any }|null = null,
-        tableProps:{onSubmit (list : any[]) : any, button : string}|null = null
+        tableProps:{selectable? : boolean, onSubmit (list : any[]) : any, button : string}|null = null
 
     let component = <NoData message='Please Select Options'/>
 
@@ -194,8 +199,11 @@ const ShuttleLine = props => {
         listProps = {
           chData : [],
           onSubmit : list=>{
+            if(newLineName === '' || newLineDay === '' || list.length < 2) {
+              setRequired(true)
+              return
+            }
             setState('apply')
-            //if(newLineName === '' || newLineDay === '' || list.length === 0) break
             setAPI('/bus/shuttle/line/create', {
               'lineName' : newLineName,
               'code' : newLineDay,
@@ -205,10 +213,10 @@ const ShuttleLine = props => {
         }
         break
       case 'update-line':
-        if(!selected) break
         listProps = {
           chData : lineData[lineName][day]['LINE'].map(value => value['IDX']),
           onSubmit : list => {
+            if(list.length < 2) { setRequired(true); return }
             setState('apply')
             //if(list.length === 0) break
             setAPI('/bus/shuttle/line/update', {
@@ -220,7 +228,6 @@ const ShuttleLine = props => {
         }
         break
       case 'update-time':
-        if(!selected) break
         tableProps = {
           onSubmit : list => {
             setState('apply')
@@ -233,8 +240,8 @@ const ShuttleLine = props => {
         }
         break
       case 'delete-bus' :
-        if(!selected) break
         tableProps = {
+          selectable : true,
           onSubmit : list => {
             setState('apply')
             setAPI(
@@ -247,7 +254,7 @@ const ShuttleLine = props => {
         break
     }
 
-    if(stat.indexOf('line') !== -1) {if(listProps !== null) 
+    if(stat === 'create-line' || stat === 'update-line') { if(listProps !== null) 
       component = <TransferList
         dataLabels = {stopName}
         allData = {Object.keys(stopName).map((value:any) => value*1)}
@@ -266,7 +273,7 @@ const ShuttleLine = props => {
       
       return (
         <Table
-          columnHead = {columns}
+          column = {columns}
           rowHead = {rowHead}
           record = {record}
           editable={stat === 'update-time'}
@@ -279,54 +286,65 @@ const ShuttleLine = props => {
   const displayModal = () => {
     if(!selected) return null
     const newBus = new Array(columns.length-1)
-    var open = false
-
-    var component:any = null
+    let dialogProps:Object|null = null
 
     switch(stat) {
       case 'create-bus':
-        open = (stat === 'create-bus')
-
-        component = <Table
-          columnHead = {columns}
-          rowHead = {['BUS']}
-          record = {[newBus]}
-          editable={true}
-          headWidth={5}
-          onChange={(bus, stop, value) => newBus[stop] = value }
-          onSubmit = { ()=> {
+        dialogProps = {
+          type : 'component', 
+          submitMsg : 'Apply',
+          children : <Table
+            column = {columns}
+            rowHead = {['BUS']}
+            record = {[newBus]}
+            editable={true}
+            headWidth={5} button={null}
+            onChange={(bus, stop, value) => newBus[stop] = value }
+            style={{
+              tablePaper : {
+                textAlign:'center',
+                width : '100%',
+              },
+            }}
+            />,
+          onSubmit : ()=> {
             setState('apply')
-             setAPI( '/bus/shuttle/time/create', 
+            setAPI( '/bus/shuttle/time/create', 
             {
               lineName : lineName,
               day : day,
               timeList : lineData[lineName][day]['LINE'].map((value, idx) => ({
                 'IDX_BUS_LINE': value['IDX'],
                 'VALUE' : newBus[idx]
-            }))}).then(res => setUpdated(!updated))      
-          }}
-      />
-      break
+            }))}).then(res => setUpdated(!updated))
+          },
+        }
+        break
       case 'delete-line':
-        open = (stat === 'delete-line')
-        component = <div style={{ textAlign:'center' }}>
-          노선을 삭제하시겠습니까?<br/><br/><br/>
-          <Button  variant="contained" color="secondary" onClick = {() => {
+        dialogProps = {
+          type : 'text',
+          submitMsg : 'Delete',
+          children : '노선을 삭제하시겠습니까?',
+          onSubmit : () => {
             setState('apply')
              setAPI('/bus//shuttle/line/delete', {
               'lineName' : lineName,
               'code' : day,
             }).then(res => setUpdated(!updated))
             init()
-          }}>Delete</Button>
-        </div>
-        
+          }
+        }
+        break
     }
-    return (
-      <Modal close = {()=>setState('show')} visible = {open}>
-        {component}
-      </Modal>
+    if(dialogProps !== null) return (
+      <Dialog
+        onExit={() => setState('show')}
+        title={'Message Popup'}
+        defaultState={true}
+        {...dialogProps}
+      />
     )
+    else return null
   }
   return (
     <div>
@@ -336,6 +354,12 @@ const ShuttleLine = props => {
       buttons={getButtonList(stat)}/>
       {displayComponent()}
       {displayModal()}
+      <Dialog
+        children={'필수 항목을 입력하십시오'}
+        onSubmit = {()=>setRequired(false)}
+        onExit = {()=>setRequired(false)}
+        defaultState={required}
+      />
     </div>
   )
 }

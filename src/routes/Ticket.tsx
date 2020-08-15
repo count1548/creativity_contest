@@ -38,7 +38,7 @@ const columns = [
                 'margin' : '0 auto'
             }}></div>
     },
-    {title : '결재금액', field : 'PRICE', width:180, filtering: false },
+    {title : '결재금액', field : 'PRICE', width:100, filtering: false },
 ]
 
 const TicketList = props => {
@@ -81,15 +81,9 @@ const TicketList = props => {
                 rowStyle: { 
                     backgroundColor: '#EEE', 
                 },
-                selection:true,
                 actionsColumnIndex: -1,
                 pageSize: 10
             }}
-            actions={[{
-                tooltip: 'Remove All Selected Users',
-                icon: 'delete',
-                onClick: (evt, data:any[]) => alert('You want to delete ' + data.length + ' rows')
-            }]}
         />
     )
 }

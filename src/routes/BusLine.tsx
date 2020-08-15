@@ -1,42 +1,18 @@
 /*eslint-disable */
 import React, { useState, useEffect } from "react"
-import TransferList from '../component/LineList/TransferList'
+import TransferList from '../component/LineList/'
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI, setTimeTable} from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
-import Modal from '../component/Modal/Modal'
-import { DropzoneDialog } from 'material-ui-dropzone';
+import Dropzone from '../component/Dropzone'
 import Toolbar from '../component/Table/Toolbar'
-import Table from '../component/Table/Table'
+import Table from '../component/Table/'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
+import Dialog from '../component/Dialog'
+
 import '../style/font.css'
 import '../style/lineTable.css'
-
-const useStyles = makeStyles(theme => createStyles({
-  previewChip: {
-    minWidth: 160,
-    maxWidth: 210,
-  },
-}));
-
-
-const Dropzone = ({ open, onClose, onSave }) => {
-  const classes = useStyles();
-  return (
-    <DropzoneDialog
-      acceptedFiles={["image/*", "video/*", "application/*"]}
-      cancelButtonText={"cancel"}
-      submitButtonText={"submit"}
-      maxFileSize={5000000}
-      open={open}
-      onClose={onClose}
-      onSave={files => onSave(files)}
-      showPreviews={false}
-      showFileNamesInPreview={true}
-    />
-  )
-}
 
 const columns = ['노선', '월', '화', '수', '목', '금']
 const week = 5
@@ -68,7 +44,7 @@ const findTimes = (object, IDX_BUS_LINE) => object['IDX_BUS_LINE'] === IDX_BUS_L
 
 let stopData:Object, lineData: Object, timeData: Object, 
     lineNames: string[], stopNames: string[],
-    selectedLines:string[] = []
+    selectedLines:string[] = [], newLineName:string = ''
 
 const BusLine = props => {
   const [stat, setState] = useState('apply')
@@ -77,9 +53,9 @@ const BusLine = props => {
   const [campus, setCampus] = useState('')
   const [way, setWay] = useState('')
   const [lineName, setLine] = useState<any | null>('')
+  const [required, setRequired] = useState(false)
 
-  const init = () => { setCampus(''); setWay(''); setLine(''); }
-  let newLineName:string = ''
+  const init = () => { setCampus(''); setWay(''); setLine(''); newLineName = ''}
 
   //setting table head data
   useEffect(() => {
@@ -103,7 +79,6 @@ const BusLine = props => {
   if(selected[0] && selected[2]) selectedLines = Object.keys(lineData)
       .filter(name => findStops(lineData[name], campus))
       .filter(name => findWays(name, way))
-      .map(name => name.split('_')[0])
   if(selected[1] && !isAvailable(lineData[lineName])) { init(); return null }
   
   const createButtonForm = (label, to) => ({ label: label, action: () => setState(to) })
@@ -179,7 +154,7 @@ const BusLine = props => {
         type : 'select',
         options: selectedLines.map((name, idx) => ({
           value : name,
-          label : name
+          label : name.split('_')[0]
         })),
         onChange: value => setLine(value),
         value: lineName,
@@ -200,22 +175,26 @@ const BusLine = props => {
       case 'create-line':
         listProps = {
           chData : [campus],
-          onSubmit : data => {
+          onSubmit : list => {
+            if(newLineName === '' || list.length < 2) {
+              setRequired(true)
+              return
+            }
             setState('apply')
             setAPI('/bus/line/create', {
-              'lineName': `${newLineName}_${way}`, 'data': data
-            }).then(res => setUpdated(!updated))
+              'lineName': `${newLineName}_${way}`, 'data': list
+            }).then(res => {init(); setUpdated(!updated)})
           }
         }
         break
       case 'update-line':
-        if(!selected[0]) break
         listProps = {
           chData : lineData[lineName].map(line => line['BUS_STOP_NAME']),
-          onSubmit : data => {
+          onSubmit : list => {
+            if(list.length < 2) { setRequired(true); return }
             setState('apply')
             setAPI('/bus/line/update', {
-              'lineName': lineName, 'data': data
+              'lineName': lineName, 'data': list
             }).then(res => setUpdated(!updated))
           }
         }
@@ -235,10 +214,11 @@ const BusLine = props => {
       })
 
       component = <Table
-        columnHead={columns}
+        column={columns}
+        isRowHead = {true}
         rowHead={lineData[lineName].map(data => data['BUS_STOP_NAME'])}
         record={record}
-        editable={stat === 'update-time'}
+        editable={(stat === 'update-time')}
         headWidth={20}
         button={stat === 'update-time' ? 'apply' : null}
         onSubmit={(chlist) => {
@@ -254,43 +234,39 @@ const BusLine = props => {
     return component
   }
   const displayModal = () => {
-    var open = false
-
-    var component: any = null
+    let component: any = null
 
     switch (stat) {
       case 'delete-line':
         if (!selected[1]) return null
-        open = (stat === 'delete-line')
-        component = <div style={{ textAlign: 'center' }}>
-          노선을 삭제하시겠습니까?<br /><br /><br />
-          <Button variant="contained" color="secondary" onClick={() => {
-            setState('apply')
-            setAPI('/bus//shuttle/line/delete', {
-              'lineName': lineName,
-            }).then(res => setUpdated(!updated))
-            init()
-          }}>Delete</Button>
-        </div>
+        component = 
+          <Dialog
+            onSubmit = {()=>{
+              setState('apply')
+              setAPI('/bus//shuttle/line/delete', {
+                'lineName': lineName,
+              }).then(res => setUpdated(!updated))
+              init()
+            }} onExit={() => setState('show')}
+            submitMsg = {'Delete'}
+            type={'text'}
+            defaultState={true}
+          >노선을 삭제하시겠습니까?</Dialog>
         break
       case 'upload':
-        open = (stat === 'upload')
-        return <Dropzone
-          open={open}
-          onClose={() => setState('show')}
-          onSave={files => {
-            setState('apply')
-            setTimeTable(files, 'bus').then(res => {
-              console.log(files, typeof (files[0]))
-              setUpdated(!updated)
-            }).catch(err => console.log(err))
-          }}/>
+        component = 
+          <Dropzone
+            defaultState={true}
+            onClose={() => setState('show')}
+            onSave={files => {
+              setState('apply')
+              setTimeTable(files, 'bus').then(res => {
+                console.log(files, typeof (files[0]))
+                setUpdated(!updated)
+              }).catch(err => console.log(err))
+            }}/>
     }
-    return (
-      <Modal close={() => setState('show')} visible={open}>
-        {component}
-      </Modal>
-    )
+    return (component)
   }
   return (
     <div>
@@ -300,6 +276,12 @@ const BusLine = props => {
         buttons={getButtonList(stat)} />
       {displayComponent()}
       {displayModal()}
+      <Dialog
+        children={'필수 항목을 입력하십시오'}
+        onSubmit = {()=>setRequired(false)}
+        onExit = {()=>setRequired(false)}
+        defaultState={required}
+      />
     </div>
   )
 }
