@@ -1,0 +1,1 @@
+pm2 -n Server start npm --start

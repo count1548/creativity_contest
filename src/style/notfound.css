@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@700&display=swap');
+
+.nf-root {
+    position:relative;
+    margin:auto;
+    min-height:500px;
+    border-radius:10px;
+    background:#eee;
+    padding:30px;
+    text-align:center;
+}
+.nf-root:after {
+    display:block;
+    content:' ';
+    clear:both;
+}
+
+.nf-icon {
+    width:200px; height:200px; margin:10px auto;
+    background:url('/imgs/nf.svg');
+    background-size:cover;
+}
+.nf-main {
+    position: relative;
+    top:50px;
+    font-size:60px;
+    color:#333;
+}
+
+.nf-sub {
+    position: relative;
+    top:80px;
+    font-size:25px;
+    color:#888;
+}
+
+.nf-msg {
+    font-weight: bold;
+    font-family: 'Play', sans-serif;
+}
