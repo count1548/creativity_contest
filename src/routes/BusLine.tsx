@@ -278,8 +278,7 @@ const BusLine = props => {
       {displayModal()}
       <Dialog
         children={'필수 항목을 입력하십시오'}
-        onSubmit = {()=>setRequired(false)}
-        onExit = {()=>setRequired(false)}
+        onClose = {()=>setRequired(false)}
         defaultState={required}
       />
     </div>

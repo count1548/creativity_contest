@@ -22,7 +22,14 @@ const createStyle = (headWidth, columnLen, style, maxHeight = null) => {
                 fontFamily:'NanumSquareRoundR',
                 testAlign:'center',
                 maxHeight:maxHeight,
-                "&::-webkit-scrollbar" : { display:'none' }
+                "&::-webkit-scrollbar" : { 	
+                    width: '10px',
+                    backgroundColor: '#F5F5F5'
+                },
+                "&::-webkit-scrollbar-thumb" : { 	
+                    borderRadius: '10px',
+                    backgroundColor: '#8097AF'
+                }
             },
 
             headCell : {

@@ -12,12 +12,16 @@ export default function AlertDialog({
     submitMsg = 'OK', resetMsg = 'Exit', 
     type = 'text',
     title = 'Dialog',
+    onClose = ()=>{},
     defaultState = false,
 }) { 
   const [open, setOpen] = useState(defaultState);
   useEffect(() =>  setOpen(defaultState), [defaultState])
 
-  const handleClose = () => setOpen(false)
+  const handleClose = () => {
+    setOpen(false)
+    onClose()
+  }
 
   return (
       <Dialog

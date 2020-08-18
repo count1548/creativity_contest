@@ -2,17 +2,17 @@
 import React, {useState, useEffect}  from "react"
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_function' 
 import Toolbar from '../component/Table/Toolbar'
-import Table from '../component/Table/'
+import Table from '../component/Table'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
 // import GoogleMapReact from 'google-map-react'
-import GoogleMap from '../component/Map/'
+import GoogleMap from '../component/Map'
 import '../style/font.css'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
 async function getData() {
-    const stop = await getAPI('bus/stop/', 'BUS_STOP')
+    const stop = await getAPI('bus/shuttle/stop/', 'result')
     if(!isAvailable(stop)) return []
 
     return stop
@@ -21,13 +21,11 @@ async function getData() {
 let stopData:any[] = []
 interface stopInterface {
     IDX?:number,
-    BUS_STOP_NAME : string, BOARDING_LOCATION? : string,
-    C_PRICE? : number, A_PRICE? : number
+    KOR_NAME : string, EN_NAME : string, DETAIL? : string,
 }
 
 const defaultValue:stopInterface = {
-    BUS_STOP_NAME : '', BOARDING_LOCATION : '',
-    C_PRICE : 0, A_PRICE : 0
+    KOR_NAME : '', EN_NAME : '', DETAIL : '',
 }
 
 let stopInfo:stopInterface = {...defaultValue} as any
@@ -68,7 +66,6 @@ const StopList = props => {
     const [stat, setState] = useState('apply')
     const [selected, setSelected] = useState('')
     const [location, setLocation] = useState({lat: 0, lng: 0 })
-    const [way, setWay] = useState('')
 
     const [zoom, setZoom] = useState(11)
     const classes = useStyles()
@@ -76,7 +73,6 @@ const StopList = props => {
         stopInfo = {...defaultValue}
         setLocation({lat:0, lng:0})
         setSelected('')
-        setWay('')
     }
 
     //setting table head data
@@ -88,7 +84,7 @@ const StopList = props => {
     }, [updated])
     if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
 
-    const rows = stopData.map(value => [value['BUS_STOP_NAME']])
+    const rows = stopData.map(value => [value['KOR_NAME']])
     const AnyReactComponent = ({ lat, lng, text }) => <div>{text}</div>;
 
     const form = [
@@ -96,29 +92,23 @@ const StopList = props => {
             {
                 label : '이름',
                 type : 'text',
-                onChange : value => {stopInfo['BUS_STOP_NAME'] = value} ,
-                value : stopInfo['BUS_STOP_NAME'],
+                onChange : value => {stopInfo['KOR_NAME'] = value} ,
+                value : stopInfo['KOR_NAME'],
             },
+            {
+                label : '영어이름',
+                type : 'text',
+                onChange : value => {stopInfo['EN_NAME'] = value} ,
+                value : stopInfo['EN_NAME'],
+            },
+        ],[
             {
                 label : '추가정보',
                 type : 'text',
-                onChange: value => { stopInfo['BOARDING_LOCATION'] = value },
-                value : stopInfo['BOARDING_LOCATION']
+                onChange: value => { stopInfo['DETAIL'] = value },
+                value : stopInfo['DETAIL'] === null ? '' : stopInfo['DETAIL']
             },
-            {
-                label : '등하교',
-                type : 'select',
-                options : [
-                    {value : '등교', label : '등교'},
-                    {value : '하교', label : '하교'},
-                ],
-                onChange: value => {
-                    setWay(value) 
-                },
-                value : way
-            },
-        ],
-        [   //Location
+        ], [   //Location
             {
                 label : '위도',
                 type : 'text',
@@ -138,48 +128,30 @@ const StopList = props => {
                 value : location.lng
             },
         ],
-        [   //PRICE
-            {
-                label : '천캠가격',
-                type : 'text',
-                textType : 'number',
-                onChange: value => { stopInfo['C_PRICE'] = value },
-                value : stopInfo['C_PRICE'],
-            },,
-            {
-                label : '아캠가격',
-                type : 'text',
-                textType : 'number',
-                onChange: value => { stopInfo['A_PRICE'] = value },
-                value : stopInfo['A_PRICE']
-            },
-        ]
     ]
     const buttonClick = () => {
         const url = (selected === '') ? 'create' : 'update'
         
         setState('apply')
-        setAPI(`/bus/stop/${url}`, {...stopInfo, 
+        setAPI(`/bus/shuttle/stop/${url}`, {...stopInfo, 
             LATITUDE : location.lat,
-            LONGITUDE : location.lng, CODE:way})
+            LONGITUDE : location.lng, })
             .then(res => { init(); setUpdated(!updated) })
     }
     const rowClick = (idx) => {
-        if(selected == idx) {init(); return}
-        const {CODE, LATITUDE, LONGITUDE, ...mainInfo} = stopData[idx]
+        if(selected === idx) {init(); return}
+        const {LATITUDE, LONGITUDE, ...mainInfo} = stopData[idx]
         stopInfo = {...mainInfo}
         defaultLocation = {
             lat : LATITUDE, 
             lng : LONGITUDE
         }
         setSelected(idx)
-        setWay(CODE)
         setLocation({
             lat : LATITUDE,
             lng : LONGITUDE
         })
     }
-
     return (
         <div className='main-warp'>
             <div className={classes.mainContent}>

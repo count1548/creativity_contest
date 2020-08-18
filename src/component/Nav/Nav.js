@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { NavLink, Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -7,6 +7,10 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Button from '@material-ui/core/Button';
 import Auth from '../Auth/auth'
 import Drawer from '@material-ui/core/Drawer';
+import Dialog from '../Dialog'
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import '../../style/font.css'
 import "./Nav.css";
@@ -35,15 +39,52 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const navList = [
-    {name : "홈화면",  path : "/"},
-    {name : "통학버스", path : "/busline"},
-    {name : "셔틀버스", path : "/shuttle"},
-    {name : "정류장관리", path : "/stoplist"},
+    {name : "통학버스", path : [
+      {name : "노선관리", path : "/busline"},
+      {name : "정류장관리", path : "/stoplist"},
+    ]},
+    {name : "셔틀버스", path : [
+      {name : "노선관리", path : "/shuttle"},
+      {name : "정류장관리", path : "/shuttlestoplist"},
+    ]},
     {name : "예매내역", path : "/ticket"},
 ]
 
+const CopyrightInfo = (props) => {
+  const {open, onClose} = props
+  return (
+    <Dialog
+      title='Copyright'
+      type='component'
+      defaultState={open}
+      onClose={onClose}>
+      <div style = {{
+        margin : '1.5rem',
+        lineHeight: '1.5rem',
+        padding : '1.2rem',
+        backgroundColor:'#eee',
+        borderRadius:'5px',
+      }}>
+        Copyright © 2020 UCK<br/>
+        Copyright © 2020 Material-UI<br/>
+        Copyright © 2020 icon-icons.com<br/>
+        Copyright © 2010-2020 Freepik Company S.L<br/>
+      </div>
+    </Dialog>
+  )
+}
+
+const tockenItem = (arr, idx) => {
+  const cpArr = arr.slice()
+  cpArr[idx] = !cpArr[idx]
+  return cpArr
+}
+
 export default function SwipeableTemporaryDrawer() {
   const classes = useStyles()
+  const [open, setOpen] = useState(false)
+  const [drop, setDrop] = useState([])
+
 	return(
 		<div>
 			<Drawer
@@ -62,16 +103,45 @@ export default function SwipeableTemporaryDrawer() {
 				
 				<div className={classes.toolbar} />
 				<List>
-				{navList.map((item, idx) =>
+				{navList.map((item, idx) => {
+          const haveSubMenu = typeof(item.path) === 'object'
+          if(haveSubMenu) drop.push(false)
+          const inner_component = <ListItem className="item" key={item.name} 
+            onClick = {haveSubMenu ? ()=>setDrop(tockenItem(drop, idx)) : null}>
+          <ListItemText primary={item.name} />
+          {haveSubMenu ? ( drop[idx] ? 
+            <ExpandLess onClick={()=>setDrop(tockenItem(drop, idx))}/> : 
+            <ExpandMore onClick={()=>setDrop(tockenItem(drop, idx))}/> ) : null}
+        </ListItem>
+          const item_component = [
+            (haveSubMenu) ? inner_component : 
             <NavLink exact to={item.path} activeClassName="active" key={idx}>
-                <ListItem className="item" key={item.name}>
-                  <ListItemText primary={item.name} />
-                </ListItem>
-            </NavLink>
-        )}
+              {inner_component}
+            </NavLink>]
+          if(haveSubMenu) {
+            item_component.push(
+              <Collapse in={drop[idx]} timeout="auto" unmountOnExit key={item.name + idx}>
+                {item.path.map((sub, idx2) => (
+                  <NavLink exact to={sub.path} activeClassName="active" key={idx2}>
+                    <ListItem className="item sub-item" key={sub.name}>
+                      <ListItemText primary={sub.name} />
+                    </ListItem>
+                  </NavLink>
+                ))}
+              </Collapse>
+            )
+          }
+          return item_component
+        })}
 				</List>
-        <div className='copyright'>Copyright © 2020 Hoseo-University</div>
+        <div className='copyright' onClick={()=>setOpen(true)}>
+          Copyright © 2020 UCK <br/><br/>Click more information
+        </div>
 			</Drawer>
+      <CopyrightInfo 
+        open={open}
+        onClose={()=>setOpen(false)}
+        />
 		</div>
   )
 }

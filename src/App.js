@@ -1,11 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Nav from "./component/Nav/Nav";
-import Home from "./routes/Home";
 import BusLine from "./routes/BusLine";
 import Shuttle from "./routes/Shuttle";
 import Ticket from "./routes/Ticket";
 import StopList from "./routes/StopList";
+import ShuttleStopList from "./routes/ShuttleStopList";
 import Login from "./component/Login/Login";
 import ProtectedRoute from "./component/Auth/protected.route"
 import { makeStyles } from "@material-ui/core/styles";
@@ -30,11 +30,12 @@ const App = () => {
 		<div className={classes.content}>
 			<Switch >
 				<Route exact path="/login" component={Login} />	
-				<Route exact path="/" component={Home} />
+				<ProtectedRoute exact path="/" component={BusLine} />
 				<ProtectedRoute exact path="/busline" component={BusLine} />
                 <ProtectedRoute exact path="/shuttle" component={Shuttle} />
                 <ProtectedRoute exact path="/ticket" component={Ticket} />
 				<ProtectedRoute exact path="/stoplist" component={StopList} />
+				<ProtectedRoute exact path="/shuttlestoplist" component={ShuttleStopList} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
 			</Switch>
 		</div>

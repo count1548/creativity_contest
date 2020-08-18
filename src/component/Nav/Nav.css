@@ -1,13 +1,16 @@
 .item {
 	color: white;
-	text-align:center !important;
 	border-radius: 5px;
 	transition:all .2s ease-in-out;
 
 	width:90% !important;
 	margin:30px auto;
+	cursor:pointer;
 }
-
+.sub-item {
+	color: #bbb;
+	margin:10px auto;
+}
 a { 
 	text-decoration:none !important;
 }
@@ -45,4 +48,5 @@ a {
 	color:#bbb;
 	text-align:center;
 	word-break:all;
+	cursor:pointer;
 }
