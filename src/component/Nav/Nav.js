@@ -40,14 +40,16 @@ const useStyles = makeStyles((theme) => ({
 
 const navList = [
     {name : "통학버스", path : [
-      {name : "노선관리", path : "/busline"},
+      {name : "시간표관리", path : "/busline"},
       {name : "정류장관리", path : "/stoplist"},
     ]},
     {name : "셔틀버스", path : [
-      {name : "노선관리", path : "/shuttle"},
+      {name : "시간표관리", path : "/shuttle"},
       {name : "정류장관리", path : "/shuttlestoplist"},
     ]},
     {name : "예매내역", path : "/ticket"},
+    {name : "사용자관리", path : '/usermanage'},
+    {name : "공지관리", path : '/notice'},
 ]
 
 const CopyrightInfo = (props) => {
@@ -76,8 +78,9 @@ const CopyrightInfo = (props) => {
 
 const tockenItem = (arr, idx) => {
   const cpArr = arr.slice()
-  cpArr[idx] = !cpArr[idx]
-  return cpArr
+  return cpArr.map((open, i) => 
+    (idx === i) ? !open : false
+  )
 }
 
 export default function SwipeableTemporaryDrawer() {

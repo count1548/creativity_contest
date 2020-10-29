@@ -1,11 +1,10 @@
-const host = "http://uck.myds.me:3001"
-
+const host = "http://uck.myds.me"
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const getAPI = (target, name) => {
+const getAPI = (target, name, port=3001) => {
     return new Promise<any[]>((resolve, reject) => {
-        fetch(`${host}/${target}`, {
+        fetch(`${host}:${port}/${target}`, {
             method: 'GET',
             headers:{
                 'Accept': 'application/json',
@@ -18,22 +17,25 @@ const getAPI = (target, name) => {
     })
     
 }
-const setAPI = (target, data) => {
-    // return fetch(`${host}/${target}`, {
-    //     method: 'POST',
-    //     	headers:{
-    //     		'Accept': 'application/json',
-    //     		'Content-Type': 'application/json'
-    //         },
-    //     body : JSON.stringify(data)
-	// })
-    // .then(res => setState(value))
+const setAPI = (target, data, port=3333) => {
     console.log({
         url : target,
         body : data,
     })
-    return new Promise((res, rej) => {
-        setTimeout(()=>(res('success')), 1000)
+    return new Promise<any>((resolve, reject) => {
+        fetch(`${host}:${port}/${target}`, {
+            method: 'POST',
+                headers:{
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            body : JSON.stringify(data)
+        })
+	.then(res => {
+		console.log(res)
+		resolve('success')
+	})
+        .catch(err => reject(err))
     })
 }
 

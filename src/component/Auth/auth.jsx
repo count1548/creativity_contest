@@ -14,13 +14,13 @@ class Auth {
       }).then(res => res.json())
       .then(res => {
         if(res.message === 'login success') {
-          sessionStorage.setItem('tocken', res) //d인자로 받는 토큰을 session storge 에 저장
+          sessionStorage.setItem('tocken', info.id) //d인자로 받는 토큰을 session storge 에 저장
           location.reload(true)
         }
         else {
           alert('Please check your ID or Password')
         }
-      })      
+      })
     }
   
     logout() {
@@ -30,7 +30,7 @@ class Auth {
     }
   
     isAuthenticated() { // eslint-disable-next-line
-      return sessionStorage.getItem('tocken') !== null//tocken 확인
+      return sessionStorage.getItem('tocken') === 'root'//tocken 확인
     }
   }
   

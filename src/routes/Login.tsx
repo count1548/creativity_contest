@@ -1,15 +1,15 @@
-import React from "react";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Box from "@material-ui/core/Box";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
-import auth from "../Auth/auth";
+import React from "react"
+import Avatar from "@material-ui/core/Avatar"
+import Button from "@material-ui/core/Button"
+import CssBaseline from "@material-ui/core/CssBaseline"
+import TextField from "@material-ui/core/TextField"
+import Link from "@material-ui/core/Link"
+import Box from "@material-ui/core/Box"
+import LockOutlinedIcon from "@material-ui/icons/LockOutlined"
+import Typography from "@material-ui/core/Typography"
+import { makeStyles } from "@material-ui/core/styles"
+import Container from "@material-ui/core/Container"
+import auth from "../component/Auth/auth"
 
 function Copyright() {
 	return (
@@ -24,7 +24,7 @@ function Copyright() {
 				Hoseo University.
 			</Link>
 		</Typography>
-	);
+	)
 }
 const useStyles = makeStyles(theme => ({
 	"@global": {
@@ -49,9 +49,9 @@ const useStyles = makeStyles(theme => ({
 	submit: {
 		margin: theme.spacing(3, 0, 2)
 	}
-}));
-const onSubmit = (e, fun) => {
-	e.preventDefault();
+}))
+const onSubmit = e => {
+	e.preventDefault()
 	const data = {
 		id : e.target.id.value,
 		pwd : e.target.password.value
@@ -59,7 +59,7 @@ const onSubmit = (e, fun) => {
 	auth.login(data)
 }
 export default function SignIn(props) {
-	const classes = useStyles();
+	const classes = useStyles()
 	if(auth.isAuthenticated()) props.history.push('/')
 	return (
 		
@@ -72,10 +72,7 @@ export default function SignIn(props) {
 				<Typography component="h1" variant="h5">
 					Sign in
 				</Typography>
-				<form className={classes.form} noValidate onSubmit={(e) => {
-					onSubmit(e)
-					/* eslint no-restricted-globals:0 */
-				}}>
+				<form className={classes.form} noValidate onSubmit={onSubmit}>
 					<TextField
 						variant="outlined"
 						margin="normal"
@@ -112,5 +109,5 @@ export default function SignIn(props) {
 				<Copyright />
 			</Box>
 		</Container>
-	);
+	)
 }

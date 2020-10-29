@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 export default function AlertDialog({
   onSubmit=()=>{}, onExit=()=>{},
     children = 'default content',
-    submitMsg = 'OK', resetMsg = 'Exit', 
+    submitMsg = '확인', resetMsg = '나가기', 
     type = 'text',
     title = 'Dialog',
     onClose = ()=>{},
@@ -29,9 +29,10 @@ export default function AlertDialog({
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        maxWidth={'xl'}
       >
         <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
-        {(type === 'component') ? children : <DialogContent>
+        {(type === 'component') ? <div style={{padding : '20px'}}>{children}</div> : <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {children}
           </DialogContentText>

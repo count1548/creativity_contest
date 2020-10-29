@@ -9,7 +9,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 const columns = [
     {title : 'ID', field : 'TICKET_ID', hidden : true, width:0 },
     {title : '학생', field : 'STUDENT_ID', width:100 },
-    {title : '노선', field : 'BUS_ID', defaultGroupOrder: 0, width:0  },
+    {title : '노선', field : 'BUS_LINE_NAME', defaultGroupOrder: 0, width:0  },
     {title : '출발지', field : 'START' },
     {title : '도착지', field : 'END' },
     {title : '예약 날짜', field : 'RESERVATION_DATE', width:150, type:"date" as const, },

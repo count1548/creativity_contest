@@ -4,18 +4,18 @@ import TransferList from '../component/LineList/'
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI, setTimeTable} from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Dropzone from '../component/Dropzone'
-import Toolbar from '../component/Table/Toolbar'
+import Toolbar from '../component/Toolbar'
 import Table from '../component/Table/'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
 import Dialog from '../component/Dialog'
-
 import '../style/font.css'
 import '../style/lineTable.css'
 
-const columns = ['노선', '월', '화', '수', '목', '금']
-const week = 5
+const weekOfDay = {'Mon' : '월', 'Tue' : '화', 'Wed' : '수', 'Thu' : '목', 'Fri' : '금'}
+const columns = ['노선', ...Object.values(weekOfDay)]
+
 async function getData() {
   const stops = await getAPI('bus/stop/', 'BUS_STOP')
   const times = await getAPI('bus/time/', 'TIME_TABLE')
@@ -47,15 +47,15 @@ let stopData:Object, lineData: Object, timeData: Object,
     selectedLines:string[] = [], newLineName:string = ''
 
 const BusLine = props => {
-  const [stat, setState] = useState('apply')
+  const [state, setState] = useState('apply')
   const [updated, setUpdated] = useState(true)
 
-  const [campus, setCampus] = useState('')
-  const [way, setWay] = useState('')
+  const [campus, setCampus] = useState('아산캠퍼스')
+  const [way, setWay] = useState('등교')
   const [lineName, setLine] = useState<any | null>('')
   const [required, setRequired] = useState(false)
 
-  const init = () => { setCampus(''); setWay(''); setLine(''); newLineName = ''}
+  const init = () => { setCampus('아산캠퍼스'); setWay('등교'); setLine(''); newLineName = ''}
 
   //setting table head data
   useEffect(() => {
@@ -66,7 +66,7 @@ const BusLine = props => {
     }).catch(err => console.log(err))
   }, [updated])
 
-  if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
+  if (state === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
   
   const dataToJson = ({row, column, value}) => ({
     IDX_BUS_LINE : lineData[lineName].find((value, idx) => (idx === row))['IDX_BUS_LINE'],
@@ -74,12 +74,14 @@ const BusLine = props => {
     BUS_TIME : value
   })
 
-  const selected = [(campus !== '' && way !== ''), (lineName !== ''), (stat !== 'create-line')]
+  const selected = [(campus !== '' && way !== ''), (lineName !== ''), (state !== 'create-line')]
 
-  if(selected[0] && selected[2]) selectedLines = Object.keys(lineData)
+  if(selected[0] && selected[2]) {
+    selectedLines = Object.keys(lineData)
       .filter(name => findStops(lineData[name], campus))
       .filter(name => findWays(name, way))
-  if(selected[1] && !isAvailable(lineData[lineName])) { init(); return null }
+    if(lineName === '' && selectedLines.length > 0) setLine(selectedLines[0])
+  }
   
   const createButtonForm = (label, to) => ({ label: label, action: () => setState(to) })
   const buttons = {
@@ -95,12 +97,12 @@ const BusLine = props => {
     'upload': createButtonForm('불러오기', 'upload')
   }
 
-  const getButtonList = stat => {
+  const getButtonList = state => {
     let bntlist: Object[] = [buttons['return']]
 
-    switch (stat) {
+    switch (state) {
       case 'show':
-        bntlist = [buttons['upload']]
+	bntlist = []
         if (selected[1]) {
           bntlist.push(buttons['update'], buttons['delete-line'])
         }
@@ -130,7 +132,7 @@ const BusLine = props => {
         setCampus(value)
       },
       value: campus,
-      disable: () => (stat !== 'show')
+      disable: () => (state !== 'show')
     },
     {
       name: '등하교',
@@ -145,7 +147,7 @@ const BusLine = props => {
         setWay(value)
       },
       value: way,
-      disable: () => (stat !== 'show')
+      disable: () => (state !== 'show')
     },
     {
       name: '노선',
@@ -158,7 +160,7 @@ const BusLine = props => {
         })),
         onChange: value => setLine(value),
         value: lineName,
-        disable: () => ((selectedLines.length === 0) || stat !== 'show')
+        disable: () => ((selectedLines.length === 0) || state !== 'show')
       } : {
         type : 'text',
         onChange: value => {newLineName = value},
@@ -170,8 +172,10 @@ const BusLine = props => {
   const displayComponent = () => {
     let listProps:{chData : any[], onSubmit (list : any[]) : any }|null = null
     let component = <NoData message='Please Select Options' />
+    
+    if(!isAvailable(lineData[lineName])) return component
 
-    switch(stat) {
+    switch(state) {
       case 'create-line':
         listProps = {
           chData : [campus],
@@ -181,7 +185,7 @@ const BusLine = props => {
               return
             }
             setState('apply')
-            setAPI('/bus/line/create', {
+            setAPI('bus/line/create', {
               'lineName': `${newLineName}_${way}`, 'data': list
             }).then(res => {init(); setUpdated(!updated)})
           }
@@ -193,14 +197,14 @@ const BusLine = props => {
           onSubmit : list => {
             if(list.length < 2) { setRequired(true); return }
             setState('apply')
-            setAPI('/bus/line/update', {
+            setAPI('bus/line/update', {
               'lineName': lineName, 'data': list
             }).then(res => setUpdated(!updated))
           }
         }
         break
     }
-    if(stat === 'update-line' || stat === 'create-line') {
+    if(state === 'update-line' || state === 'create-line') {
       if(listProps !== null) component = <TransferList
           allData={stopData[way].map(data => data['BUS_STOP_NAME'])}
           title={'노선'}
@@ -210,7 +214,15 @@ const BusLine = props => {
     else if(selected[1]) {
       const record = lineData[lineName].map(data => {
         if (typeof (timeData[data['IDX_BUS_LINE']]) === 'undefined') return new Array(5)
-        else return timeData[data['IDX_BUS_LINE']].map(time => time['BUS_TIME'])
+        else { var cnt = 0
+          const value = timeData[data['IDX_BUS_LINE']]
+
+          return Object.keys(weekOfDay).map(day => {
+            const _time = value.find(data => data['WEEK_OF_DAY'] === day)
+            if(!isAvailable(_time)) return;
+            return _time['BUS_TIME']
+          })
+        }
       })
 
       component = <Table
@@ -218,13 +230,13 @@ const BusLine = props => {
         isRowHead = {true}
         rowHead={lineData[lineName].map(data => data['BUS_STOP_NAME'])}
         record={record}
-        editable={(stat === 'update-time')}
+        editable={(state === 'update-time')}
         headWidth={20}
-        button={stat === 'update-time' ? 'apply' : null}
+        button={state === 'update-time' ? 'apply' : null}
         onSubmit={(chlist) => {
           setState('apply')
           setAPI(
-            '/bus/time/update',
+            'bus/time/update',
             { timeList: chlist.map(data => dataToJson(data)) })
             .then(res => setUpdated(!updated))
         }}
@@ -236,19 +248,19 @@ const BusLine = props => {
   const displayModal = () => {
     let component: any = null
 
-    switch (stat) {
+    switch (state) {
       case 'delete-line':
         if (!selected[1]) return null
         component = 
           <Dialog
             onSubmit = {()=>{
               setState('apply')
-              setAPI('/bus//shuttle/line/delete', {
+              setAPI('bus/line/delete', {
                 'lineName': lineName,
               }).then(res => setUpdated(!updated))
               init()
-            }} onExit={() => setState('show')}
-            submitMsg = {'Delete'}
+            }} onClose={() => setState('show')}
+            submitMsg = {'삭제'}
             type={'text'}
             defaultState={true}
           >노선을 삭제하시겠습니까?</Dialog>
@@ -273,7 +285,7 @@ const BusLine = props => {
       <Toolbar
         title='통학버스 시간표'
         inputForm={forms}
-        buttons={getButtonList(stat)} />
+        buttons={getButtonList(state)} />
       {displayComponent()}
       {displayModal()}
       <Dialog

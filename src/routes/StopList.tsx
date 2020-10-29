@@ -1,12 +1,12 @@
 /*eslint-disable */
 import React, {useState, useEffect}  from "react"
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_function' 
-import Toolbar from '../component/Table/Toolbar'
+import Toolbar from '../component/Toolbar'
 import Table from '../component/Table/'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
-// import GoogleMapReact from 'google-map-react'
+import Dialog from '../component/Dialog'
 import GoogleMap from '../component/Map/'
 import '../style/font.css'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
@@ -66,16 +66,17 @@ let defaultLocation = {
 const StopList = props => {
     const [updated, setUpdated] = useState(true)
     const [stat, setState] = useState('apply')
-    const [selected, setSelected] = useState('')
+    const [selected, setSelected] = useState<number|null>(null)
     const [location, setLocation] = useState({lat: 0, lng: 0 })
     const [way, setWay] = useState('')
+    const [required, setRequired] = useState(false)
 
     const [zoom, setZoom] = useState(11)
     const classes = useStyles()
     const init = () => {
         stopInfo = {...defaultValue}
         setLocation({lat:0, lng:0})
-        setSelected('')
+        setSelected(null)
         setWay('')
     }
 
@@ -103,7 +104,7 @@ const StopList = props => {
                 label : '추가정보',
                 type : 'text',
                 onChange: value => { stopInfo['BOARDING_LOCATION'] = value },
-                value : stopInfo['BOARDING_LOCATION']
+                value : stopInfo['BOARDING_LOCATION'] === null ? '' : stopInfo['BOARDING_LOCATION']
             },
             {
                 label : '등하교',
@@ -142,30 +143,34 @@ const StopList = props => {
             {
                 label : '천캠가격',
                 type : 'text',
-                textType : 'number',
+                textType : 'money',
                 onChange: value => { stopInfo['C_PRICE'] = value },
                 value : stopInfo['C_PRICE'],
             },,
             {
                 label : '아캠가격',
                 type : 'text',
-                textType : 'number',
+                textType : 'money',
                 onChange: value => { stopInfo['A_PRICE'] = value },
                 value : stopInfo['A_PRICE']
             },
         ]
     ]
     const buttonClick = () => {
-        const url = (selected === '') ? 'create' : 'update'
-        
+        const url = (selected === null) ? 'create' : 'update'
+        if(stopInfo['BUS_STOP_NAME'] === '' || way === '') {
+            setRequired(true)
+            return
+        }
         setState('apply')
-        setAPI(`/bus/stop/${url}`, {...stopInfo, 
+        setAPI(`bus/stop/${url}`, {...stopInfo, 
             LATITUDE : location.lat,
             LONGITUDE : location.lng, CODE:way})
             .then(res => { init(); setUpdated(!updated) })
     }
-    const rowClick = (idx) => {
-        if(selected == idx) {init(); return}
+    const rowClick = idx => {
+        if(selected === idx) {init(); return}
+        console.log(stopData[idx])
         const {CODE, LATITUDE, LONGITUDE, ...mainInfo} = stopData[idx]
         stopInfo = {...mainInfo}
         defaultLocation = {
@@ -182,6 +187,11 @@ const StopList = props => {
 
     return (
         <div className='main-warp'>
+            <Dialog
+                children={'필수 항목을 입력하십시오'}
+                onClose = {()=>setRequired(false)}
+                defaultState={required}
+            />
             <div className={classes.mainContent}>
                 <div className={classes.table}>
                     <Table

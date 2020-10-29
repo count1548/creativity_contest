@@ -1,12 +1,12 @@
 /*eslint-disable */
 import React, {useState, useEffect}  from "react"
 import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_function' 
-import Toolbar from '../component/Table/Toolbar'
+import Toolbar from '../component/Toolbar'
 import Table from '../component/Table'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
-// import GoogleMapReact from 'google-map-react'
+import Dialog from '../component/Dialog'
 import GoogleMap from '../component/Map'
 import '../style/font.css'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
@@ -14,18 +14,17 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 async function getData() {
     const stop = await getAPI('bus/shuttle/stop/', 'result')
     if(!isAvailable(stop)) return []
-
     return stop
 }
 
 let stopData:any[] = []
 interface stopInterface {
     IDX?:number,
-    KOR_NAME : string, EN_NAME : string, DETAIL? : string,
+    SHUTTLE_STOP_NAME : string, DETAIL? : string,
 }
 
 const defaultValue:stopInterface = {
-    KOR_NAME : '', EN_NAME : '', DETAIL : '',
+    SHUTTLE_STOP_NAME : '', DETAIL : '',
 }
 
 let stopInfo:stopInterface = {...defaultValue} as any
@@ -64,15 +63,16 @@ let defaultLocation = {
 const StopList = props => {
     const [updated, setUpdated] = useState(true)
     const [stat, setState] = useState('apply')
-    const [selected, setSelected] = useState('')
+    const [selected, setSelected] =  useState<number|null>(null)
     const [location, setLocation] = useState({lat: 0, lng: 0 })
+    const [required, setRequired] = useState(false)
 
     const [zoom, setZoom] = useState(11)
     const classes = useStyles()
     const init = () => {
         stopInfo = {...defaultValue}
         setLocation({lat:0, lng:0})
-        setSelected('')
+        setSelected(null)
     }
 
     //setting table head data
@@ -84,7 +84,7 @@ const StopList = props => {
     }, [updated])
     if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
 
-    const rows = stopData.map(value => [value['KOR_NAME']])
+    const rows = stopData.map(value => [value['SHUTTLE_STOP_NAME']])
     const AnyReactComponent = ({ lat, lng, text }) => <div>{text}</div>;
 
     const form = [
@@ -92,16 +92,9 @@ const StopList = props => {
             {
                 label : '이름',
                 type : 'text',
-                onChange : value => {stopInfo['KOR_NAME'] = value} ,
-                value : stopInfo['KOR_NAME'],
+                onChange : value => {stopInfo['SHUTTLE_STOP_NAME'] = value} ,
+                value : stopInfo['SHUTTLE_STOP_NAME'],
             },
-            {
-                label : '영어이름',
-                type : 'text',
-                onChange : value => {stopInfo['EN_NAME'] = value} ,
-                value : stopInfo['EN_NAME'],
-            },
-        ],[
             {
                 label : '추가정보',
                 type : 'text',
@@ -130,10 +123,13 @@ const StopList = props => {
         ],
     ]
     const buttonClick = () => {
-        const url = (selected === '') ? 'create' : 'update'
-        
+        const url = (selected === null) ? 'create' : 'update'
+        if(stopInfo['SHUTTLE_STOP_NAME'] === '') {
+            setRequired(true)
+            return
+        }
         setState('apply')
-        setAPI(`/bus/shuttle/stop/${url}`, {...stopInfo, 
+        setAPI(`shuttle/stop/${url}`, {...stopInfo, 
             LATITUDE : location.lat,
             LONGITUDE : location.lng, })
             .then(res => { init(); setUpdated(!updated) })
@@ -154,6 +150,11 @@ const StopList = props => {
     }
     return (
         <div className='main-warp'>
+            <Dialog
+                children={'필수 항목을 입력하십시오'}
+                onClose = {()=>setRequired(false)}
+                defaultState={required}
+            />
             <div className={classes.mainContent}>
                 <div className={classes.table}>
                     <Table

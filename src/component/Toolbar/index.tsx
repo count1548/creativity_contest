@@ -6,9 +6,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SelectForm from './SelectForm'
+import SelectForm from '../Table/SelectForm'
 import TextField from '@material-ui/core/TextField'
-
+import PrefixTextField from './PfixTextField'
 
 import '../../style/font.css'
 
@@ -60,8 +60,14 @@ const TextForm = ({label, onChange, name, value='', textType = 'text'}) => {
         setText(value)
     }, [value])
 
-    const textField = 
-        <TextField 
+    const textField = (textType === 'money') ? 
+        <PrefixTextField
+            id={label}
+            label={label}
+            defaultValue={value}
+            onChange={value => onChange(value)}
+        />
+        :<TextField 
             id={label} 
             label={label} 
             variant="outlined" 

@@ -17,6 +17,7 @@ import Divider from '@material-ui/core/Divider';
 
 import RootRef from "@material-ui/core/RootRef";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Alert from '@material-ui/lab/Alert'
 
 const useStyles = makeStyles((theme : Theme) => createStyles({
     root: {
@@ -43,13 +44,6 @@ const useStyles = makeStyles((theme : Theme) => createStyles({
         display : 'block',
         margin : '10px auto'
     },
-    text: {
-        ...theme.typography.button,
-        backgroundColor: theme.palette.background.paper,
-        textAlign:'center',
-        color:'grey',
-        padding: theme.spacing(1),
-      },
 }))
 
 function not(a : number[], b : number[]) {
@@ -260,7 +254,9 @@ export default function TransferList({dataLabels = null, chData, allData, title,
                 color="primary" 
                 className={classes.submit}
                 onClick={()=>onSubmit(left)}>Submit</Button>
-            <div className={classes.text}>{"첫 or 마지막 정류장은 항상 캠퍼스여야 하며, 하나 이상의 경유지가 존재해야 합니다."}</div>
+            <Alert variant="outlined" severity="warning">
+                {"첫 or 마지막 정류장은 항상 캠퍼스여야 하며, 하나 이상의 경유지가 존재해야 합니다."}
+            </Alert>
         </div>
     );
 }

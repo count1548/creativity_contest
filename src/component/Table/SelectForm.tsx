@@ -26,7 +26,6 @@ interface form_interface {
 const SelectForm = ({name, label, options, onChange, value, disable = null, width = 33} : form_interface) => {
     const changeValue = event => onChange(event.target.value)
     const classes = useStyles()
-
     const content = <FormControl variant="outlined" className={classes.formControl} {
             ...{disabled : (disable == null) ? false : disable()}}>
             <InputLabel htmlFor="outlined-age-native-simple">{label}</InputLabel>
@@ -40,7 +39,6 @@ const SelectForm = ({name, label, options, onChange, value, disable = null, widt
             {options.map((data, idx) => <MenuItem value={data['value']} key={idx}>{data['label']}</MenuItem>)}
             </Select>
         </FormControl>
-
     return (
         (typeof(name) === 'undefined') ? content : <FormControlLabel control={content} label={name} labelPlacement="start" style={{marginLeft:40}}/>
     )

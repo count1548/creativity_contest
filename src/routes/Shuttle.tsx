@@ -5,23 +5,22 @@ import {isAvailable, getAPI, dictToArr, dictToArr_s, setAPI} from '../data_funct
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
 import '../style/lineTable.css'
-import Toolbar from '../component/Table/Toolbar'
+import Toolbar from '../component/Toolbar'
 import Table from '../component/Table/'
 import NoData from '../component/Table/NoData'
 import Loading from '@material-ui/core/CircularProgress'
-import Button from '@material-ui/core/Button';
 import Dialog from '../component/Dialog'
 
 import '../style/font.css'
 import { LinearProgress } from "@material-ui/core"
 
-const lineToRows = (dict:any, stop, lineIDX) => {
-  const IDX =  dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_ID')
+const lineToRows = (dict:any, lineIDX) => {
+  const IDX =  dictToArr(lineIDX, 'IDX', 'SHUTTLE_STOP_NAME')
   for(var line in dict) for(var day in dict[line]) for(var bus in dict[line][day])  {
     const now = dict[line][day][bus]
     dict[line][day]['LINE'] = now.map(value => ({
-      'IDX' : IDX[value['IDX_BUS_LINE']], 
-      'NAME' : stop[IDX[value['IDX_BUS_LINE']]]
+      'IDX' : value['IDX_BUS_LINE'], 
+      'NAME' : IDX[value['IDX_BUS_LINE']]
     }))
     dict[line][day][bus] = now.map((value, idx) => ({
       'IDX_BUS_LINE' : value['IDX_BUS_LINE'],
@@ -42,25 +41,23 @@ const setTime_orderby_ID = (dict:any[]) =>  {
 const lang = 'KOR_NAME'
 
 async function getData() {
-  const stop = await  getAPI('bus/shuttle/stop', 'result')
+  const stop = await  getAPI('bus/shuttle/stop/', 'result')
   const time = await  getAPI('bus/shuttle/time/', 'result')  // important api sql 구문에서 첫 노선 시간에 따른 정렬 순서대로 불러올것!
   const line = await  getAPI('bus/shuttle/line/', 'result')
   
-  const stopName =  dictToArr(stop, 'SHUTTLE_STOP_ID', lang)
+  const stopName =  stop.map(value => value['SHUTTLE_STOP_NAME'])
   const timeData = setTime_orderby_ID(time)
-  const lineData = lineToRows(timeData, stopName, line)
+  const lineData = lineToRows(timeData, line)
   
   return {stopName, timeData, lineData}
 }
 
-let stopName:Object = {}, 
-    lineData:Object = {}, 
-    timeData:Object = {},
-    columns:string[] = [],
+let stopName:string[] = [], columns:string[] = [],
+    lineData:Object = {}, timeData:Object = {},
     newLineName:string = '', newLineDay:string = ''
 
 const ShuttleLine = props => {
-  const [stat, setState] = useState('apply')
+  const [state, setState] = useState('apply')
 
   const [required, setRequired] = useState(false)
   const [updated, setUpdated] = useState(true)
@@ -72,15 +69,19 @@ const ShuttleLine = props => {
     newLineName = ''
     newLineDay = ''
   }
-  
   //data setting
   useEffect(()=> {
     getData().then(res => {
       ({stopName, timeData, lineData} = res)
+      const _name = Object.keys(lineData)[0]
+
+      setLineName(_name)
+      setDay(Object.keys(lineData[_name])[0])
+
       setState('show')
     })
   }, [updated])
-  if(stat === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
+  if(state === 'apply') return <div style={{width:'300px', margin:'30px auto'}}><Loading size={200}/></div>
   
   let selected = !(lineName === '' || day === '')
   if(selected) {
@@ -90,8 +91,9 @@ const ShuttleLine = props => {
     }
     else columns = ['운행', ...lineData[lineName][day]['LINE'].map(value => value['NAME'])]
   }
+  
   //setting table head data
-  const IdxToID = (busidx) => {
+  const IdxToID = busidx => {
     const key = Object.keys(lineData[lineName][day]).find((value, idx) => busidx === idx)
     return key
   }
@@ -99,7 +101,7 @@ const ShuttleLine = props => {
     const key = IdxToID(row)
     return {
       BUS_ID : key,
-      IDX_BUS_LINE : lineData[lineName][day][key][column],
+      IDX_BUS_LINE : lineData[lineName][day]['LINE'][column]['IDX'],
       BUS_TIME : value
     }
   }
@@ -108,7 +110,7 @@ const ShuttleLine = props => {
     [{
         name : '노선',
         label : 'Line',
-        ...(stat === 'create-line') ? {
+        ...(state === 'create-line') ? {
           type : 'text',
           onChange : value => { newLineName = value },
           value:newLineName,
@@ -116,17 +118,17 @@ const ShuttleLine = props => {
           type : 'select',
           options : Object.keys(lineData).map((value, idx) => ({'value' : value, 'label' : value})),
           onChange : value => {
-            setDay('')
+            setDay(Object.keys(lineData[value])[0])
             setLineName(value)
           },
           value:lineName,
-          disable : () => (stat !== 'show')
+          disable : () => (state !== 'show')
         },
     },
     {
         name : '날짜',
         label : 'Days',
-        ...(stat === 'create-line') ? {
+        ...(state === 'create-line') ? {
           type : 'text',
           onChange : value => { newLineDay = value },
           value : newLineDay,
@@ -136,7 +138,7 @@ const ShuttleLine = props => {
             Object.keys(lineData[lineName]).map((value, idx) => ({'value' : value, 'label' : value})),
           onChange: value => setDay(value),
           value:day,
-          disable : () => ((lineName == '') || (stat !== 'show'))
+          disable : () => ((lineName == '') || (state !== 'show'))
         },
     },]
   ]
@@ -158,10 +160,10 @@ const ShuttleLine = props => {
     'del-bus' : createButtonForm('배차삭제', 'delete-bus')
   }
 
-  const getButtonList = stat => {
+  const getButtonList = state => {
     let bntlist:Object[] = [buttons['return']]
 
-    switch(stat) {
+    switch(state) {
       case 'show':
         bntlist = [buttons['create']]
         if(selected) {
@@ -187,14 +189,14 @@ const ShuttleLine = props => {
     (obj1['BUS_ID'] == obj2['BUS_ID'])) return true
     return false
   }
-
+  
   const displayComponent = () => {
     let listProps:{chData : any[], onSubmit (list : any[]) : any }|null = null,
         tableProps:{selectable? : boolean, onSubmit (list : any[]) : any, button : string}|null = null
 
     let component = <NoData message='Please Select Options'/>
 
-    switch(stat) {
+    switch(state) {
       case 'create-line':
         listProps = {
           chData : [],
@@ -204,7 +206,7 @@ const ShuttleLine = props => {
               return
             }
             setState('apply')
-            setAPI('/bus/shuttle/line/create', {
+            setAPI('shuttle/line/create', {
               'lineName' : newLineName,
               'code' : newLineDay,
               'data' : list,
@@ -214,12 +216,12 @@ const ShuttleLine = props => {
         break
       case 'update-line':
         listProps = {
-          chData : lineData[lineName][day]['LINE'].map(value => value['IDX']),
+          chData : lineData[lineName][day]['LINE'].map(value => value['NAME']),
           onSubmit : list => {
             if(list.length < 2) { setRequired(true); return }
             setState('apply')
             //if(list.length === 0) break
-            setAPI('/bus/shuttle/line/update', {
+            setAPI('shuttle/line/update', {
               'lineName' : lineName,
               'code' : day,
               'data' : list,
@@ -232,8 +234,11 @@ const ShuttleLine = props => {
           onSubmit : list => {
             setState('apply')
             setAPI(
-             '/bus/shuttle/time/update', 
-             {timeList : list.map(data => dataToJson(data))})
+             'shuttle/time/update', 
+             {info : {
+               lineName : lineName,
+               code : day
+             }, timeList : list.map(data => dataToJson(data))})
              .then(res => setUpdated(!updated))
           },
           button : 'apply'
@@ -245,7 +250,7 @@ const ShuttleLine = props => {
           onSubmit : list => {
             setState('apply')
             setAPI(
-             '/bus/shuttle/bus/delete', 
+             'shuttle/bus/delete', 
              {delList : list.map(idx => IdxToID(idx))})
              .then(res => setUpdated(!updated))
           },
@@ -254,10 +259,9 @@ const ShuttleLine = props => {
         break
     }
 
-    if(stat === 'create-line' || stat === 'update-line') { if(listProps !== null) 
+    if(state === 'create-line' || state === 'update-line') { if(listProps !== null) 
       component = <TransferList
-        dataLabels = {stopName}
-        allData = {Object.keys(stopName).map((value:any) => value*1)}
+        allData = {stopName}
         title = {'노선'}
         {...listProps}
       />
@@ -276,7 +280,7 @@ const ShuttleLine = props => {
           column = {columns}
           rowHead = {rowHead}
           record = {record}
-          editable={stat === 'update-time'}
+          editable={state === 'update-time'}
           headWidth={5}
           {...tableProps}
         />
@@ -288,11 +292,11 @@ const ShuttleLine = props => {
     const newBus = new Array(columns.length-1)
     let dialogProps:Object|null = null
 
-    switch(stat) {
+    switch(state) {
       case 'create-bus':
         dialogProps = {
           type : 'component', 
-          submitMsg : 'Apply',
+          submitMsg : '생성',
           children : <Table
             column = {columns}
             rowHead = {['BUS']}
@@ -309,7 +313,7 @@ const ShuttleLine = props => {
             />,
           onSubmit : ()=> {
             setState('apply')
-            setAPI( '/bus/shuttle/time/create', 
+            setAPI( 'shuttle/bus/create', 
             {
               lineName : lineName,
               day : day,
@@ -323,11 +327,11 @@ const ShuttleLine = props => {
       case 'delete-line':
         dialogProps = {
           type : 'text',
-          submitMsg : 'Delete',
+          submitMsg : '삭제',
           children : '노선을 삭제하시겠습니까?',
           onSubmit : () => {
             setState('apply')
-             setAPI('/bus//shuttle/line/delete', {
+             setAPI('shuttle/line/delete', {
               'lineName' : lineName,
               'code' : day,
             }).then(res => setUpdated(!updated))
@@ -338,8 +342,8 @@ const ShuttleLine = props => {
     }
     if(dialogProps !== null) return (
       <Dialog
-        onExit={() => setState('show')}
-        title={'Message Popup'}
+        onClose={() => setState('show')}
+        title={'배차 생성'}
         defaultState={true}
         {...dialogProps}
       />
@@ -351,13 +355,12 @@ const ShuttleLine = props => {
       <Toolbar 
       title = '셔틀버스 시간표' 
       inputForm = {forms}
-      buttons={getButtonList(stat)}/>
+      buttons={getButtonList(state)}/>
       {displayComponent()}
       {displayModal()}
       <Dialog
         children={'필수 항목을 입력하십시오'}
-        onSubmit = {()=>setRequired(false)}
-        onExit = {()=>setRequired(false)}
+        onClose = {()=>setRequired(false)}
         defaultState={required}
       />
     </div>
