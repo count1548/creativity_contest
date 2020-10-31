@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     width: drawerWidth,
     overflowX:'hidden',
-    backgroundColor:'#2c537a'
+    backgroundColor:'#de1f2f'
   },
   // necessary for content to be below app bar
   toolbar: theme.mixins.toolbar,
@@ -39,17 +39,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const navList = [
-    {name : "통학버스", path : [
-      {name : "시간표관리", path : "/busline"},
-      {name : "정류장관리", path : "/stoplist"},
-    ]},
-    {name : "셔틀버스", path : [
-      {name : "시간표관리", path : "/shuttle"},
-      {name : "정류장관리", path : "/shuttlestoplist"},
-    ]},
-    {name : "예매내역", path : "/ticket"},
-    {name : "사용자관리", path : '/usermanage'},
-    {name : "공지관리", path : '/notice'},
+  {name : "홈화면", path : "/"},
+  {name : "장비관리", path : "/busline"},
+  {name : "점검기록", path : "/check_log"},
 ]
 
 const CopyrightInfo = (props) => {
@@ -97,7 +89,7 @@ export default function SwipeableTemporaryDrawer() {
 				anchor="left"
 			>
         <div className='MuiList-script'>
-          <div className='MuiList-main script'>HUB</div>
+          <div className='MuiList-main script'>HoseoGuard</div>
           <div className='MuiList-sub script'>관리자 페이지</div>
           {Auth.isAuthenticated() ? 
             <Button variant="contained" className='script' onClick={Auth.logout}>Logout</Button> : 
@@ -138,7 +130,7 @@ export default function SwipeableTemporaryDrawer() {
         })}
 				</List>
         <div className='copyright' onClick={()=>setOpen(true)}>
-          Copyright © 2020 UCK <br/><br/>Click more information
+          Copyright © 2020 HoseoGuard <br/><br/>Click more information
         </div>
 			</Drawer>
       <CopyrightInfo 

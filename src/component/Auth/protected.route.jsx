@@ -21,8 +21,7 @@ export const ProtectedRoute = ({
                 state: {
                   from: props.location
                 }
-              }}
-            />
+            }}/>
           );
         }
       }}
