@@ -4,6 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import { equip_data, check_log } from '../../dataset'
 import CheckLog from './CheckLog'
+import TextLabel from '../TextLabel'
 
 const useStyles = makeStyles((theme) => ({
     container : {
@@ -63,7 +64,9 @@ const EquipInfo = props => {
         <div className={classes.infoContainer}>
             <img className={classes.imageBox} src={image} />
             <div className={classes.infoBox}>
-
+                <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
+                <TextLabel label={'위치'}>{EquipInfo['location']}</TextLabel>
+                <TextLabel label={'점검여부'}>{EquipInfo['check']}</TextLabel>
             </div>
         </div>
         <div className={classes.logBox}><CheckLog size={5}/></div>

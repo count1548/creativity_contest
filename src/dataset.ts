@@ -1,50 +1,51 @@
 const equip_data = [{
     ID: 0,
     serial: 1254524,
+    location : 'location',
     check: 1
   }, {
     ID: 1,
-    serial: 2125423,
+    serial: 2125423,location : 'location',
     check: 1
   }, {
     ID: 2,
-    serial: 4565244,
+    serial: 4565244,location : 'location',
     check: 1
   }, {
     ID: 3,
-    serial: 1208424,
+    serial: 1208424,location : 'location',
     check: 0
   }, {
     ID: 4,
-    serial: 1254524,
+    serial: 1254524,location : 'location',
     check: 0
   }, {
     ID: 5,
-    serial: 2125423,
+    serial: 2125423,location : 'location',
     check: 0
   }, {
     ID: 6,
-    serial: 4565244,
+    serial: 4565244,location : 'location',
     check: 1
   }, {
     ID: 7,
-    serial: 1208424,
+    serial: 1208424,location : 'location',
     check: 0
   }, {
     ID: 8,
-    serial: 1254524,
+    serial: 1254524,location : 'location',
     check: 0
   }, {
     ID: 9,
-    serial: 2125423,
+    serial: 2125423,location : 'location',
     check: 0
   }, {
     ID: 10,
-    serial: 4565244,
+    serial: 4565244,location : 'location',
     check: 1
   }, {
     ID: 11,
-    serial: 1208424,
+    serial: 1208424,location : 'location',
     check: 0
   }]
   
