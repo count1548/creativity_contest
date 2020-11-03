@@ -13,25 +13,21 @@ const useStyles = makeStyles((theme) => ({
             display : 'block',
             clear : 'both',
         },
-        minWidth:'800px',
-        border:'1px solid gray'
+        width:'100%',
     },
     infoContainer: {
-        position : 'relative',
         float:'left',
-        width:'30%',
-        marginTop:'20px',
-        padding:'30px',
-        border:'1px solid gray'
+        width:'40%',
     },
     imageBox: {
-        width:'100%',
+        width:'calc(100% - 20px)',
+        height:'331px',
         padding : '10px',
         background : '#eee',
     },
     infoBox: {
-        width:'100%',
-        marginTop : '30px',
+        width:'calc(100% - 20px)', height:'117px',
+        marginTop : '10px',
         padding : '10px',
         border:'1px solid gray'
     },
@@ -46,31 +42,46 @@ const useStyles = makeStyles((theme) => ({
         left:'0',
     },
     logBox : {
-
+        float:'right',
+        width:'58%',
     }
 }));
 const EquipInfo = props => {
     const { stat, title, image, EquipInfo } = props
     const classes = useStyles()
     const [selected, setSelected] = useState<number>(0);
-
-    return <div className={classes.container}>
+    console.log(EquipInfo)
+    return (
+    <div className={classes.container}>
         <div className={classes.header}>
             <span className={classes.title}>{title}</span>
             <div className={classes.controlBox}>
                 <Button>생성하기</Button>
             </div>
         </div>
-        <div className={classes.infoContainer}>
-            <img className={classes.imageBox} src={image} />
-            <div className={classes.infoBox}>
-                <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
-                <TextLabel label={'위치'}>{EquipInfo['location']}</TextLabel>
-                <TextLabel label={'점검여부'}>{EquipInfo['check']}</TextLabel>
+        <div className={classes.container} style={{
+                width : 'calc(100% - 20px)',
+                padding : '10px',
+                marginTop:'20px'
+            }}>
+            <div className={classes.infoContainer}>
+                <img className={classes.imageBox} src={image} />
+                <div className={classes.infoBox}>
+                    <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
+                    <TextLabel label={'위치'}>{EquipInfo['location']}</TextLabel>
+                    <TextLabel label={'점검여부'}>{EquipInfo['check']}</TextLabel>
+                </div>
             </div>
+            <div className={classes.logBox}>
+                <CheckLog size={8}
+                    id = {selected}
+                    filtering = {false}
+                    search = {false}
+                    paging = {false}
+                    title = {false}
+                /></div>
         </div>
-        <div className={classes.logBox}><CheckLog size={5}/></div>
-    </div>
+    </div>) //등록하기를 새로운 다이어로그로 띄우기
 }
 
 export default EquipInfo;
