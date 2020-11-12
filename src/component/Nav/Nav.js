@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 const navList = [
   {name : "홈화면", path : "/"},
   {name : "장비관리", path : "/equiplist"},
-  {name : "점검기록", path : "/check_log"},
+  {name : "점검기록", path : "/checklog"},
 ]
 
 const CopyrightInfo = (props) => {

@@ -1,19 +1,27 @@
 const host = "http://uck.myds.me"
+const {equip_data, check_log} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 const getAPI = (target, name, port=3001) => {
-    return new Promise<any[]>((resolve, reject) => {
-        fetch(`${host}:${port}/${target}`, {
-            method: 'GET',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(res => resolve(res[name]))
-        .catch(err => reject(err))
+    // return new Promise<any[]>((resolve, reject) => {
+    //     fetch(`${host}:${port}/${target}`, {
+    //         method: 'GET',
+    //         headers:{
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json'
+    //         }
+    //     })
+    //     .then(res => res.json())
+    //     .then(res => resolve(res[name]))
+    //     .catch(err => reject(err))
+    // })
+    return new Promise<any>((resolve, reject) => {
+        setTimeout(()=> {
+            if(target == '/equip/list') resolve(equip_data)
+            else if(target == '/checklog') resolve(check_log)
+            reject('fail')
+        }, 1000)
     })
     
 }

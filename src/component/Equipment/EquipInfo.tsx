@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react"
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
-import { equip_data, check_log } from '../../dataset'
-import CheckLog from './CheckLog'
+import CheckLog from '../../routes/CheckLog'
 import TextLabel from '../TextLabel'
 
 const useStyles = makeStyles((theme) => ({
@@ -21,19 +20,17 @@ const useStyles = makeStyles((theme) => ({
     },
     imageBox: {
         width:'calc(100% - 20px)',
-        height:'331px',
+        height:'320px',
         padding : '10px',
         background : '#eee',
     },
     infoBox: {
-        width:'calc(100% - 20px)', height:'117px',
+        width:'calc(100% - 20px)', height:'105px',
         marginTop : '10px',
         padding : '10px',
         border:'1px solid gray'
     },
-    header : {
-
-    },
+    header : { },
     title : {
         marginLeft:'20px'
     },
@@ -46,11 +43,13 @@ const useStyles = makeStyles((theme) => ({
         width:'58%',
     }
 }));
+
 const EquipInfo = props => {
-    const { stat, title, image, EquipInfo } = props
+    const { title, image, EquipInfo } = props
     const classes = useStyles()
     const [selected, setSelected] = useState<number>(0);
-    console.log(EquipInfo)
+
+
     return (
     <div className={classes.container}>
         <div className={classes.header}>

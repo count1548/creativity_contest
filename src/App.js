@@ -1,7 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Nav from "./component/Nav/Nav";
+
 import EquipList from "./routes/EquipList";
+import CheckLog from "./routes/CheckLog";
+
 import Home from "./routes/Home";
 import Login from "./routes/Login";
 import AccountManage from './routes/AdminPage'
@@ -33,6 +36,7 @@ const App = () => {
 				<Route exact path="/login" component={Login} />	
 				<ProtectedRoute exact path="/" component={Home} />
 				<ProtectedRoute exact path="/equiplist" component={EquipList} />
+				<ProtectedRoute exact path="/checklog" component={CheckLog} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
 			</Switch>
 		</div>
