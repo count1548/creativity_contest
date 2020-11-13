@@ -6,6 +6,8 @@ import CheckLog from '../../routes/CheckLog'
 import TextLabel from '../TextLabel'
 import Loading from '@material-ui/core/CircularProgress';
 import { getAPI, isAvailable } from "../../data_function"
+import Tooltip from '../Tooltip'
+import InnerMap from '../Tooltip/InnerMap'
 
 const useStyles = makeStyles((theme) => ({
     container : {
@@ -77,7 +79,9 @@ const EquipInfo = props => {
                 marginTop:'20px'
             }}>
             <div className={classes.infoContainer}>
-                <img className={classes.imageBox} src={image} />
+                <Tooltip content={<InnerMap/>}>
+                    <img className={classes.imageBox} src={image} />
+                </Tooltip>
                 <div className={classes.infoBox}>
                     <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
                     <TextLabel label={'위치'}>{EquipInfo['location']}</TextLabel>
