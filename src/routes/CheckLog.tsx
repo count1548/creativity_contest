@@ -26,17 +26,22 @@ const columns = [
     { title: '책임자', field: 'user', },
 ]
 async function getData() {
-    const check_log = await getAPI('/checklog', 'result')
+    const check_log = await getAPI('/check_log/all', 'result')
     if (!isAvailable(check_log)) return {check_log :[]}
     return { check_log }
 }
 let check_log:any[]
 
 const CheckLog = props => {
-    const {title = true, filtering = true, search = true, paging = true, id = null, size = 10} = props
-    const [stat, setState] = useState('apply')
+    const {
+        title = true, filtering = true, 
+        search = true, paging = true, 
+        id = null, size = 10,
+        data = null
+    } = props
+    const [stat, setState] = useState(data === null ? 'apply' : 'show')
     const [updated, setUpdated] = useState(true)
-  
+
     useEffect(() => {
       getData().then(res => {
         ({check_log} = res)
@@ -44,10 +49,10 @@ const CheckLog = props => {
       })
     }, [updated])
     if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
-  
+
     return <MaterialTable
         columns = {columns}
-        data={(id !== null) ? check_log.slice(0, size) : check_log}
+        data={(id !== null) ? data.slice(0, size) : check_log}
         title={'점검기록'}
         options = {{
             filtering : filtering,

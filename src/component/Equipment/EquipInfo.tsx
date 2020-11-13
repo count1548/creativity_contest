@@ -4,6 +4,8 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import CheckLog from '../../routes/CheckLog'
 import TextLabel from '../TextLabel'
+import Loading from '@material-ui/core/CircularProgress';
+import { getAPI, isAvailable } from "../../data_function"
 
 const useStyles = makeStyles((theme) => ({
     container : {
@@ -44,11 +46,22 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+let check_log:any[]
 const EquipInfo = props => {
     const { title, image, EquipInfo } = props
     const classes = useStyles()
     const [selected, setSelected] = useState<number>(0);
-
+    const [stat, setState] = useState('apply')
+    const [updated, setUpdated] = useState(true)
+  
+    useEffect(() => {
+        setState('apply')
+        getAPI(`/check_log/id`, 'result', 3001, EquipInfo['ID']).then(res => {
+            check_log = res
+            setState('show')
+        })
+    }, [updated, EquipInfo['ID']])
+    if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
 
     return (
     <div className={classes.container}>
@@ -78,6 +91,7 @@ const EquipInfo = props => {
                     search = {false}
                     paging = {false}
                     title = {false}
+                    data = {check_log}
                 /></div>
         </div>
     </div>) //등록하기를 새로운 다이어로그로 띄우기

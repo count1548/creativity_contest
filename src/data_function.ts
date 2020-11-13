@@ -1,9 +1,10 @@
+/*eslint-disable */
 const host = "http://uck.myds.me"
 const {equip_data, check_log} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const getAPI = (target, name, port=3001) => {
+const getAPI = (target, name, port=3001, id=null) => {
     // return new Promise<any[]>((resolve, reject) => {
     //     fetch(`${host}:${port}/${target}`, {
     //         method: 'GET',
@@ -14,14 +15,16 @@ const getAPI = (target, name, port=3001) => {
     //     })
     //     .then(res => res.json())
     //     .then(res => resolve(res[name]))
-    //     .catch(err => reject(err))
+    //     .catch(err => rejeallct(err))
     // })
     return new Promise<any>((resolve, reject) => {
         setTimeout(()=> {
             if(target == '/equip/list') resolve(equip_data)
-            else if(target == '/checklog') resolve(check_log)
+            else if(target == '/check_log/all') resolve(check_log)
+            else if(target == '/check_log/id') 
+                resolve(check_log.filter(value => value['equip_ID'] == id))
             reject('fail')
-        }, 1000)
+        }, 500)
     })
     
 }
