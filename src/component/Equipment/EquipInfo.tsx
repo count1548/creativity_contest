@@ -89,7 +89,12 @@ const EquipInfo = props => {
                 <div className={classes.infoBox}>
                     <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
                     <TextLabel label={'위치'}>{EquipInfo['location_name']}</TextLabel>
-                    <TextLabel label={'점검여부'}>{EquipInfo['check']}</TextLabel>
+                    <TextLabel label={'점검여부'}>
+                        <div style={{
+                            width: '20px', height: '20px',
+                            borderRadius: '50%', backgroundColor: (EquipInfo['check'] ? 'green' : 'red'),
+                        }}></div>
+                    </TextLabel>
                 </div>
             </div>
             <div className={classes.logBox}>
