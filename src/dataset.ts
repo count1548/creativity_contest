@@ -11,15 +11,15 @@ const equip_data = [{
     check: 1
   }, {
     ID: 2,
-    serial: 4565244,location_name : 1,location:{x:100,y:100},
+    serial: 4565244,location_name : 1,location:{x:100,y:170},
     check: 1
   }, {
     ID: 3,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,location_name : 1,location:{x:110,y:120},
     check: 0
   }, {
     ID: 4,
-    serial: 1254524,location_name : 1,location:{x:100,y:100},
+    serial: 1254524,location_name : 1,location:{x:30,y:100},
     check: 0
   }, {
     ID: 5,

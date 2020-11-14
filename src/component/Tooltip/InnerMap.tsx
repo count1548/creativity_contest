@@ -32,7 +32,7 @@ export default function InnerMap(props) {
                 if(Mark !== null) {
                     console.log('draw Mark')
                     ctx.beginPath()
-                    ctx.arc(Mark.x, Mark.y, 3, 0, 2 * Math.PI)
+                    ctx.arc(wdt * Mark.x / 400, hgt * Mark.y / 200, 3, 0, 2 * Math.PI)
                     ctx.fill()
                 }
             }
