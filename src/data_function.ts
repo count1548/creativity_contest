@@ -1,6 +1,6 @@
 /*eslint-disable */
 const host = "http://uck.myds.me"
-const {equip_data, check_log} = require('./dataset')
+const {equip_data, check_log, map_data} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -23,8 +23,10 @@ const getAPI = (target, name, port=3001, id=null) => {
             else if(target == '/check_log/all') resolve(check_log)
             else if(target == '/check_log/id') 
                 resolve(check_log.filter(value => value['equip_ID'] == id))
+            else if(target == '/map/list') 
+                resolve(map_data)
             reject('fail')
-        }, 500)
+        }, 100)
     })
     
 }

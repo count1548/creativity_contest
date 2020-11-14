@@ -21,7 +21,7 @@ function Copyright() {
 			{new Date().getFullYear()}
 			{". Built with "}
 			<Link color="inherit" href="https://material-ui.com/">
-				Hoseo University.
+				HoseoGuard.
 			</Link>
 		</Typography>
 	)

@@ -6,13 +6,14 @@ import MaterialTable from 'material-table'
 import Loading from '@material-ui/core/CircularProgress';
 import EquipInfo from '../component/Equipment/EquipInfo'
 import EquipStat from '../component/Equipment/EquipStat'
+import RegistEquip from '../component/Equipment/RegistEquip'
 import '../style/font.css'
 import '../style/lineTable.css'
 
 const columns = [
   { title: 'ID', field: 'ID', hidden: true },
   { title: 'Serial number', field: 'serial', width: 150 },
-  { title: '위치', field: 'location', },
+  { title: '위치', field: 'location_name', },
   {
     title: 'Check', field: 'check', render: rowData =>
       <div style={{
@@ -24,11 +25,11 @@ const columns = [
 
 async function getData() {
   const equip_data = await getAPI('/equip/list', 'result')
-  if (!isAvailable(equip_data)) return { equip_data: [] }
-
-  return { equip_data }
+  const map_data = await getAPI('/map/list', 'result')
+  
+  return { equip_data, map_data }
 }
-let equip_data: any[]
+let equip_data: any[], map_data: any[]
 
 const EquipList = props => {
   const [selected, setSelected] = useState<number>(0);
@@ -37,7 +38,9 @@ const EquipList = props => {
 
   useEffect(() => {
     getData().then(res => {
-      ({ equip_data } = res)
+      ({ equip_data, map_data } = res)
+      if(typeof equip_data === 'undefined') equip_data = []
+      if(typeof map_data === 'undefined') map_data = []
       setState('show')
     })
   }, [updated])
@@ -64,15 +67,28 @@ const EquipList = props => {
       onRowClick={((evt, selected: any) => setSelected(selected.tableData.id))}
       style={{ width: 350, float: 'left' }}
     />
-    <div style={{ width: 'calc(100% - 350px)', float: 'right' }}> { /* equipment box */}
+    <div style={{ width: 'calc(100% - 350px)', float: 'right' }}>
       <EquipInfo
         stat={'view'}
         title={"장비정보"}
         image={'./imgs/equipment.png'}
         EquipInfo={equip_data[selected]}
+        clickButton={()=> setState('regist') }
+        map_data={map_data}
       />
       <EquipStat/>
     </div>
+    <RegistEquip
+      map_info={map_data}
+      onSubmit={(data) => {
+        setState('apply')
+        setAPI('/equip/regist', {
+          ...data
+        }).then(res => setState('show'))
+      }}
+      onClose={()=>setState('show')}
+      open_p = {stat === 'regist'}
+    />
   </>
 }
 

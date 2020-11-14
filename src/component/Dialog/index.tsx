@@ -7,8 +7,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default function AlertDialog({
-  onSubmit=()=>{}, onExit=()=>{},
-    children = 'default content',
+  onSubmit=()=>true, onExit=()=>true,
+    children,
     submitMsg = '확인', resetMsg = '나가기', 
     type = 'text',
     title = 'Dialog',
@@ -39,14 +39,12 @@ export default function AlertDialog({
         </DialogContent>}
         <DialogActions>
           <Button onClick={()=>{
-            onSubmit()
-            handleClose()
+            if(onSubmit()) handleClose()
           }} color="primary" autoFocus>
             {submitMsg}
           </Button>
           <Button onClick={()=>{
-            onExit()
-            handleClose()
+            if(onExit()) handleClose()
           }} color="primary">
             {resetMsg}
           </Button>

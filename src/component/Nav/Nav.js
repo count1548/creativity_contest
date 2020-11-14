@@ -59,7 +59,7 @@ const CopyrightInfo = (props) => {
         backgroundColor:'#eee',
         borderRadius:'5px',
       }}>
-        Copyright © 2020 UCK<br/>
+        Copyright © 2020 HoseoGuard<br/>
         Copyright © 2020 Material-UI<br/>
         Copyright © 2020 icon-icons.com<br/>
         Copyright © 2010-2020 Freepik Company S.L<br/>

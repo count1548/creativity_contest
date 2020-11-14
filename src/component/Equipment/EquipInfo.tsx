@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
 
 let check_log:any[]
 const EquipInfo = props => {
-    const { title, image, EquipInfo } = props
+    const { title, image, EquipInfo, clickButton, map_data } = props
     const classes = useStyles()
     const [selected, setSelected] = useState<number>(0);
     const [stat, setState] = useState('apply')
@@ -63,14 +63,14 @@ const EquipInfo = props => {
             setState('show')
         })
     }, [updated, EquipInfo['ID']])
-    if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
+    if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
 
     return (
     <div className={classes.container}>
         <div className={classes.header}>
             <span className={classes.title}>{title}</span>
             <div className={classes.controlBox}>
-                <Button>생성하기</Button>
+                <Button onClick={clickButton}>생성하기</Button>
             </div>
         </div>
         <div className={classes.container} style={{
@@ -79,12 +79,16 @@ const EquipInfo = props => {
                 marginTop:'20px'
             }}>
             <div className={classes.infoContainer}>
-                <Tooltip content={<InnerMap/>}>
-                    <img className={classes.imageBox} src={image} />
-                </Tooltip>
+                <Tooltip content={
+                    <InnerMap 
+                        image={map_data[EquipInfo['location_name']]['image']} 
+                        Mark={EquipInfo['location']}
+                        wdt={300} hgt={150}
+                        />
+                }><img className={classes.imageBox} src={image} /></Tooltip>
                 <div className={classes.infoBox}>
                     <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
-                    <TextLabel label={'위치'}>{EquipInfo['location']}</TextLabel>
+                    <TextLabel label={'위치'}>{EquipInfo['location_name']}</TextLabel>
                     <TextLabel label={'점검여부'}>{EquipInfo['check']}</TextLabel>
                 </div>
             </div>
