@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
         background : '#eee',
     },
     infoBox: {
+        display:'table',
         width:'calc(100% - 20px)', height:'105px',
         marginTop : '10px',
         padding : '10px',
@@ -81,20 +82,16 @@ const EquipInfo = props => {
             <div className={classes.infoContainer}>
                 <Tooltip content={
                     <InnerMap 
-                        image={map_data[EquipInfo['location_name']]['image']} 
+                        image={map_data[EquipInfo['map']]['image']} 
                         Mark={EquipInfo['location']}
                         wdt={300} hgt={150}
+                        allowClick={false}
                         />
                 }><img className={classes.imageBox} src={image} /></Tooltip>
                 <div className={classes.infoBox}>
-                    <TextLabel label={'제조번호'}>{EquipInfo['serial']}</TextLabel>
-                    <TextLabel label={'위치'}>{EquipInfo['location_name']}</TextLabel>
-                    <TextLabel label={'점검여부'}>
-                        <div style={{
-                            width: '20px', height: '20px',
-                            borderRadius: '50%', backgroundColor: (EquipInfo['check'] ? 'green' : 'red'),
-                        }}></div>
-                    </TextLabel>
+                    <TextLabel label={'제조번호'} button={'QR'}>{EquipInfo['serial']}</TextLabel>
+                    <TextLabel label={'위치'}>{EquipInfo['boarding_location']}</TextLabel>
+                    <TextLabel label={'점검여부'}>{EquipInfo['check'] ? "점검" : "미점검"}</TextLabel>
                 </div>
             </div>
             <div className={classes.logBox}>

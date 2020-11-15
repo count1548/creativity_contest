@@ -3,91 +3,91 @@ const moment = require('moment')
 const equip_data = [{
     ID: 0,
     serial: 1254524,
-    location_name : 1,location:{x:100,y:100},
+    map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 1,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 2,
-    serial: 4565244,location_name : 1,location:{x:100,y:170},
+    serial: 4565244,map : 1,location:{x:100,y:170},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 3,
-    serial: 1208424,location_name : 1,location:{x:110,y:120},
+    serial: 1208424,map : 1,location:{x:110,y:120},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 4,
-    serial: 1254524,location_name : 1,location:{x:30,y:100},
+    serial: 1254524,map : 1,location:{x:30,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 5,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 6,
-    serial: 4565244,location_name : 1,location:{x:100,y:100},
+    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 7,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 8,
-    serial: 1254524,location_name : 1,location:{x:100,y:100},
+    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 9,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 10,
-    serial: 4565244,location_name : 1,location:{x:100,y:100},
+    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 11,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 12,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 13,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 14,
-    serial: 1254524,location_name : 1,location:{x:100,y:100},
+    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 15,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 16,
-    serial: 4565244,location_name : 1,location:{x:100,y:100},
+    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 17,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 18,
-    serial: 1254524,location_name : 1,location:{x:100,y:100},
+    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 19,
-    serial: 2125423,location_name : 1,location:{x:100,y:100},
+    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     ID: 20,
-    serial: 4565244,location_name : 1,location:{x:100,y:100},
+    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     ID: 21,
-    serial: 1208424,location_name : 1,location:{x:100,y:100},
+    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }]
   const d = moment(new Date())

@@ -13,7 +13,7 @@ import '../style/lineTable.css'
 const columns = [
   { title: 'ID', field: 'ID', hidden: true },
   { title: 'Serial number', field: 'serial', width: 150 },
-  { title: '위치', field: 'location_name', render: rowData => map_data[rowData['location_name']]['name']},
+  { title: '위치', field: 'boarding_location' },
   {
     title: 'Check', field: 'check', render: rowData =>
       <div style={{

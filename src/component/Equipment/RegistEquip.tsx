@@ -28,11 +28,10 @@ const useStyles = makeStyles((theme) => ({
         float:'left'
     },
     innerMap : {
-        border:'1px solid gray',
         float:'right'
     }
 }));
-let serial:string
+let serial:string, boarding_location:string
 
 const RegistEquip = props => {
     const { map_info, onSubmit, onClose, open_p } = props
@@ -55,7 +54,8 @@ const RegistEquip = props => {
             if(typeof(serial) === 'undefined' || serial === '' || building === -1) return false
             onSubmit({
                 serial : serial,
-                location_name : map_info[building]['name'],
+                boarding_location : boarding_location,
+                map : map_info[building]['name'],
                 location : location
             })
             return true
@@ -68,7 +68,9 @@ const RegistEquip = props => {
                 <div><TextField id="serial" label="Serial Number" variant="outlined" onChange={
                     ev => {serial = ev.target.value}
                 }/></div>
-
+                <div><TextField id="serial" label="위치" variant="outlined" onChange={
+                    ev => {boarding_location = ev.target.value}
+                }/></div>
                 <div><FormControl variant="outlined">
                     <InputLabel id="demo-simple-select-outlined-label">점검여부</InputLabel>
                     <Select
