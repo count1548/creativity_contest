@@ -9,7 +9,7 @@ import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import InnerMap from '../Tooltip/InnerMap'
+import InnerMap from '../Map/InnerMap'
 import Dialog from '../Dialog'
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +47,6 @@ const RegistEquip = props => {
             setCheck(defaultData['check'])
             setMap(defaultData['map'])
             setLocation(defaultData['location'])
-
         }
         else {
             serial = ''; boarding_location = '';

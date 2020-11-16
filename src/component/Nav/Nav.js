@@ -42,6 +42,7 @@ const navList = [
   {name : "홈화면", path : "/"},
   {name : "장비관리", path : "/equiplist"},
   {name : "점검기록", path : "/checklog"},
+  {name : "도면관리", path : "/managemap"},
 ]
 
 const CopyrightInfo = (props) => {

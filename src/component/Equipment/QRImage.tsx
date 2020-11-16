@@ -27,10 +27,15 @@ export default function QRImage(props) {
             onSubmit={() => {
                 //새탭열어서 이미지 띄운 뒤 print 하는 방법이나을거같음
                 const printContents = ReactDOM.findDOMNode(refs.current).innerHTML;
-                const originalContents = document.body.innerHTML;
-                document.body.innerHTML = printContents;
-                window.print();
-                document.body.innerHTML = originalContents;
+                const nwindow = window.open("", "print", "width=420, height=450, menubar=no, status=no, toolbar=no");
+                if(nwindow) {
+                    nwindow.onload = () => {
+                        nwindow.print()
+                        setTimeout(() => nwindow.close(), 500)
+                    }
+                    nwindow.document.body.innerHTML = printContents 
+                }
+
                 return true
             }}
             title='QR Image'

@@ -7,7 +7,7 @@ import TextLabel from '../TextLabel'
 import Loading from '@material-ui/core/CircularProgress';
 import { getAPI, isAvailable } from "../../data_function"
 import Tooltip from '../Tooltip'
-import InnerMap from '../Tooltip/InnerMap'
+import InnerMap from '../Map/InnerMap'
 import QRImage from './QRImage'
 
 const useStyles = makeStyles((theme) => ({

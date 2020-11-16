@@ -4,10 +4,10 @@ import Nav from "./component/Nav/Nav";
 
 import EquipList from "./routes/EquipList";
 import CheckLog from "./routes/CheckLog";
+import ManageMap from "./routes/ManageMap";
 
 import Home from "./routes/Home";
 import Login from "./routes/Login";
-import AccountManage from './routes/AdminPage'
 
 import ProtectedRoute from "./component/Auth/protected.route"
 import { makeStyles } from "@material-ui/core/styles";
@@ -37,7 +37,9 @@ const App = () => {
 				<ProtectedRoute exact path="/" component={Home} />
 				<ProtectedRoute exact path="/equiplist" component={EquipList} />
 				<ProtectedRoute exact path="/checklog" component={CheckLog} />
+				<ProtectedRoute exact path="/managemap" component={ManageMap} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
+				
 			</Switch>
 		</div>
 	</div> </Router> );
