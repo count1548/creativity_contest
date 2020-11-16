@@ -22,7 +22,7 @@ const getAPI = (target, name, port=3001, id=null) => {
             if(target == '/equip/list') resolve(equip_data)
             else if(target == '/check_log/all') resolve(check_log)
             else if(target == '/check_log/id') 
-                resolve(check_log.filter(value => value['equip_ID'] == id))
+                resolve(check_log.filter(value => value['equip_id'] == id))
             else if(target == '/map/list') 
                 resolve(map_data)
             reject('fail')

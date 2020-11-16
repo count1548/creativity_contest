@@ -58,8 +58,8 @@ const EquipList = props => {
           backgroundColor: '#bc1f2f',
           color: '#FFF'
         }, toolbar: false,
-        pageSize: 14,
-        pageSizeOptions : [5, 10, 14],
+        pageSize: 11,
+        pageSizeOptions : [5, 10, 11],
         rowStyle: rowData => ({
           backgroundColor: (selected === rowData.tableData.id) ? '#BBB' : '#FFF'
         })
@@ -73,7 +73,23 @@ const EquipList = props => {
         title={"장비정보"}
         image={'./imgs/equipment.png'}
         EquipInfo={equip_data[selected]}
-        clickButton={()=> setState('regist') }
+        buttonList = {[
+          {
+            label : '수정',
+            func : () => setState('update')
+          }, {
+            label : '등록',
+            func : () => setState('regist')
+          }, {
+            label : '삭제',
+            func : () => {
+              setState('apply')
+              setAPI(`/equip/delete`, {
+                id : equip_data[selected]['ID']
+              }).then(res => setState('show'))
+            }
+          }
+        ]}
         map_data={map_data}
       />
       <EquipStat/>
@@ -82,12 +98,14 @@ const EquipList = props => {
       map_info={map_data}
       onSubmit={(data) => {
         setState('apply')
-        setAPI('/equip/regist', {
+        setAPI(`/equip/${stat}`, {
           ...data
         }).then(res => setState('show'))
       }}
+      update={stat === 'update'}
       onClose={()=>setState('show')}
-      open_p = {stat === 'regist'}
+      open_p = {stat === 'regist' || stat === 'update'}
+      defaultData = {equip_data[selected]}
     />
   </>
 }

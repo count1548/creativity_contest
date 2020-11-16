@@ -14,13 +14,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 const TextLabel = props => {
-    const {label, children, button=null} = props
+    const {label, children, button=null, buttonEvent = null} = props
     const classes = useStyles()
     return (
     <div className={classes.tableRow}>
         <div className={classes.tableCell}>{label}</div>
         <div className={classes.tableCell}>{children}</div>
-        {button ? <div className={classes.tableCell}>{button}</div> : null}
+        {button ? <div className={classes.tableCell} onClick={buttonEvent}>{button}</div> : null}
     </div>)
 }
 

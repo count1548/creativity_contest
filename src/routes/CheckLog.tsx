@@ -10,9 +10,9 @@ const result_color = ['green', 'yellow', 'red']
 const max_success = 6
 
 const columns = [
-    { title: 'ID', field: 'ID', hidden:true },
-    { title: '장비', field: 'equip_ID', width:120, render : rowData => (rowData['equip_ID'] + '번 장비')},
-    { title: '점검결과', field: 'check_res', width : 120, render : rowData => {
+    { title: 'ID', field: 'id', hidden:true },
+    { title: '장비', field: 'equip_id', width:120, render : rowData => (rowData['equip_id'] + '번 장비')},
+    { title: '점검결과', field: 'check_res', width : 115, render : rowData => {
         const idx = (max_success - rowData['check_res'].length) / 2
         const color = result_color[parseInt(idx.toString())]
         return (
@@ -22,7 +22,7 @@ const columns = [
             }}></div> 
         )
     }},
-    { title: '점검시간', field: 'date', width:170},
+    { title: '점검시간', field: 'date', width:150},
     { title: '책임자', field: 'user', },
 ]
 async function getData() {
@@ -36,11 +36,12 @@ const CheckLog = props => {
     const {
         title = true, filtering = true, 
         search = true, paging = true, 
-        id = null, size = 10,
+        id = null, size = 10, hiddenNumber = false,
         data = null
     } = props
     const [stat, setState] = useState(data === null ? 'apply' : 'show')
     const [updated, setUpdated] = useState(true)
+    columns[1]['hidden'] = hiddenNumber
 
     useEffect(() => {
       getData().then(res => {

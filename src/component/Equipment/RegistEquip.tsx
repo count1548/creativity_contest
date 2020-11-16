@@ -31,18 +31,34 @@ const useStyles = makeStyles((theme) => ({
         float:'right'
     }
 }));
-let serial:string, boarding_location:string
+let serial:string, boarding_location:string, id:number
 
 const RegistEquip = props => {
-    const { map_info, onSubmit, onClose, open_p } = props
+    const { map_info, onSubmit, onClose, open_p, defaultData, update } = props
     const classes = useStyles()
     const [check, setCheck] = useState(1)
-    const [building, setBuilding] = useState(-1)
+    const [map, setMap] = useState(-1)
     const [location, setLocation] = useState<null | {x : number, y : number }>(null)
     const [open, setOpen] = useState(false)
 
-    useEffect(()=> setOpen(open_p) , [open_p])
+    const setInit = () => {
+        if(update) {
+            ({id, serial, boarding_location} = defaultData)
+            setCheck(defaultData['check'])
+            setMap(defaultData['map'])
+            setLocation(defaultData['location'])
 
+        }
+        else {
+            serial = ''; boarding_location = '';
+            setCheck(1); setMap(-1); setLocation(null);
+        }
+    }
+
+    useEffect(()=> {
+        setInit()
+        setOpen(open_p)
+    }, [open_p])
 
     return (
     <Dialog
@@ -51,11 +67,12 @@ const RegistEquip = props => {
         type={'component'}
         title={'장비등록'}
         onSubmit={()=> {
-            if(typeof(serial) === 'undefined' || serial === '' || building === -1) return false
+            if(typeof(serial) === 'undefined' || serial === '' || map === -1) return false
             onSubmit({
+                id : id,
                 serial : serial,
                 boarding_location : boarding_location,
-                map : map_info[building]['name'],
+                map : map,
                 location : location
             })
             return true
@@ -65,12 +82,22 @@ const RegistEquip = props => {
         >
         <div className={classes.container}>
             <div className={classes.inputForm}>
-                <div><TextField id="serial" label="Serial Number" variant="outlined" onChange={
-                    ev => {serial = ev.target.value}
-                }/></div>
-                <div><TextField id="serial" label="위치" variant="outlined" onChange={
-                    ev => {boarding_location = ev.target.value}
-                }/></div>
+                <div>
+                    <TextField 
+                        id="serial" 
+                        label="Serial Number" 
+                        variant="outlined" 
+                        onChange={ev => {serial = ev.target.value}}
+                        defaultValue={serial}
+                /></div>
+                <div>
+                    <TextField 
+                        id="boarding_location" 
+                        label="위치" 
+                        variant="outlined" 
+                        onChange={ev => {boarding_location = ev.target.value}}
+                        defaultValue={boarding_location}
+                /></div>
                 <div><FormControl variant="outlined">
                     <InputLabel id="demo-simple-select-outlined-label">점검여부</InputLabel>
                     <Select
@@ -89,8 +116,8 @@ const RegistEquip = props => {
                     <Select
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
-                        value={building}
-                        onChange={ev => setBuilding(ev.target.value as number)}
+                        value={map}
+                        onChange={ev => setMap(ev.target.value as number)}
                         label="Age" >
                     <MenuItem value={-1}> <em>None</em> </MenuItem>
                     {map_info.map((map, key) => <MenuItem value={key} key={key}>{map['name']}</MenuItem>)}
@@ -102,7 +129,7 @@ const RegistEquip = props => {
                     allview={false}
                     onClick={(loc) =>  setLocation(loc)}
                     Mark={location}
-                    image={building === -1 ? null : map_info[building]['image']}
+                    image={map === -1 ? null : map_info[map]['image']}
                 />
             </div>
         </div>
