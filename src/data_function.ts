@@ -39,10 +39,10 @@ const setAPI = (target, data, port=3333) => {
     return new Promise<any>((resolve, reject) => {
         fetch(`${host}:${port}/${target}`, {
             method: 'POST',
-                headers:{
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body : JSON.stringify(data)
         })
 	.then(res => {
