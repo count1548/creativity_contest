@@ -36,11 +36,6 @@ export default function QRImage(props) {
                         setTimeout(() => window.close(), 500)
                     </script>
                     `)
-                    // nwindow.onload = () => {
-                    //     console.log('success')
-                    //     // nwindow.print()
-                    //     // setTimeout(() => nwindow.close(), 500)
-                    // }
                 }
 
                 return true
