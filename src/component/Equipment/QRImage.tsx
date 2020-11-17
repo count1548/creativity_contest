@@ -29,11 +29,18 @@ export default function QRImage(props) {
                 const printContents = ReactDOM.findDOMNode(refs.current).innerHTML;
                 const nwindow = window.open("", "print", "width=420, height=450, menubar=no, status=no, toolbar=no");
                 if(nwindow) {
-                    nwindow.onload = () => {
-                        nwindow.print()
-                        setTimeout(() => nwindow.close(), 500)
-                    }
-                    nwindow.document.body.innerHTML = printContents 
+                    nwindow.document.write(`
+                    ${printContents}
+                    <script>
+                        window.print()
+                        setTimeout(() => window.close(), 500)
+                    </script>
+                    `)
+                    // nwindow.onload = () => {
+                    //     console.log('success')
+                    //     // nwindow.print()
+                    //     // setTimeout(() => nwindow.close(), 500)
+                    // }
                 }
 
                 return true
