@@ -46,7 +46,7 @@ export default function QRImage(props) {
         >
             <div ref={refs} ><img className={classes.image} src={`./imgs/${image}`} onError={(e:any) => {
                 e.target.onerror=null
-                e.target.src = 'https://via.placeholder.com/400x400'
+                e.target.src = 'https://fakeimg.pl/400x400/?text=No+Image'
             }}/></div>
         </Dialog>
     )

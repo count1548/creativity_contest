@@ -168,12 +168,15 @@ const equip_data = [{
   ]
 const map_data = [
   {
+    'id' : 0,
     'name' : '2공대',
     'image' : '2building.png',
   },{
+    'id' : 1,
     'name' : '1공대',
     'image' : '1building.png',
   },{
+    'id' : 2,
     'name' : '3공대',
     'image' : '3building.png',
   },

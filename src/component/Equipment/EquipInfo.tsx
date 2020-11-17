@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let check_log:any[]
+
 const EquipInfo = props => {
     const { title, image, EquipInfo, buttonList, map_data } = props
     const classes = useStyles()
@@ -93,7 +94,7 @@ const EquipInfo = props => {
                 <div className={classes.infoBox}>
                     <TextLabel 
                         label={'제조번호'} 
-                        button={'QR'}
+                        button={<img src='./imgs/qrimg.png' width={20} height={20}/>}
                         buttonEvent={() => setState('qrview')}
                     >{EquipInfo['serial']}</TextLabel>
                     <TextLabel label={'위치'}>{EquipInfo['boarding_location']}</TextLabel>

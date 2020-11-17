@@ -6,11 +6,14 @@ import { equip_data, check_log } from '../../dataset'
 
 const useStyles = makeStyles((theme) => ({
     tableRow : {
-        display:'table-row',
-    },
+        display:'table-row'
+    }, button : { position:'relative', bottom:'-3px'},
     tableCell : {
+        '&:nth-of-type(1)' : {
+            fontWeight:'bold',
+            color:'#A12422'
+        },
         display:'table-cell',
-        padding:'0px'
     }
 }));
 const TextLabel = props => {
@@ -20,7 +23,7 @@ const TextLabel = props => {
     <div className={classes.tableRow}>
         <div className={classes.tableCell}>{label}</div>
         <div className={classes.tableCell}>{children}</div>
-        {button ? <div className={classes.tableCell} onClick={buttonEvent}>{button}</div> : null}
+        {button ? <div className={classes.tableCell + ' ' + classes.button} onClick={buttonEvent}>{button}</div> : null}
     </div>)
 }
 

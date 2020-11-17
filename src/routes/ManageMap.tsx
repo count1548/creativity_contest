@@ -5,6 +5,9 @@ import { getAPI, setAPI, isAvailable } from "../data_function"
 import MaterialTable from 'material-table'
 import Tooltip from '../component/Tooltip'
 import InnerMap from '../component/Map/InnerMap'
+import TextField from '@material-ui/core/TextField'
+import Button from '@material-ui/core/Button'
+import Alert from '@material-ui/lab/Alert'
 
 const useStyles = makeStyles((theme) => ({
     container : {
@@ -13,13 +16,12 @@ const useStyles = makeStyles((theme) => ({
             display : 'block',
             clear : 'both',
         },
-        width:'100%',
+        width:'100%', textAlign:'center'
     },
-	infoBox : {
+	dataBox : {
 		float:'right',
 		width : 'calc(100% - 252px)',
-		minHeight : '300px', padding:'0 0 0 30px',
-		background : '#eee'
+		minHeight : '300px', marginLeft:'30px',	
 	},
 	inTable : {
 		'& .MuiTablePagination-selectRoot' : {
@@ -30,7 +32,29 @@ const useStyles = makeStyles((theme) => ({
 	imagePreview : {
 		display:'block',
 		width:'400px', height:'200px',
-		margin:'10px auto', borderRadius:'5px',
+		margin:'10px auto', borderRadius:'5px', border:'1px solid grey',
+	},
+	textBox : {
+		width:'200px',
+		margin:'10px auto',	
+	},
+	topMenu : { position:'relative', borderBottom:'2px solid #bbb' },
+	title : {
+		float:'left',
+		fontSize:'18px',
+		padding:'6px'
+	},
+	buttonGroup : {
+		position:'absolute',
+		right:'0'
+	},
+	alignCenter : { display:'inline-block', },
+	infoBox : {
+		width:'80%',
+		padding:'10px',
+		margin:'100px auto 0 auto',
+		background:'#fed',
+		borderRadius : '5px'
 	}
 }));
 let mapData:any[]
@@ -49,17 +73,21 @@ const columns = [
 		}><img width={20} height={20} src={'./imgs/exist.png'}/></Tooltip> : null },
 ]
 
-let _file:null|any = null
+let _file:null|any = null, name_text:string = ''
 
-const onUpload = (data, setState) => {
+const onUpload = (data, setState, target = 'update') => {
+	if(data['name'] === '') return;
+
 	const formData = new FormData();
     formData.append('file', _file);
 	setState('apply')
-    setAPI("/map/upload", {
+    setAPI(`/map/${target}`, {
 		...data, 
 		image : formData,
 	}).then(res => setState('show'))
+	.catch(err => console.error(err))
 }
+const base_img = 'https://fakeimg.pl/400x200/?text=Click+Me'
 
 export default function ManageMap(props) {
     const {} = props
@@ -67,8 +95,9 @@ export default function ManageMap(props) {
     const [selected, setSelected] = useState<number>(-1);
     const [stat, setState] = useState('apply')
     const [updated, setUpdated] = useState(true)
-	const [src, setSrc] = useState('./imgs/noimg.png')
-	
+	const [src, setSrc] = useState(base_img)
+	const [name, setName] = useState('')
+
     useEffect(() => {
         setState('apply')
         getAPI(`/map/list`, 'result').then(res => {
@@ -86,12 +115,13 @@ export default function ManageMap(props) {
 				</div>
 
 	const onFileSet = (ev) => {
-		console.log('file upload')
-		_file = ev.target.files[0] 
+		_file = ev.target.files[0]
 		ev.target.value = null
 		setSrc(window.URL.createObjectURL(_file))
 	}
-	console.log(src)
+
+	const initState = () => {setSelected(-1); setState('show'); setSrc(base_img); setName('')}
+
     return (
         <div className={classes.container + ' ' + classes.inTable}>
 			<MaterialTable
@@ -112,34 +142,57 @@ export default function ManageMap(props) {
 					})					
 			 	}}
 				onRowClick={(ev, cell: any) => {
-					if(stat !== 'show') return;
 					const selected_number = cell.tableData.id
-					if(selected == selected_number) {
-						setSelected(-1) 
-						setSrc('./imgs/noimg.png')
-					}
-					else {
-						setSelected(selected_number)
-						setSrc('./imgs/' + mapData[selected_number]['image'])
-					}					
+					setSelected(selected_number)
+					setSrc('./imgs/' + mapData[selected_number]['image'])
+					setName(mapData[selected_number]['name'])
 				}}
 				style={{ width: 222, float: 'left' }}
 			/>
-			<div className={classes.infoBox}>
-				<label htmlFor='image_file'>
-					<img 
-						className={classes.imagePreview} src={src}
-						onError={(e:any) => {
-							e.target.onerror=null
-							e.target.src = './imgs/noimg.png'
-						}}/>
-				</label>
-				<input id='image_file' type='file' name='image_file' style={{
-					display:'none',
-				}} onChange={onFileSet}/>
+			<div className = {classes.dataBox}>
+				<div className={classes.container + ' ' + classes.topMenu}>
+					<div className={classes.title}>맵수정</div>
+					<div className={classes.buttonGroup}>
+						<Button onClick = {() => initState()}>생성하기</Button>
+					</div>
+				</div>
+				<div className={classes.infoBox}>
+					<label htmlFor='image_file'>
+						<img 
+							className={classes.imagePreview} src={src}
+							onError={(e:any) => {
+								e.target.onerror=null
+								e.target.src = base_img
+							}}/>
+					</label>
+					<input id='image_file' type='file' name='image_file' style={{
+						display:'none',
+					}} onChange={onFileSet}/>
+
+					<div className={classes.textBox}>
+						<TextField
+							id="standard-textarea"
+							placeholder="맵이름"
+							inputProps={{min: 0, style: { textAlign: 'center' }}}
+							value={name}
+							onChange={(ev) => setName(ev.target.value)}
+							/>
+					</div>
+					<div className={classes.alignCenter}>
+						<Button 
+							variant="contained" 
+							color="primary"
+							onClick={() => onUpload({
+								id : (selected === -1 ? null : mapData[selected]['id']),
+								name : name,
+							}, setState, selected === -1 ? "create" : "update")}>
+						Submit </Button>
+					</div><br/>
+					<div className={classes.alignCenter}>
+						<Alert severity="error">400x200 크기의 도면 이미지를 권장합니다.</Alert>
+					</div>
+				</div>
 			</div>
-            {/*Right view Map information (map name / map image)*/}
-            {/*Dialog regist / update Map information*/}
         </div>
     )
 }
