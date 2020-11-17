@@ -88,6 +88,7 @@ export default function ManageMap(props) {
 	const onFileSet = (ev) => {
 		console.log('file upload')
 		_file = ev.target.files[0] 
+		ev.target.files[0] = null
 		setSrc(window.URL.createObjectURL(_file))
 	}
 	console.log(src)
