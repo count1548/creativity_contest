@@ -61,13 +61,13 @@ const EquipInfo = props => {
   
     useEffect(() => {
         setState('apply')
-        getAPI(`/check_log/id`, 'result', 3001, EquipInfo['id']).then(res => {
+        getAPI(`/check_log/id`, 'result').then(res => {
             check_log = res
             setState('show')
         })
-    }, [updated, EquipInfo['id']])
+    }, [])
     if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
-
+    if(check_log.length === 0) return <div></div>
     return (
     <div className={classes.container}>
         <div className={classes.header}>

@@ -18,7 +18,7 @@ const getAPI = (target, name, port=3001, id=null) => {
             console.log(res)
             resolve(res[name])
         })
-        .catch(err => resolve(err))
+        .catch(err => resolve([]))
     })
     // return new Promise<any>((resolve, reject) => {
     //     setTimeout(()=> {

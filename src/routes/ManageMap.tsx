@@ -101,7 +101,7 @@ export default function ManageMap(props) {
     useEffect(() => {
         setState('apply')
         getAPI(`/map/list`, 'result').then(res => {
-            mapData = res
+			mapData = res
 			_file = null
             setState('show')
         })
@@ -113,7 +113,7 @@ export default function ManageMap(props) {
 					margin: '30px auto' }}>
 					<Loading size={200} />
 				</div>
-
+	if (mapData.length === 0) return <div></div> // no data page 
 	const onFileSet = (ev) => {
 		_file = ev.target.files[0]
 		ev.target.value = null
