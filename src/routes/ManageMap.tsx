@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 			'&~div' : { margin:'0 auto' }
 		},
 	},
-	imagePreview : {
+	imagePreview : {	
 		display:'block',
 		width:'400px', height:'200px',
 		margin:'10px auto', borderRadius:'5px', border:'1px solid grey',
@@ -81,7 +81,7 @@ const onUpload = (data, setState, target = 'update') => {
 	const formData = new FormData();
     formData.append('file', _file);
 	setState('apply')
-    setAPI(`/map/${target}`, {
+    setAPI(`/map/${target}`, 'POST', {
 		...data, 
 		image : formData,
 	}).then(res => setState('show'))
