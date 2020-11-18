@@ -4,34 +4,34 @@ const {equip_data, check_log, map_data} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const getAPI = (target, name, port=3001, id=null) => {
-    return new Promise<any[]>((resolve, reject) => {
-        fetch(`${host}:${port}/${target}`, {
-            method: 'GET',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res)
-            resolve(res[name])
-        })
-        .catch(err => resolve([]))
-    })
-    // return new Promise<any>((resolve, reject) => {
-    //     setTimeout(()=> {
-    //         if(target == '/equip/list') resolve(equip_data)
-    //         else if(target == '/check_log/all') resolve(check_log)
-    //         else if(target == '/check_log/id') 
-    //             resolve(check_log.filter(value => 
-	// 									 value['equip_id'] == id))
-    //         else if(target == '/map/list') 
-    //             resolve(map_data)
-    //         reject('fail')
-    //     }, 100)
+const getAPI = (target, name, port=3001, id:number|null=null) => {
+    // return new Promise<any[]>((resolve, reject) => {
+    //     fetch(`${host}:${port}/${target}`, {
+    //         method: 'GET',
+    //         headers:{
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json'
+    //         }
+    //     })
+    //     .then(res => res.json())
+    //     .then(res => {
+    //         console.log(res)
+    //         resolve(res[name])
+    //     })
+    //     .catch(err => resolve([]))
     // })
+    return new Promise<any>((resolve, reject) => {
+        setTimeout(()=> {
+            if(target == '/equip/list') resolve(equip_data)
+            else if(target == '/check_log/all') resolve(check_log)
+            else if(target == '/check_log/id') 
+                resolve(check_log.filter(value => 
+										 value['equip_id'] == id))
+            else if(target == '/map/list') 
+                resolve(map_data)
+            reject([])
+        }, 100)
+    })
 }
 const setAPI = (target, type, data, port=3333) => {
     console.log({
