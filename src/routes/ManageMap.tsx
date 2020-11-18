@@ -79,12 +79,10 @@ const onUpload = (data, setState, target = 'upload') => {
 	if(data['name'] === '') return;
 
 	const formData = new FormData();
-    formData.append('file', _file);
+	formData.append('file', _file);
+	Object.keys(data).map(key => formData.append(key, data[key]))
 	setState('apply')
-    setAPI(`/${target}/map`, 'POST', {
-		...data, 
-		img : formData,
-	}).then(res => setState('show'))
+    setAPI(`/${target}/map`, formData, true).then(res => setState('show'))
 	.catch(err => console.error(err))
 }
 const base_img = 'https://fakeimg.pl/400x200/?text=Click+Me'
