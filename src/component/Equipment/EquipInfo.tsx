@@ -4,7 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import CheckLog from '../../routes/CheckLog'
 import TextLabel from '../TextLabel'
-import Loading from '@material-ui/core/CircularProgress';
+import Loading from '@material-ui/core/CircularProgress'
 import { getAPI, isAvailable } from "../../data_function"
 import Tooltip from '../Tooltip'
 import InnerMap from '../Map/InnerMap'
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let check_log:any[]
+let check_log:any[] = []
 
 const EquipInfo = props => {
     const { title, image, EquipInfo, buttonList, map_data } = props
@@ -60,13 +60,14 @@ const EquipInfo = props => {
   
     useEffect(() => {
         setState('apply')
-        getAPI(`/check_log/id`, 'result', 3001, EquipInfo['id']).then(res => {
+        getAPI(`/check_log/id`, 'GET', 'result', 3001, EquipInfo['id']).then(res => {
+            console.log(res)
             check_log = res
             setState('show')
         })
     }, [EquipInfo['id']])
     if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
-    //if(check_log.length === 0) return <div></div>
+    if(check_log.length === 0) return <div></div>
     return (
     <div className={classes.container}>
         <div className={classes.header}>

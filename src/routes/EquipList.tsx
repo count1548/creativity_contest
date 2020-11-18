@@ -11,7 +11,7 @@ import '../style/font.css'
 import '../style/lineTable.css'
 
 const columns = [
-  { title: 'ID', field: 'ID', hidden: true },
+  { title: 'ID', field: 'id', hidden: true },
   { title: 'Serial number', field: 'serial', width: 150 },
   { title: '위치', field: 'boarding_location' },
   {
@@ -24,12 +24,11 @@ const columns = [
 ]
 
 async function getData() {
-  const equip_data = await getAPI('/equip/list', 'result')
-  const map_data = await getAPI('/map/list', 'result')
-  
+  const equip_data = await getAPI('/equip/list', 'GET', 'result')
+  const map_data = await getAPI('/download/map', 'GET', 'result')
   return { equip_data, map_data }
 }
-let equip_data: any[], map_data: any[]
+let equip_data: any[] = [], map_data: any[] = []
 
 const EquipList = props => {
   const [selected, setSelected] = useState<number>(0);
@@ -39,11 +38,9 @@ const EquipList = props => {
   useEffect(() => {
     getData().then(res => {
       ({ equip_data, map_data } = res)
-      if(typeof equip_data === 'undefined') equip_data = []
-      if(typeof map_data === 'undefined') map_data = []
       setState('show')
     })
-  }, [updated])
+  }, [updated]) 
   if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
 
 
@@ -93,6 +90,12 @@ const EquipList = props => {
         map_data={map_data}
       />
       <EquipStat/>
+    {/* <InnerMap
+      image={map_data[equip_data[selected]['map']]['image']}
+      
+    >
+
+    </InnerMap> */}
     </div>
     <RegistEquip
       map_info={map_data}

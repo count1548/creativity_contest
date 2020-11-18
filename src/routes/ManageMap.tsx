@@ -100,7 +100,7 @@ export default function ManageMap(props) {
 
     useEffect(() => {
         setState('apply')
-        getAPI(`/map/list`, 'result').then(res => {
+        getAPI(`/download/map`, 'result').then(res => {
 			mapData = res
 			_file = null
             setState('show')

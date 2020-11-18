@@ -1,12 +1,13 @@
 /*eslint-disable */
-const host = "http://uck.myds.me"
+const host = "http://210.119.104.154"
 const {equip_data, check_log, map_data} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const getAPI = (target, name, port=3001, id:number|null=null) => {
+const getAPI = (target, type='POST', name='result', port=3001, id:number|null=null) => {
+    console.log(`${host}:${port}${target}`)
     // return new Promise<any[]>((resolve, reject) => {
-    //     fetch(`${host}:${port}/${target}`, {
+    //     fetch(`${host}:${port}${target}`, {
     //         method: 'GET',
     //         headers:{
     //             'Accept': 'application/json',
@@ -14,10 +15,7 @@ const getAPI = (target, name, port=3001, id:number|null=null) => {
     //         }
     //     })
     //     .then(res => res.json())
-    //     .then(res => {
-    //         console.log(res)
-    //         resolve(res[name])
-    //     })
+    //     .then(res => resolve(res))
     //     .catch(err => resolve([]))
     // })
     return new Promise<any>((resolve, reject) => {
@@ -27,7 +25,7 @@ const getAPI = (target, name, port=3001, id:number|null=null) => {
             else if(target == '/check_log/id') 
                 resolve(check_log.filter(value => 
 										 value['equip_id'] == id))
-            else if(target == '/map/list') 
+            else if(target == '/download/map') 
                 resolve(map_data)
             reject([])
         }, 100)
