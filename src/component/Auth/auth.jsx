@@ -1,28 +1,27 @@
-const host = "http://uck.myds.me:3001"
+const host = "http://210.119.104.154:3001"
 
 class Auth {  
     login(info) {
-      // fetch(`${host}/auth/login/`, {
-      //   method: 'POST',
-      //   headers:{
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body : JSON.stringify({
-      //       'sid' : info.id, 
-      //       'pwd' : info.pwd,
-      //   })
-      // }).then(res => res.json())
-      // .then(res => {
-      //   if(res.message === 'login success') {
-      //     sessionStorage.setItem('tocken', info.id) //d인자로 받는 토큰을 session storge 에 저장
-      //     location.reload(true)
-      //   }
-      //   else {
-      //     alert('Please check your ID or Password')
-      //   }
-      // })
-      sessionStorage.setItem('tocken', info.id)
-      location.reload(true)
+      fetch(`${host}/login/`, {
+        method: 'POST',
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        body : JSON.stringify({
+            'user' : info.id, 
+            'passwd' : info.pwd,
+        })
+      }).then(res => res.json())
+      .then(res => {
+        console.log(res)
+        if(res.message === '0') {
+          sessionStorage.setItem('tocken', info.id) //d인자로 받는 토큰을 session storge 에 저장
+          location.reload(true)
+        }
+        else {
+          alert('Please check your ID or Password')
+        }
+      })
     }
   
     logout() {
@@ -32,7 +31,7 @@ class Auth {
     }
   
     isAuthenticated() { // eslint-disable-next-line
-      return sessionStorage.getItem('tocken') === 'root'//tocken 확인
+      return sessionStorage.getItem('tocken')//tocken 확인
     }
   }
   
