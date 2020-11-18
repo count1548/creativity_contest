@@ -84,7 +84,7 @@ const EquipList = props => {
             label : '삭제',
             func : () => {
               setState('apply')
-              setAPI(`/equip/delete`, {
+              setAPI(`/equip/delete`, 'GET', {
                 id : equip_data[selected]['ID']
               }).then(res => setState('show'))
             }
@@ -98,7 +98,7 @@ const EquipList = props => {
       map_info={map_data}
       onSubmit={(data) => {
         setState('apply')
-        setAPI(`/equip/${stat}`, {
+        setAPI(`/equip/${stat}`, 'POST', {
           ...data
         }).then(res => setState('show'))
       }}
