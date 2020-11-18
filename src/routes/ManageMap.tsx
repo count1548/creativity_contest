@@ -1,7 +1,7 @@
 import React, {createRef, useState, useEffect} from 'react';
 import { makeStyles, Theme, createStyles, } from '@material-ui/core/styles'
 import Loading from '@material-ui/core/CircularProgress';
-import { getAPI, setAPI, isAvailable } from "../data_function"
+import { getAPI, setAPI, isAvailable, getAPI_local } from "../data_function"
 import MaterialTable from 'material-table'
 import Tooltip from '../component/Tooltip'
 import InnerMap from '../component/Map/InnerMap'
@@ -75,15 +75,15 @@ const columns = [
 
 let _file:null|any = null, name_text:string = ''
 
-const onUpload = (data, setState, target = 'update') => {
+const onUpload = (data, setState, target = 'upload') => {
 	if(data['name'] === '') return;
 
 	const formData = new FormData();
     formData.append('file', _file);
 	setState('apply')
-    setAPI(`/map/${target}`, 'POST', {
+    setAPI(`/${target}/map`, 'POST', {
 		...data, 
-		image : formData,
+		img : formData,
 	}).then(res => setState('show'))
 	.catch(err => console.error(err))
 }
@@ -100,7 +100,7 @@ export default function ManageMap(props) {
 
     useEffect(() => {
         setState('apply')
-        getAPI(`/download/map`, 'result').then(res => {
+        getAPI(`/map/list`).then(res => {
 			mapData = res
 			_file = null
             setState('show')
@@ -185,11 +185,11 @@ export default function ManageMap(props) {
 							onClick={() => onUpload({
 								id : (selected === -1 ? null : mapData[selected]['id']),
 								name : name,
-							}, setState, selected === -1 ? "create" : "update")}>
+							}, setState, selected === -1 ? "upload" : "update")}>
 						Submit </Button>
 					</div><br/>
 					<div className={classes.alignCenter}>
-						<Alert severity="error">400x200 크기의 도면 이미지를 권장합니다.</Alert>
+						<Alert severity="error">2:1 비율의 도면 이미지를 권장합니다.</Alert>
 					</div>
 				</div>
 			</div>

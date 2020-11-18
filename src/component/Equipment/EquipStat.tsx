@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
         width:'calc(100% - 20px)',
         minHeight:'300px',
         background:'#eee',
-        margin: '10px', padding: '10px'
+        padding: '10px'
     },
     guideBox : {
         height : '200px',
@@ -52,7 +52,7 @@ const EquipStat = props => {
     const classes = useStyles()
     return (
     <div className={classes.container}>
-        <GuideBox title={'장비목록'} classname={classes.guideBox}>
+        <GuideBox title={'장비목록(Check)'} classname={classes.guideBox}>
             <table>
                 <tbody>
                     <tr className = {classes.guideTr}>
@@ -64,7 +64,7 @@ const EquipStat = props => {
                 </tbody>
             </table>
         </GuideBox>
-        <GuideBox title={'점검기록'} classname={classes.guideBox}>
+        <GuideBox title={'점검기록(점검결과)'} classname={classes.guideBox}>
             <table>
                 <tbody>
                     <tr className = {classes.guideTr}>

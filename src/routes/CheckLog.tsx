@@ -4,7 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import MaterialTable from 'material-table'
 import Button from '@material-ui/core/Button'
 import Loading from '@material-ui/core/CircularProgress';
-import { isAvailable, getAPI, setAPI } from '../data_function'
+import { isAvailable, getAPI, setAPI, getAPI_local } from '../data_function'
 
 const result_color = ['green', 'yellow', 'red']
 const max_success = 6
@@ -26,7 +26,7 @@ const columns = [
     { title: '책임자', field: 'user', },
 ]
 async function getData() {
-    const check_log = await getAPI('/check_log/all', 'result')
+    const check_log = await getAPI('/check_log/all')
     if (!isAvailable(check_log)) return {check_log :[]}
     return { check_log }
 }
@@ -44,7 +44,7 @@ const CheckLog = props => {
     columns[1]['hidden'] = hiddenNumber
 
     useEffect(() => {
-      getData().then(res => {
+      if(id === null && data === null) getData().then(res => {
         ({check_log} = res)
         setState('show')
       })

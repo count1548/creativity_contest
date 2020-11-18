@@ -5,10 +5,11 @@ import Button from '@material-ui/core/Button'
 import CheckLog from '../../routes/CheckLog'
 import TextLabel from '../TextLabel'
 import Loading from '@material-ui/core/CircularProgress'
-import { getAPI, isAvailable } from "../../data_function"
+import { getAPI, isAvailable, getAPI_local } from "../../data_function"
 import Tooltip from '../Tooltip'
 import InnerMap from '../Map/InnerMap'
 import QRImage from './QRImage'
+import EquipStat from './EquipStat'
 
 const useStyles = makeStyles((theme) => ({
     container : {
@@ -51,23 +52,27 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let check_log:any[] = []
+const base_img : string = './imgs/equipment.png'
 
 const EquipInfo = props => {
-    const { title, image, EquipInfo, buttonList, map_data } = props
+    const { title, EquipInfo, buttonList = [], map_data, innerState = false, limit = 8 } = props
     const classes = useStyles()
     const [stat, setState] = useState('apply')
     const [updated, setUpdated] = useState(true)
   
+    if(typeof EquipInfo === 'undefined') return <div></div>
+
     useEffect(() => {
         setState('apply')
-        getAPI(`/check_log/id`, 'GET', 'result', 3001, EquipInfo['id']).then(res => {
-            console.log(res)
+        getAPI_local(`/check_log/id`, 'GET', 'result', 3001, EquipInfo['id']).then(res => {
             check_log = res
             setState('show')
         })
     }, [EquipInfo['id']])
     if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
-    if(check_log.length === 0) return <div></div>
+    
+    const map = map_data.find(data => data['id'] == EquipInfo['map']) 
+
     return (
     <div className={classes.container}>
         <div className={classes.header}>
@@ -85,12 +90,15 @@ const EquipInfo = props => {
             <div className={classes.infoContainer}>
                 <Tooltip content={
                     <InnerMap 
-                        image={map_data[EquipInfo['map']]['image']} 
+                        image={typeof map !== 'undefined' ? map['image'] : null} 
                         Mark={EquipInfo['location']}
                         wdt={300} hgt={150}
                         allowClick={false}
                         />
-                }><img className={classes.imageBox} src={image} /></Tooltip>
+                }><img className={classes.imageBox} src={`./imgs/${EquipInfo['image']}`} onError={(e:any) => {
+                    e.target.onerror=null
+                    e.target.src = base_img
+                }}/></Tooltip>
                 <div className={classes.infoBox}>
                     <TextLabel 
                         label={'제조번호'} 
@@ -102,7 +110,7 @@ const EquipInfo = props => {
                 </div>
             </div>
             <div className={classes.logBox}>
-                <CheckLog size={8}
+                <CheckLog size={limit}
                     id = {EquipInfo['id']}
                     filtering = {false}
                     search = {false}
@@ -110,7 +118,9 @@ const EquipInfo = props => {
                     title = {false}
                     data = {check_log}
                     hiddenNumber = {true}
-                /></div>
+                />
+                {innerState ? <EquipStat/> : null }
+            </div>
         </div>
     <QRImage 
         open={stat === 'qrview'}

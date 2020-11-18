@@ -3,11 +3,11 @@ const moment = require('moment')
 const equip_data = [{
     id: 0,
     serial: 1254524,
-    map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
+    map : 1,location:{x:120,y:110},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     id: 1,
-    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
+    serial: 2125423,map : 1,location:{x:101,y:150},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     id: 2,
@@ -25,71 +25,7 @@ const equip_data = [{
     id: 5,
     serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
-  }, {
-    id: 6,
-    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 1
-  }, {
-    id: 7,
-    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 8,
-    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 9,
-    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 10,
-    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 1
-  }, {
-    id: 11,
-    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 12,
-    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 1
-  }, {
-    id: 13,
-    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 14,
-    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 15,
-    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 16,
-    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 1
-  }, {
-    id: 17,
-    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 18,
-    serial: 1254524,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 19,
-    serial: 2125423,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }, {
-    id: 20,
-    serial: 4565244,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 1
-  }, {
-    id: 21,
-    serial: 1208424,map : 1,location:{x:100,y:100},boarding_location:'1공대 1층 화장실앞',
-    check: 0
-  }]
+  }, ]
   const d = moment(new Date())
   const _date = d.format('YY/MM/DD HH:mm')
   const check_log = [{

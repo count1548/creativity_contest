@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 let serial:string, boarding_location:string, id:number
 
 const RegistEquip = props => {
-    const { map_info, onSubmit, onClose, open_p, defaultData, update } = props
+    const { map_data, onSubmit, onClose, open_p, defaultData, update } = props
     const classes = useStyles()
     const [check, setCheck] = useState(1)
     const [map, setMap] = useState(-1)
@@ -119,7 +119,7 @@ const RegistEquip = props => {
                         onChange={ev => setMap(ev.target.value as number)}
                         label="Age" >
                     <MenuItem value={-1}> <em>None</em> </MenuItem>
-                    {map_info.map((map, key) => <MenuItem value={key} key={key}>{map['name']}</MenuItem>)}
+                    {map_data.map((map, key) => <MenuItem value={key} key={key}>{map['name']}</MenuItem>)}
                     </Select>
                 </FormControl></div>
             </div>
@@ -128,7 +128,7 @@ const RegistEquip = props => {
                     allview={false}
                     onClick={(loc) =>  setLocation(loc)}
                     Mark={location}
-                    image={map === -1 ? null : map_info[map]['image']}
+                    image={map === -1 ? null : map_data[map]['image']}
                 />
             </div>
         </div>

@@ -1,6 +1,6 @@
 /*eslint-disable */
 import React, { useState, useEffect } from "react"
-import { isAvailable, getAPI, setAPI } from '../data_function'
+import { isAvailable, getAPI, getAPI_local, setAPI } from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import MaterialTable from 'material-table'
 import Loading from '@material-ui/core/CircularProgress';
@@ -24,8 +24,8 @@ const columns = [
 ]
 
 async function getData() {
-  const equip_data = await getAPI('/equip/list', 'GET', 'result')
-  const map_data = await getAPI('/download/map', 'GET', 'result')
+  const equip_data = await getAPI('/equip/list')
+  const map_data = await getAPI('/map/list')
   return { equip_data, map_data }
 }
 let equip_data: any[] = [], map_data: any[] = []
@@ -38,11 +38,12 @@ const EquipList = props => {
   useEffect(() => {
     getData().then(res => {
       ({ equip_data, map_data } = res)
+      console.log(equip_data, map_data)
       setState('show')
     })
   }, [updated]) 
   if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
-
+  if (equip_data.length === 0) return <div>{/*nodatapage*/}</div>
 
   return <>
     <MaterialTable
@@ -68,7 +69,6 @@ const EquipList = props => {
       <EquipInfo
         stat={'view'}
         title={"장비정보"}
-        image={'./imgs/equipment.png'}
         EquipInfo={equip_data[selected]}
         buttonList = {[
           {
@@ -89,16 +89,12 @@ const EquipList = props => {
         ]}
         map_data={map_data}
       />
+      <div style={{margin:'10px'}}>
       <EquipStat/>
-    {/* <InnerMap
-      image={map_data[equip_data[selected]['map']]['image']}
-      
-    >
-
-    </InnerMap> */}
+      </div>
     </div>
     <RegistEquip
-      map_info={map_data}
+      map_data={map_data}
       onSubmit={(data) => {
         setState('apply')
         setAPI(`/equip/${stat}`, 'POST', {

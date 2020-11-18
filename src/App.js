@@ -5,6 +5,7 @@ import Nav from "./component/Nav/Nav";
 import EquipList from "./routes/EquipList";
 import CheckLog from "./routes/CheckLog";
 import ManageMap from "./routes/ManageMap";
+import MapLayout from "./routes/MapLayout";
 
 import Home from "./routes/Home";
 import Login from "./routes/Login";
@@ -38,6 +39,7 @@ const App = () => {
 				<ProtectedRoute exact path="/equiplist" component={EquipList} />
 				<ProtectedRoute exact path="/checklog" component={CheckLog} />
 				<ProtectedRoute exact path="/managemap" component={ManageMap} />
+				<ProtectedRoute exact path="/all_equip" component={MapLayout} />
 				<Route path="*" component={() => "404 NOT FOUND 정확한 URL입력하세요"} />
 				
 			</Switch>

@@ -42,6 +42,7 @@ const navList = [
   {name : "홈화면", path : "/"},
   {name : "장비관리", path : "/equiplist"},
   {name : "점검기록", path : "/checklog"},
+  {name : "소화기현황", path : "/all_equip"},
   {name : "도면관리", path : "/managemap"},
 ]
 
