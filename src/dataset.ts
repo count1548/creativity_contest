@@ -3,7 +3,7 @@ const moment = require('moment')
 const equip_data = [{
     id: 0,
     serial: 1254524,
-    map : 1,location:{x:120,y:110},boarding_location:'1공대 1층 화장실앞',
+    map : 0,location:{x:120,y:110},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     id: 1,
@@ -11,7 +11,7 @@ const equip_data = [{
     check: 1
   }, {
     id: 2,
-    serial: 4565244,map : 1,location:{x:100,y:170},boarding_location:'1공대 1층 화장실앞',
+    serial: 4565244,map : 0,location:{x:100,y:170},boarding_location:'1공대 1층 화장실앞',
     check: 1
   }, {
     id: 3,
@@ -19,7 +19,7 @@ const equip_data = [{
     check: 0
   }, {
     id: 4,
-    serial: 1254524,map : 1,location:{x:30,y:100},boarding_location:'1공대 1층 화장실앞',
+    serial: 1254524,map : 0,location:{x:30,y:100},boarding_location:'1공대 1층 화장실앞',
     check: 0
   }, {
     id: 5,

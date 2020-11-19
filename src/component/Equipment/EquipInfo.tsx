@@ -49,13 +49,18 @@ const useStyles = makeStyles((theme) => ({
         float:'right',
         width:'58%',
     },
+    guideTr : {
+        '& td' : {
+            padding : '5px',
+        },
+    },
 }));
 
 let check_log:any[] = []
 const base_img : string = './imgs/equipment.png'
 
 const EquipInfo = props => {
-    const { title, EquipInfo, buttonList = [], map_data, innerState = false, limit = 8 } = props
+    const { title, EquipInfo, buttonList = [], map_data, InnerState = null, limit = 8 } = props
     const classes = useStyles()
     const [stat, setState] = useState('apply')
     const [updated, setUpdated] = useState(true)
@@ -72,7 +77,7 @@ const EquipInfo = props => {
     if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
     
     const map = map_data.find(data => data['id'] == EquipInfo['map']) 
-
+    
     return (
     <div className={classes.container}>
         <div className={classes.header}>
@@ -119,7 +124,7 @@ const EquipInfo = props => {
                     data = {check_log}
                     hiddenNumber = {true}
                 />
-                {innerState ? <EquipStat/> : null }
+                {InnerState === null ? null : InnerState}
             </div>
         </div>
     <QRImage 

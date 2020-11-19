@@ -15,7 +15,6 @@ const useStyles = makeStyles((theme) => ({
             clear : 'both',
         },
         width:'calc(100% - 20px)',
-        minHeight:'300px',
         background:'#eee',
         padding: '10px'
     },
@@ -48,37 +47,40 @@ const GuideBox = props => {
 
 let check_log:any[]
 const EquipStat = props => {
-    const { title, image, EquipInfo } = props
+    const { title, EquipInfo, children = null } = props
     const classes = useStyles()
     return (
     <div className={classes.container}>
-        <GuideBox title={'장비목록(Check)'} classname={classes.guideBox}>
-            <table>
-                <tbody>
-                    <tr className = {classes.guideTr}>
-                    <td><div className={classes.circle} style={{background:'green'}}></div></td><td>점검완료</td>
-                    </tr>
-                    <tr className = {classes.guideTr}>
-                    <td><div className={classes.circle} style={{background:'red'}}></div></td><td>미점검</td>
-                    </tr>
-                </tbody>
-            </table>
-        </GuideBox>
-        <GuideBox title={'점검기록(점검결과)'} classname={classes.guideBox}>
-            <table>
-                <tbody>
-                    <tr className = {classes.guideTr}>
-                    <td><div className={classes.circle} style={{background:'green'}}></div></td><td>합격</td>
-                    </tr>
-                    <tr className = {classes.guideTr}>
-                    <td><div className={classes.circle} style={{background:'yellow'}}></div></td><td>일부합격</td>
-                    </tr>
-                    <tr className = {classes.guideTr}>
-                    <td><div className={classes.circle} style={{background:'red'}}></div></td><td>불합격</td>
-                    </tr>
-                </tbody>
-            </table>
-        </GuideBox>
+        {children !== null ? children :
+        <div>
+            <GuideBox title={'장비목록(Check)'} classname={classes.guideBox}>
+                <table>
+                    <tbody>
+                        <tr className = {classes.guideTr}>
+                        <td><div className={classes.circle} style={{background:'green'}}></div></td><td>점검완료</td>
+                        </tr>
+                        <tr className = {classes.guideTr}>
+                        <td><div className={classes.circle} style={{background:'red'}}></div></td><td>미점검</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </GuideBox>
+            <GuideBox title={'점검기록(점검결과)'} classname={classes.guideBox}>
+                <table>
+                    <tbody>
+                        <tr className = {classes.guideTr}>
+                        <td><div className={classes.circle} style={{background:'green'}}></div></td><td>합격</td>
+                        </tr>
+                        <tr className = {classes.guideTr}>
+                        <td><div className={classes.circle} style={{background:'yellow'}}></div></td><td>일부합격</td>
+                        </tr>
+                        <tr className = {classes.guideTr}>
+                        <td><div className={classes.circle} style={{background:'red'}}></div></td><td>불합격</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </GuideBox>
+        </div> }
     </div>) //등록하기를 새로운 다이어로그로 띄우기
 }
 

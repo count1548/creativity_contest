@@ -18,9 +18,7 @@ class Auth {
           sessionStorage.setItem('tocken', info.id) //d인자로 받는 토큰을 session storge 에 저장
           location.reload(true)
         }
-        else {
-          alert('Please check your ID or Password')
-        }
+        else alert('Please check your ID or Password')
       })
     }
   

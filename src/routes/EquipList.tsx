@@ -38,7 +38,6 @@ const EquipList = props => {
   useEffect(() => {
     getData().then(res => {
       ({ equip_data, map_data } = res)
-      console.log(equip_data, map_data)
       setState('show')
     })
   }, [updated]) 
@@ -81,7 +80,7 @@ const EquipList = props => {
             label : '삭제',
             func : () => {
               setState('apply')
-              setAPI(`/equip/delete`, 'GET', {
+              setAPI(`/equip/delete`, {
                 id : equip_data[selected]['ID']
               }).then(res => setState('show'))
             }

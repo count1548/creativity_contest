@@ -25,6 +25,7 @@ export default function InnerMap(props) {
     } = props
     
     const getObject_location = (pos, size) => {
+        if(typeof Mark.length !== 'undefined') return null;
         const _pos = {
             x : pos.x*origin.width / wdt,
             y : pos.y*origin.height / hgt
