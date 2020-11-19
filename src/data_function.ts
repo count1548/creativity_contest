@@ -1,5 +1,5 @@
 /*eslint-disable */
-const host = "http://210.119.104.154"
+const host = "http://210.119.104.160"
 const {equip_data, check_log, map_data} = require('./dataset')
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
@@ -38,7 +38,13 @@ const getAPI_local = (target, type='POST', name='result', port=3001, id:number|n
 }
 
 const setAPI = (target, data, file = false, port=3001) => {
-    console.log(target, data)
+    console.log(`${host}:${port}${target}`, data)
+    if(file) return new Promise<any>((resolve, reject) => {
+        fetch(`${host}:${port}${target}`, {
+            method: 'POST',
+            body : data,
+        })
+	.then(res => resolve('success') ).catch(err => reject(err))})
     return new Promise<any>((resolve, reject) => {
         fetch(`${host}:${port}${target}`, {
             method: 'POST',
@@ -46,7 +52,7 @@ const setAPI = (target, data, file = false, port=3001) => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body : file ? data : JSON.stringify(data),
+            body : JSON.stringify(data),
         })
 	.then(res => {
 		resolve('success')

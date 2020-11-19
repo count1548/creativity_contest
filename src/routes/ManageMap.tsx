@@ -1,7 +1,7 @@
 import React, {createRef, useState, useEffect} from 'react';
 import { makeStyles, Theme, createStyles, } from '@material-ui/core/styles'
 import Loading from '@material-ui/core/CircularProgress';
-import { getAPI, setAPI, isAvailable, getAPI_local } from "../data_function"
+import { getAPI, setAPI, isAvailable } from "../data_function"
 import MaterialTable from 'material-table'
 import Tooltip from '../component/Tooltip'
 import InnerMap from '../component/Map/InnerMap'
@@ -79,12 +79,13 @@ const onUpload = (data, setState, target = 'upload') => {
 	if(data['name'] === '') return;
 
 	const formData = new FormData();
-    formData.append('file', _file);
+	formData.append('file', _file);
+	formData.append('id', data['id'])
+	formData.append('name', data['name'])
+	
 	setState('apply')
-    setAPI(`/${target}/map`, 'POST', {
-		...data, 
-		img : formData,
-	}).then(res => setState('show'))
+
+	setAPI(`/${target}/map`, formData, true).then(res => setState('show'))
 	.catch(err => console.error(err))
 }
 const base_img = 'https://fakeimg.pl/400x200/?text=Click+Me'

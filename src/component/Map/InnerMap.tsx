@@ -16,22 +16,24 @@ const origin = {
     height : 200
 }
 let mouseDown = false
+let mark_list:{location : {x : number, y : number}}[] = []
 
 export default function InnerMap(props) {
     const {onClick=(data)=>{}, 
         image=null, Mark=null,
         wdt = 400, hgt = 200,
-        allowClick = true, specialMark = 0
+        allowClick = true, specialMark = 0, update = true
     } = props
-    
+    mark_list = Mark
     const getObject_location = (pos, size) => {
-        if(typeof Mark.length !== 'undefined') return null;
+        if(mark_list === null ||
+            typeof mark_list['length'] === 'undefined') return null;
         const _pos = {
             x : pos.x*origin.width / wdt,
             y : pos.y*origin.height / hgt
         }
-
-        return Mark.find(data => {
+        
+        return mark_list.find(data => {
             const target = data['location']
             if( Math.abs(target.x - _pos.x) < size && 
                 Math.abs(target.y - _pos.y) < size) return true
@@ -71,7 +73,6 @@ export default function InnerMap(props) {
                 x : ev.offsetX,
                 y : ev.offsetY,
             }
-            console.log(pos)
             const data = {
                 x : pos.x, y : pos.y,
                 color : ctx.getImageData(pos.x, pos.y, 1, 1).data, //?
@@ -83,7 +84,7 @@ export default function InnerMap(props) {
                 drawMark(ctx, wdt * pos.x / origin.width, hgt * pos.y / origin.height, size)
             }
         }); canvas.addEventListener('mouseup', ev => mouseDown = false )
-    }, [image, specialMark])
+    }, [image, specialMark, ])
 
     return (
         <div><canvas ref={canvasRef} width={wdt} height={hgt}/></div>

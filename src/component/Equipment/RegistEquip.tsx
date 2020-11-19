@@ -71,6 +71,7 @@ const RegistEquip = props => {
                 id : id,
                 serial : serial,
                 boarding_location : boarding_location,
+                branch_check : check,
                 map : map,
                 location : location
             })

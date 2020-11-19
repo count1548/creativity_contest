@@ -21,12 +21,12 @@ const columns = [
                 borderRadius : '50%', backgroundColor : color,
             }}></div> 
         )
-    }},
-    { title: '점검시간', field: 'date', width:150},
+    }, filtering : false as const,},
+    { title: '점검시간', field: 'date', width:150, type:'date' as const},
     { title: '책임자', field: 'user', },
 ]
 async function getData() {
-    const check_log = await getAPI('/check_log/all')
+    const check_log = await getAPI('/equip/check/all') 
     if (!isAvailable(check_log)) return {check_log :[]}
     return { check_log }
 }

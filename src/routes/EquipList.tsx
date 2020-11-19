@@ -1,6 +1,6 @@
 /*eslint-disable */
 import React, { useState, useEffect } from "react"
-import { isAvailable, getAPI, getAPI_local, setAPI } from '../data_function'
+import { isAvailable, getAPI, setAPI } from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import MaterialTable from 'material-table'
 import Loading from '@material-ui/core/CircularProgress';
@@ -15,10 +15,10 @@ const columns = [
   { title: 'Serial number', field: 'serial', width: 150 },
   { title: '위치', field: 'boarding_location' },
   {
-    title: 'Check', field: 'check', render: rowData =>
+    title: 'Check', field: 'branch_check', render: rowData =>
       <div style={{
         width: '20px', height: '20px',
-        borderRadius: '50%', backgroundColor: (rowData['check'] ? 'green' : 'red'),
+        borderRadius: '50%', backgroundColor: (rowData['branch_check'] ? 'green' : 'red'),
       }}></div>
   }
 ]
@@ -26,6 +26,7 @@ const columns = [
 async function getData() {
   const equip_data = await getAPI('/equip/list')
   const map_data = await getAPI('/map/list')
+  console.log(equip_data)
   return { equip_data, map_data }
 }
 let equip_data: any[] = [], map_data: any[] = []
@@ -82,7 +83,7 @@ const EquipList = props => {
               setState('apply')
               setAPI(`/equip/delete`, {
                 id : equip_data[selected]['ID']
-              }).then(res => setState('show'))
+              }).then(res => setUpdated(!updated))
             }
           }
         ]}
@@ -96,9 +97,10 @@ const EquipList = props => {
       map_data={map_data}
       onSubmit={(data) => {
         setState('apply')
-        setAPI(`/equip/${stat}`, 'POST', {
-          ...data
-        }).then(res => setState('show'))
+        setAPI(`/equip/${stat}`, data).then(res => {
+          console.log(res)
+          setUpdated(!updated)
+        })
       }}
       update={stat === 'update'}
       onClose={()=>setState('show')}

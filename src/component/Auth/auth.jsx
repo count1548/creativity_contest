@@ -1,4 +1,4 @@
-const host = "http://210.119.104.154:3001"
+const host = "http://210.119.104.160:3001"
 
 class Auth {  
     login(info) {

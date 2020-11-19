@@ -1,6 +1,6 @@
 /*eslint-disable */
 import React, { useState, useEffect } from "react"
-import { isAvailable, getAPI, getAPI_local, setAPI } from '../data_function'
+import { isAvailable, getAPI, setAPI } from '../data_function'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import MaterialTable from 'material-table'
 import Loading from '@material-ui/core/CircularProgress';
@@ -29,7 +29,7 @@ const columns = [
 ]
 
 async function getData() {
-  const equip_data = await getAPI_local('/equip/list', 'GET', 'result')
+  const equip_data = await getAPI('/equip/list')
   const map_data = await getAPI('/map/list')
   return { equip_data, map_data }
 }
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
         minWidth: 120,
     },
 }));
-
+let equip_list
 const MapLayout = props => {
   const [map, setMap] = useState<number>(0);
   const [selected, setSelected] = useState<number>(0);
@@ -53,14 +53,14 @@ const MapLayout = props => {
   useEffect(() => {
     getData().then(res => {
       ({ equip_data, map_data } = res)
-      setSelected(0)
       setState('show')
     })
-  }, [updated]) 
+  }, []) 
   if (stat === 'apply' || equip_data.length === 0) return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
   
   const Mark_list = equip_data.filter(equip => equip['map'] == map_data[map]['id'])
-
+  equip_list = Mark_list
+  console.log('origin', Mark_list)
   return <>
     <div>
             <FormControl variant="outlined" className={classes.formControl}>
@@ -68,7 +68,10 @@ const MapLayout = props => {
                 <Select
                     native
                     value={map}
-                    onChange={(ev: React.ChangeEvent<{ name?:string; value: unknown }>) => setMap(ev.target.value as number)}
+                    onChange={(ev: React.ChangeEvent<{ name?:string; value: unknown }>) => {
+                        setMap(ev.target.value as number)
+                        setSelected(0)
+                    }}
                     label="Map"
                     >
                     <option aria-label="None" value="" />
@@ -90,17 +93,18 @@ const MapLayout = props => {
                 if(data.color[0] === data.color[1] && data.color[1] === data.color[2]) return;
                 let res = 0
                 if(typeof data.object === 'undefined') return;
-                Mark_list.find((equip, idx) => {
+                equip_list.find((equip, idx) => {
                     if(equip['id'] === data.object['id']) { res = idx; return true }
                 })
                 setSelected(res)
+                setUpdated(!updated)
             }}
         />
     </div>
     <div style={{ width: 'calc(100% - 350px)', margin:'0 auto' }}>
       <EquipInfo
         stat={'view'}
-        EquipInfo={equip_data[selected]}
+        EquipInfo={Mark_list[selected]}
         map_data={map_data}
         InnerState = {
         <EquipStat>

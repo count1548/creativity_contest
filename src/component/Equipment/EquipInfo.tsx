@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
 
 let check_log:any[] = []
 const base_img : string = './imgs/equipment.png'
-
+null
 const EquipInfo = props => {
     const { title, EquipInfo, buttonList = [], map_data, InnerState = null, limit = 8 } = props
     const classes = useStyles()
@@ -66,10 +66,9 @@ const EquipInfo = props => {
     const [updated, setUpdated] = useState(true)
   
     if(typeof EquipInfo === 'undefined') return <div></div>
-
     useEffect(() => {
         setState('apply')
-        getAPI_local(`/check_log/id`, 'GET', 'result', 3001, EquipInfo['id']).then(res => {
+        getAPI(`/equip/check?Eq_id=${EquipInfo['id']}`).then(res => {
             check_log = res
             setState('show')
         })
