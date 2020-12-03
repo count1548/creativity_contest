@@ -62,7 +62,7 @@ const CheckLog = props => {
             pageSize : size,
             toolbar : title,
             headerStyle: {
-                backgroundColor: '#bc1f2f',
+                backgroundColor: '#20876F',
                 color: '#FFF'
             }
         }}

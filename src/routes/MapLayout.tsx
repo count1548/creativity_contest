@@ -60,24 +60,24 @@ const MapLayout = props => {
   
   const Mark_list = equip_data.filter(equip => equip['map'] == map_data[map]['id'])
   equip_list = Mark_list
-  console.log('origin', Mark_list)
+  console.log(equip_list)
   return <>
     <div>
-            <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel htmlFor="outlined-age-native-simple">맵 선택</InputLabel>
-                <Select
-                    native
-                    value={map}
-                    onChange={(ev: React.ChangeEvent<{ name?:string; value: unknown }>) => {
-                        setMap(ev.target.value as number)
-                        setSelected(0)
-                    }}
-                    label="Map"
-                    >
-                    <option aria-label="None" value="" />
-                    {map_data.map((map, idx) => <option value={idx} key={idx}>{map['name']}</option>)}
-                </Select>
-            </FormControl>
+          <FormControl variant="outlined" className={classes.formControl}>
+              <InputLabel htmlFor="outlined-age-native-simple">맵 선택</InputLabel>
+              <Select
+                  native
+                  value={map}
+                  onChange={(ev: React.ChangeEvent<{ name?:string; value: unknown }>) => {
+                      setMap(ev.target.value as number)
+                      setSelected(0)
+                  }}
+                  label="Map"
+                  >
+                  <option aria-label="None" value="" />
+                  {map_data.map((map, idx) => <option value={idx} key={idx}>{map['name']}</option>)}
+              </Select>
+          </FormControl>
     </div>
     <div style={{
         width:'800px', height:'400px', margin:'0 auto',
@@ -97,7 +97,6 @@ const MapLayout = props => {
                     if(equip['id'] === data.object['id']) { res = idx; return true }
                 })
                 setSelected(res)
-                setUpdated(!updated)
             }}
         />
     </div>
@@ -106,6 +105,7 @@ const MapLayout = props => {
         stat={'view'}
         EquipInfo={Mark_list[selected]}
         map_data={map_data}
+        checklog = {false}
         InnerState = {
         <EquipStat>
             <table>
@@ -114,7 +114,6 @@ const MapLayout = props => {
                     <tr><td>점검 완료</td><td>{Mark_list.filter(equip => equip['check']).length}</td></tr>
                     <tr><td>점검 미완료</td><td>{Mark_list.filter(equip => !equip['check']).length}</td></tr>
                     <tr><td>점수 평균</td><td>80</td></tr>
-                    
                 </tbody>
             </table>
         </EquipStat>}

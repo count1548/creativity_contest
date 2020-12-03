@@ -42,9 +42,8 @@ export default function QRImage(props) {
             }}
             title='QR Image'
             onClose= {() => onClose()}
-            defaultState={_open}
-        >
-            <div ref={refs} ><img className={classes.image} src={`./imgs/${image}`} onError={(e:any) => {
+            defaultState={_open}        >
+            <div ref={refs} ><img className={classes.image} src={image} onError={(e:any) => {
                 e.target.onerror=null
                 e.target.src = 'https://fakeimg.pl/400x400/?text=No+Image'
             }}/></div>

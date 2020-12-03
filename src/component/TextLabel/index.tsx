@@ -14,6 +14,11 @@ const useStyles = makeStyles((theme) => ({
             color:'#A12422'
         },
         display:'table-cell',
+    },
+    child : {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
     }
 }));
 const TextLabel = props => {
@@ -22,7 +27,7 @@ const TextLabel = props => {
     return (
     <div className={classes.tableRow}>
         <div className={classes.tableCell}>{label}</div>
-        <div className={classes.tableCell}>{children}</div>
+        <div className={classes.tableCell + ' ' + classes.child}>{children}</div>
         {button ? <div className={classes.tableCell + ' ' + classes.button} onClick={buttonEvent}>{button}</div> : null}
     </div>)
 }

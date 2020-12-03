@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     },
 	dataBox : {
 		float:'right',
-		width : 'calc(100% - 252px)',
+		width : 'calc(100% - 295px)',
 		minHeight : '300px', marginLeft:'30px',	
 	},
 	inTable : {
@@ -61,7 +61,7 @@ let mapData:any[]
 
 const columns = [
   { title: 'ID', field: 'ID', hidden: true },
-  { title: '건물명', field: 'name', width: 130 },
+  { title: '건물명', field: 'name', width: 110 },
   { title: '', field: 'image', render: rowData =>
    	rowData['image'] ? 
 	  <Tooltip content={
@@ -73,16 +73,18 @@ const columns = [
 		}><img width={20} height={20} src={'./imgs/exist.png'}/></Tooltip> : null },
 ]
 
-let _file:null|any = null, name_text:string = ''
+let _file:null|any = null, name_text:string = '', file_name:string = ''
 
 const onUpload = (data, setState, target = 'upload') => {
 	if(data['name'] === '') return;
 
-	const formData = new FormData();
-	formData.append('file', _file);
+	const formData = new FormData()
+	
 	formData.append('id', data['id'])
 	formData.append('name', data['name'])
-	
+	formData.append('file_name', file_name)
+	formData.append('img', _file)
+	console.log(formData)
 	setState('apply')
 
 	setAPI(`/${target}/map`, formData, true).then(res => setState('show'))
@@ -117,6 +119,8 @@ export default function ManageMap(props) {
 	if (mapData.length === 0) return <div></div> // no data page 
 	const onFileSet = (ev) => {
 		_file = ev.target.files[0]
+		console.log(_file)
+		file_name = ev.target.files[0]['name']
 		ev.target.value = null
 		setSrc(window.URL.createObjectURL(_file))
 	}
@@ -132,7 +136,7 @@ export default function ManageMap(props) {
 				options={{
 					search: false,
 					headerStyle: {
-					backgroundColor: '#bc1f2f',
+					backgroundColor: '#20876F',
 					color: '#FFF'
 					}, toolbar: false,
 					pageSize: 11,
@@ -148,7 +152,7 @@ export default function ManageMap(props) {
 					setSrc('./imgs/' + mapData[selected_number]['image'])
 					setName(mapData[selected_number]['name'])
 				}}
-				style={{ width: 222, float: 'left' }}
+				style={{ width: 265, float: 'left' }}
 			/>
 			<div className = {classes.dataBox}>
 				<div className={classes.container + ' ' + classes.topMenu}>

@@ -4,7 +4,7 @@ import { withStyles, Theme } from '@material-ui/core/styles';
 let ctx, canvas, canvasRef = createRef<HTMLCanvasElement>()
 let img = new Image()
 
-const drawMark = (ctx, x, y, size, color = 'yellow') => {
+const drawMark = (ctx, x, y, size, color = 'blue') => {
     ctx.fillStyle = color
     ctx.beginPath()
     ctx.arc(x, y, size, 0, 2 * Math.PI)
@@ -57,7 +57,7 @@ export default function InnerMap(props) {
                 if(typeof Mark.length !== 'undefined') {
                     Mark.map((pos, idx) => {
                         const loc = pos['location']
-                        const color = idx === specialMark ? 'red' : 'yellow'
+                        const color = idx === specialMark ? 'red' : 'blue'
                         drawMark(ctx, wdt * loc.x / origin.width, hgt * loc.y / origin.height, size, color)
                     })
                 }

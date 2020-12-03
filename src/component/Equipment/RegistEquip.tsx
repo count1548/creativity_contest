@@ -44,8 +44,15 @@ const RegistEquip = props => {
     const setInit = () => {
         if(update) {
             ({id, serial, boarding_location} = defaultData)
-            setCheck(defaultData['check'])
-            setMap(defaultData['map'])
+            setCheck(defaultData['branch_check'])
+            let _idx
+            map_data.find((map, idx) => {
+                if (defaultData['map'] === map['id']) {
+                    _idx = idx
+                    return true
+                }
+            })
+            setMap(_idx)
             setLocation(defaultData['location'])
         }
         else {
@@ -53,7 +60,6 @@ const RegistEquip = props => {
             setCheck(1); setMap(-1); setLocation(null);
         }
     }
-
     useEffect(()=> {
         setInit()
         setOpen(open_p)
@@ -72,12 +78,13 @@ const RegistEquip = props => {
                 serial : serial,
                 boarding_location : boarding_location,
                 branch_check : check,
-                map : map,
+                map : map_data[map]['id'],
                 location : location
             })
             return true
         }}
         onClose={onClose}
+        submitOnly = {true}
         defaultState={open}
         >
         <div className={classes.container}>
@@ -117,7 +124,9 @@ const RegistEquip = props => {
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
                         value={map}
-                        onChange={ev => setMap(ev.target.value as number)}
+                        onChange={ev => {
+                            setMap(ev.target.value as number)
+                        }}
                         label="Age" >
                     <MenuItem value={-1}> <em>None</em> </MenuItem>
                     {map_data.map((map, key) => <MenuItem value={key} key={key}>{map['name']}</MenuItem>)}

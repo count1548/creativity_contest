@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
         padding: '10px'
     },
     guideBox : {
-        height : '200px',
+        height : '180px',
         padding : '5px', margin: '5px',
         border:'1px solid gray', float:'left'
     },

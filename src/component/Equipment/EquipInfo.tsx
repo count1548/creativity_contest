@@ -56,27 +56,20 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let check_log:any[] = []
 const base_img : string = './imgs/equipment.png'
-null
+
 const EquipInfo = props => {
-    const { title, EquipInfo, buttonList = [], map_data, InnerState = null, limit = 8 } = props
+    const { title, EquipInfo, buttonList = [], map_data, InnerState = null, limit = 8, checklog = true, check_data, selected } = props
     const classes = useStyles()
-    const [stat, setState] = useState('apply')
-    const [updated, setUpdated] = useState(true)
-  
+    const [stat, setState] = useState('show')
+    const [data, setData] = useState([])
     if(typeof EquipInfo === 'undefined') return <div></div>
-    useEffect(() => {
-        setState('apply')
-        getAPI(`/equip/check?Eq_id=${EquipInfo['id']}`).then(res => {
-            check_log = res
-            setState('show')
-        })
-    }, [EquipInfo['id']])
+    if(checklog) useEffect(() => {
+        setData(check_data)
+    }, [selected])
     if (stat === 'apply') return <div style={{ width: '300px', height:'490px', margin: '30px auto' }}><Loading size={200} /></div>
     
-    const map = map_data.find(data => data['id'] == EquipInfo['map']) 
-    
+    const map = map_data.find(data => data['id'] == EquipInfo['map'])
     return (
     <div className={classes.container}>
         <div className={classes.header}>
@@ -114,21 +107,21 @@ const EquipInfo = props => {
                 </div>
             </div>
             <div className={classes.logBox}>
-                <CheckLog size={limit}
+                {checklog ? <CheckLog size={limit}
                     id = {EquipInfo['id']}
                     filtering = {false}
                     search = {false}
                     paging = {false}
                     title = {false}
-                    data = {check_log}
+                    data = {data}
                     hiddenNumber = {true}
-                />
+                /> : null}
                 {InnerState === null ? null : InnerState}
             </div>
         </div>
     <QRImage 
         open={stat === 'qrview'}
-        image = {EquipInfo['QRImg']}
+        image = {EquipInfo['QR']}
         onClose = {()=>setState('show')}
     />
     </div>) //등록하기를 새로운 다이어로그로 띄우기

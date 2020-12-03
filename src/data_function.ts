@@ -38,7 +38,7 @@ const getAPI_local = (target, type='POST', name='result', port=3001, id:number|n
 }
 
 const setAPI = (target, data, file = false, port=3001) => {
-    console.log(`${host}:${port}${target}`, data)
+    console.log(`${host}:${port}${target}`, data, file)
     if(file) return new Promise<any>((resolve, reject) => {
         fetch(`${host}:${port}${target}`, {
             method: 'POST',

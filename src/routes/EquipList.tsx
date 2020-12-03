@@ -12,7 +12,7 @@ import '../style/lineTable.css'
 
 const columns = [
   { title: 'ID', field: 'id', hidden: true },
-  { title: 'Serial number', field: 'serial', width: 150 },
+  { title: 'Serial', field: 'serial', width: 130 },
   { title: '위치', field: 'boarding_location' },
   {
     title: 'Check', field: 'branch_check', render: rowData =>
@@ -26,26 +26,25 @@ const columns = [
 async function getData() {
   const equip_data = await getAPI('/equip/list')
   const map_data = await getAPI('/map/list')
-  console.log(equip_data)
-  return { equip_data, map_data }
+  const check_data = await getAPI('/equip/check/all')
+  return { equip_data, map_data, check_data }
 }
-let equip_data: any[] = [], map_data: any[] = []
+let equip_data: any[] = [], map_data: any[] = [], check_data : any = []
 
 const EquipList = props => {
   const [selected, setSelected] = useState<number>(0);
   const [stat, setState] = useState('apply')
   const [updated, setUpdated] = useState(true)
-
   useEffect(() => {
     getData().then(res => {
-      ({ equip_data, map_data } = res)
+      ({ equip_data, map_data, check_data } = res)
+      
       setState('show')
     })
-  }, [updated]) 
+  }, [updated])
   if (stat === 'apply') return <div style={{ width: '300px', margin: '30px auto' }}><Loading size={200} /></div>
-  if (equip_data.length === 0) return <div>{/*nodatapage*/}</div>
-
-  return <>
+  else if (equip_data.length === 0) return <div>{/*nodatapage*/}</div>
+  else return <>
     <MaterialTable
       title={"Equipment List"}
       columns={columns}
@@ -53,11 +52,11 @@ const EquipList = props => {
       options={{
         search: false,
         headerStyle: {
-          backgroundColor: '#bc1f2f',
+          backgroundColor: '#20876F',
           color: '#FFF'
         }, toolbar: false,
-        pageSize: 11,
-        pageSizeOptions : [5, 10, 11],
+        pageSize: 9,
+        pageSizeOptions : [5, 9],
         rowStyle: rowData => ({
           backgroundColor: (selected === rowData.tableData.id) ? '#BBB' : '#FFF'
         })
@@ -70,6 +69,8 @@ const EquipList = props => {
         stat={'view'}
         title={"장비정보"}
         EquipInfo={equip_data[selected]}
+        check_data = {check_data.filter(check => check['equip_id'] === equip_data[selected]['id'])}
+        selected = {selected}
         buttonList = {[
           {
             label : '수정',
@@ -82,25 +83,22 @@ const EquipList = props => {
             func : () => {
               setState('apply')
               setAPI(`/equip/delete`, {
-                id : equip_data[selected]['ID']
-              }).then(res => setUpdated(!updated))
+                id : equip_data[selected]['id']
+              }).then(res => {
+                setSelected(0)
+                setUpdated(!updated)
+              })
             }
           }
         ]}
         map_data={map_data}
-      />
-      <div style={{margin:'10px'}}>
-      <EquipStat/>
-      </div>
+      /> <div style={{margin:'10px'}}><EquipStat/></div>
     </div>
     <RegistEquip
       map_data={map_data}
       onSubmit={(data) => {
         setState('apply')
-        setAPI(`/equip/${stat}`, data).then(res => {
-          console.log(res)
-          setUpdated(!updated)
-        })
+        setAPI(`/equip/${stat}`, data).then(res => setUpdated(!updated) )
       }}
       update={stat === 'update'}
       onClose={()=>setState('show')}

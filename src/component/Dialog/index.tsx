@@ -14,6 +14,7 @@ export default function AlertDialog({
     title = 'Dialog',
     onClose = ()=>{},
     defaultState = false,
+    submitOnly = false
 }) { 
   const [open, setOpen] = useState(defaultState);
   useEffect(() =>  setOpen(defaultState), [defaultState])
@@ -39,7 +40,8 @@ export default function AlertDialog({
         </DialogContent>}
         <DialogActions>
           <Button onClick={()=>{
-            if(onSubmit()) handleClose()
+            if(submitOnly) onSubmit()
+            else if(onSubmit()) handleClose()
           }} color="primary" autoFocus>
             {submitMsg}
           </Button>
